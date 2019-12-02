@@ -25,12 +25,11 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.os.VibrationEffect
 import android.view.Menu
-import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar
-//import com.github.mrengineer13.snackbar.SnackBar
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 200)
     private lateinit var leftFencer: Fencer
     private lateinit var rightFencer: Fencer
@@ -568,6 +567,10 @@ class MainActivity : AppCompatActivity() {
         if (mTimerRunning)
             mCountDownTimer!!.cancel()
         updateScores()
+    }
+
+    override fun onDialogClick(dialogFragment: DialogFragment, fencer: Int, cardType: Int) {
+        giveCard(fencer, cardType)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -4,15 +4,13 @@ package com.andvl1.engrade
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import androidx.fragment.app.DialogFragment
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 
-/**
- * Created by ethan on 7/23/14.
- */
-class CardAlertFragment : DialogFragment() {
+class CardAlertFragment : DialogFragment(){
     private var mViewId: Int = 0
     private lateinit var mListener: CardAlertListener
 
@@ -57,8 +55,8 @@ class CardAlertFragment : DialogFragment() {
         return builder.create()
     }
 
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
         try {
             // Instantiate the CardAlertListener so we can send events to the host
             mListener = activity as CardAlertListener
@@ -66,7 +64,6 @@ class CardAlertFragment : DialogFragment() {
             // The activity doesn't implement the interface, throw exception
             throw ClassCastException("$activity must implement CardAlertListener")
         }
-
     }
 
     interface CardAlertListener {
@@ -75,7 +72,6 @@ class CardAlertFragment : DialogFragment() {
     }
 
     companion object {
-
         fun newInstance(view: View): CardAlertFragment {
             val cardAlertFragment = CardAlertFragment()
 
