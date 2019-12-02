@@ -673,7 +673,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     } else false
                 }
                 R.id.scoreTwo -> {
-                    leftFencer.addScore()
+                    rightFencer.addScore()
                     mRecentActions!!.push(1)
                     showSnackbar(
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
