@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools" package="com.andvl1.engrade">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@drawable/ic_launcher"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".CardActivity"
+                  android:configChanges="keyboardHidden|orientation|screenSize"
+                  android:label="@string/penalty_card"
+                  android:parentActivityName=".MainActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+                android:name=".SettingsActivity"
+                android:label="@string/activity_settings"
+                android:parentActivityName=".MainActivity">
+                <meta-data android:name="android.support.PARENT_ACTIVITY"
+                           android:value="com.andvl1.engrade.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

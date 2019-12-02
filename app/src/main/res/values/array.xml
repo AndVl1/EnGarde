@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="fencer_names">
+        <item name="fencer_left">Left Fencer</item>
+        <item name="fencer_right">Right Fencer</item>
+    </string-array>
+
+    <string-array name="mode_entries">
+        <item name="mode_5touch">@string/pref_mode_5touch</item>
+        <item name="mode_15touch">@string/pref_mode_15touch</item>
+    </string-array>
+
+    <string-array name="mode_values">
+        <item name="value_5touch">5</item>
+        <item name="value_15touch">15</item>
+    </string-array>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/pref_behavior">
+        <ListPreference
+            android:defaultValue="5"
+            android:dialogTitle="@string/pref_choose_mode"
+            android:entries="@array/mode_entries"
+            android:entryValues="@array/mode_values"
+            android:key="pref_mode"
+            android:summary="@string/pref_mode_summary"
+            android:title="@string/pref_mode" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/pref_show_double"
+            android:key="pref_show_double"/>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:title="@string/pref_anywhere_to_start"
+            android:summary="@string/pref_anywhere_description"
+            android:key="pref_anywhere_to_start" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_looks">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:summary="@string/pref_black_summary"
+            android:title="@string/pref_black"
+            android:key="pref_black"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_about">
+        <Preference
+            android:summary="@string/current_version"
+            android:title="@string/pref_version" />
+    </PreferenceCategory>
+</PreferenceScreen>
