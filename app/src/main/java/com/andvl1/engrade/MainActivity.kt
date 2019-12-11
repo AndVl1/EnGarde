@@ -23,8 +23,11 @@ import android.media.ToneGenerator
 import android.view.animation.AlphaAnimation
 import android.content.Intent
 import android.media.RingtoneManager
+import android.media.effect.Effect
 import android.os.VibrationEffect
+import android.util.Log
 import android.view.Menu
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -159,13 +162,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mEndVibrationPattern = longArrayOf(
             0, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50,
             500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50,
-            100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50,
-            500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50,
-            100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50,
-            500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50,
-            100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50,
-            500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50,
-            100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50
+            100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50, 500, 50, 100, 50
         )
 
         var mAlert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -364,38 +361,50 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     }
 
     fun undoMostRecent(menuItem: MenuItem) {
-        undoAction(mRecentActions!!.peek())
+        if (mRecentActions!!.isNotEmpty())
+            undoAction(mRecentActions!!.pop())
+        else
+            Toast.makeText(applicationContext, "Already removed all actions", Toast.LENGTH_LONG/2).show()
     }
 
     private fun undoAction(action: Int?) {
         pauseTimer()
+        Toast.makeText(applicationContext, "$action number", Toast.LENGTH_SHORT).show()
         when (action) {
             0 -> {
                 subScore(leftFencer)
                 if (leftFencer.isWinner) leftFencer.takeWinner(rightFencer.score)
+                updateViews()
+                updateWinner()
             }
             1 -> {
                 subScore(rightFencer)
                 if (rightFencer.isWinner) rightFencer.takeWinner(leftFencer.score)
+                updateViews()
             }
             2 -> {
                 subBothScores()
                 if (leftFencer.isWinner) leftFencer.takeWinner(rightFencer.score)
                 else if (rightFencer.isWinner) rightFencer.takeWinner(leftFencer.score)
+                updateViews()
             }
             3 -> {
                 leftFencer.takeYellowCard()
+                updatePenaltyIndicators()
             }
             4 -> {
                 leftFencer.takeRedCard()
                 subScore(rightFencer)
+                updateViews()
             }
             5 -> {
                 rightFencer.takeYellowCard()
+                updatePenaltyIndicators()
             }
             6 -> {
                 rightFencer.takeRedCard()
                 subScore(leftFencer)
+                updateViews()
             }
             7 -> {
                 pauseTimer()
@@ -425,6 +434,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                 pauseTimer()
                 resetPriority()
                 resetOver()
+                updateViews()
             }
         }
     }
@@ -435,7 +445,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_SIGNAL_OFF)
             mTimer!!.setTextColor(Color.WHITE)
 //            mVibrator!!.vibrate(mStartVibrationPattern, -1)
-            mVibrator!!.vibrate(VibrationEffect.createWaveform(mEndVibrationPattern, 1))
+            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // keep screen awake when timer is running
             mCountDownTimer = object : CountDownTimer(time!!, 10) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -459,7 +469,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
-        mVibrator!!.vibrate(VibrationEffect.createWaveform(mStartVibrationPattern, 1))
+        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
         mRinger!!.play()
         mTimerRunning = false
 
@@ -677,7 +687,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     mRecentActions!!.push(1)
                     showSnackbar(
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
-                        resources.getString(R.string.toast_left)
+                        resources.getString(R.string.toast_right)
                     )
                     mIsOver = if (rightFencer.score >= mMode || mInPriority) {
                         rightFencer.makeWinner(rightFencer.score)
@@ -753,7 +763,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mRinger!!.stop()
         mVibrator!!.cancel()
         if (mTimerRunning) {
-            mVibrator!!.vibrate(VibrationEffect.createWaveform(mEndVibrationPattern, 1))
+            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             mCountDownTimer!!.cancel()
             mTimerRunning = false
 
@@ -884,20 +894,20 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                             alreadyYellow = true
                         rightFencer.giveYellowCard()
                         if (!alreadyYellow) {
-                            mRecentActions!!.push(3)
+                            mRecentActions!!.push(5)
                             showSnackbar(
                                 resources.getString(R.string.toast_gave), resources.getString(R.string.toast_yellow),
-                                resources.getString(R.string.toast_card), resources.getString(R.string.toast_left)
+                                resources.getString(R.string.toast_card), resources.getString(R.string.toast_right)
                             )
                         }
                     }
                     1 -> {
                         if (leftFencer.score < mMode) leftFencer.addScore()
                         rightFencer.giveRedCard()
-                        mRecentActions!!.push(4)
+                        mRecentActions!!.push(6)
                         showSnackbar(
                             resources.getString(R.string.toast_gave), resources.getString(R.string.toast_red),
-                            resources.getString(R.string.toast_card), resources.getString(R.string.toast_left)
+                            resources.getString(R.string.toast_card), resources.getString(R.string.toast_right)
                         )
                         if (leftFencer.score >= mMode) {
                             leftFencer.makeWinner(rightFencer.score)

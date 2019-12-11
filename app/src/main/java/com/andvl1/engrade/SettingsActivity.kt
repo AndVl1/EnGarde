@@ -1,26 +1,17 @@
 package com.andvl1.engrade
 
-import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
+import androidx.appcompat.app.AppCompatActivity
 
-import java.util.Objects
-
-class SettingsActivity : Activity() {
+class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Objects.requireNonNull(actionBar!!).setDisplayHomeAsUpEnabled(true)
+        actionBar?.setDisplayHomeAsUpEnabled(true)
         // Display the fragment as the main content.
 
-
-        val fm : FragmentManager = FragmentActivity().supportFragmentManager
-        fm.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(android.R.id.content, SettingsFragment())
             .commit()
-//        fragmentManager.beginTransaction()
-//            .replace(android.R.id.content, SettingsFragment())
-//            .commit()
     }
 }

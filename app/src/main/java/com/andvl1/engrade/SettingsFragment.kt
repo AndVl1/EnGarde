@@ -8,7 +8,7 @@ import androidx.preference.PreferenceFragmentCompat
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        addPreferencesFromResource(R.xml.preferences)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

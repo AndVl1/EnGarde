@@ -111,7 +111,7 @@
             android:clickable="true"
             android:onClick="addScore"
             android:text="@string/double_touch"
-            flatui:theme="@array/dark"
+            flatui:theme="@style/CardView.Dark"
             android:singleLine="false" />
 
         <RelativeLayout
