@@ -14,4 +14,9 @@
         <item name="value_5touch">5</item>
         <item name="value_15touch">15</item>
     </string-array>
+
+    <string-array name="mode_weapons_entries">
+        <item name="weapon_sabre">@string/sabre</item>
+        <item name="weapon_foil_epee">@string/epee_foil</item>
+    </string-array>
 </resources>

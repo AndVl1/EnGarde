@@ -45,4 +45,8 @@
     <string name="pref_behavior">Режим</string>
     <string name="pref_looks">Внешний вид</string>
     <string name="pref_anywhere_to_start" translatable="false">Любая область для начала</string>
+    <string name="epee_foil">Шпага/Рапира</string>
+    <string name="sabre">Сабля</string>
+    <string name="pref_weapon">Оружие</string>
+    <string name="pref_choose_weapon">Выбирете оружие</string>
 </resources>

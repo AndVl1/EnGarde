@@ -376,18 +376,21 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                 if (leftFencer.isWinner) leftFencer.takeWinner(rightFencer.score)
                 updateWinner()
                 updateViews()
+                updateUndoButton()
             }
             1 -> {
                 subScore(rightFencer)
                 if (rightFencer.isWinner) rightFencer.takeWinner(leftFencer.score)
                 updateWinner()
                 updateViews()
+                updateUndoButton()
             }
             2 -> {
                 subBothScores()
                 if (leftFencer.isWinner) leftFencer.takeWinner(rightFencer.score)
                 else if (rightFencer.isWinner) rightFencer.takeWinner(leftFencer.score)
                 updateViews()
+                updateUndoButton()
             }
             3 -> {
                 leftFencer.takeYellowCard()
@@ -397,6 +400,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                 leftFencer.takeRedCard()
                 subScore(rightFencer)
                 updateViews()
+                updateUndoButton()
             }
             5 -> {
                 rightFencer.takeYellowCard()
@@ -406,6 +410,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                 rightFencer.takeRedCard()
                 subScore(leftFencer)
                 updateViews()
+                updateUndoButton()
             }
             7 -> {
                 pauseTimer()
@@ -435,6 +440,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                 pauseTimer()
                 resetPriority()
                 resetOver()
+                updateTimer(mTimeRemaining)
                 updateViews()
             }
         }
