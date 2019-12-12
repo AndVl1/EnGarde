@@ -49,4 +49,6 @@
     <string name="sabre">Сабля</string>
     <string name="pref_weapon">Оружие</string>
     <string name="pref_choose_weapon">Выбирете оружие</string>
+    <string name="toast_unable" translatable="false">Невозможно</string>
+    <string name="toast_give" translatable="false">присвоить</string>
 </resources>

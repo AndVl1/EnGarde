@@ -31,8 +31,8 @@
     <string name="toast_gave" translatable="false">Gave</string>
     <string name="toast_skipped" translatable="false">Skipped</string>
     <string name="toast_undid" translatable="false">Undid</string>
-    <string name="toast_unable" translatable="false">Can\'t</string>
-    <string name="toast_give" translatable="false">give</string>
+    <string name="toast_unable">Can\'t</string>
+    <string name="toast_give">give</string>
     <string name="toast_skip" translatable="false">skip</string>
     <string name="toast_touch" translatable="false">touch</string>
     <string name="toast_card" translatable="false">card</string>

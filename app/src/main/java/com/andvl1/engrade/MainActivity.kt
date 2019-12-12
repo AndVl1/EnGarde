@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private var mPeriodNumber: Int = 0
     private var mNextSectionType: Int = 0
     private var mMode: Int = 0
+    private var mWeapon: Int = 0 // 0 - sabre, 1 - foil/epee
     private var mMaxPeriods: Int = 0
     private var mRecentActionArray: IntArray? = null
     private var mPreviousPeriodNumbersArray: IntArray? = null
@@ -266,9 +267,6 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         updateAll()
         resetOver()
         resetWinner()
-//        if (mSnackBar != null) {
-//            mSnackBar
-//        }
     }
 
     private fun resetWinner() {
@@ -684,6 +682,10 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
                         resources.getString(R.string.toast_left)
                     )
+                    if (mWeapon == 0 && leftFencer.score == 8 && rightFencer.score < 8) {
+                        mTimeRemaining = mBreakLength
+                        mInBreak = true
+                    }
                     mIsOver = if (leftFencer.score >= mMode || mInPriority) {
                         leftFencer.makeWinner(rightFencer.score)
                         true
@@ -696,6 +698,10 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
                         resources.getString(R.string.toast_right)
                     )
+                    if (mWeapon == 0 && rightFencer.score == 8 && leftFencer.score < 8) {
+                        mTimeRemaining = mBreakLength
+                        mInBreak = true
+                    }
                     mIsOver = if (rightFencer.score >= mMode || mInPriority) {
                         rightFencer.makeWinner(rightFencer.score)
                         true
@@ -740,9 +746,11 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private fun loadSettings() {
         val mSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         mMode = Integer.parseInt(mSharedPreferences.getString("pref_mode", "5")!!)
-        when (mMode) {
-            5 -> mMaxPeriods = 1
-            15 -> mMaxPeriods = 3
+        mWeapon = Integer.parseInt(mSharedPreferences.getString("pref_weapon", "0")!!)
+        when  {
+            mMode == 5 -> mMaxPeriods = 1
+            mMode == 15 && mWeapon == 1 -> mMaxPeriods = 3
+            mMode == 15 && mWeapon == 0 -> mMaxPeriods = 2
         }
         mShowDouble = mSharedPreferences.getBoolean("pref_show_double", true)
 
