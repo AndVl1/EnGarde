@@ -374,12 +374,13 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             0 -> {
                 subScore(leftFencer)
                 if (leftFencer.isWinner) leftFencer.takeWinner(rightFencer.score)
-                updateViews()
                 updateWinner()
+                updateViews()
             }
             1 -> {
                 subScore(rightFencer)
                 if (rightFencer.isWinner) rightFencer.takeWinner(leftFencer.score)
+                updateWinner()
                 updateViews()
             }
             2 -> {

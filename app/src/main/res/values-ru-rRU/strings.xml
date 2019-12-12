@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">En Garde</string>
+    <string name="action_reset">Сбросить</string>
+    <string name="action_settings">Настройки</string>
+    <string name="action_skip_section">Пропустить</string>
+    <string name="action_undo">Отменить последнее</string>
+    <string name="activity_settings">Настройки</string>
+    <string name="double_touch">Двойной</string>
+    <string name="fencer_one_score">0</string>
+    <string name="fencer_two_score">0</string>
+    <string name="penalty_card">Карта</string>
+    <string name="pref_black">AMOLED тема</string>
+    <string name="pref_black_summary">Экономие энергии у AMOLED экранов</string>
+    <string name="pref_choose_mode">Выбор режима</string>
+    <string name="pref_mode">Количество ударов</string>
+    <string name="pref_mode_15touch">15 ударов</string>
+    <string name="pref_mode_5touch">5 ударов</string>
+    <string name="pref_mode_summary">Выбирете количество необходимых ударов</string>
+    <string name="pref_show_double">Кнопка двойного удара</string>
+    <string name="pref_version">Версия</string>
+    <string name="priority">Приоритет</string>
+    <string name="priority_left">Приоритет слева</string>
+    <string name="priority_right">Приоритет справа</string>
+    <string name="red_card">Красная карта</string>
+    <string name="red_card_dialog">Дать красную карту …</string>
+    <string name="rest">Перерыв</string>
+    <string name="toast_card">Карта</string>
+    <string name="toast_double">Двойной</string>
+    <string name="winner">ПОБЕДИТЕЛЬ</string>
+    <string name="toast_yellow">желтая</string>
+    <string name="toast_winner_determined">--победитель уже определен--</string>
+    <string name="yellow_card">Желтая карта</string>
+    <string name="yellow_card_dialog">Дать жултую карту …</string>
+    <string name="toast_touch">удар</string>
+    <string name="toast_skip">пропустить</string>
+    <string name="toast_right">бойцу справа</string>
+    <string name="toast_red">красная</string>
+    <string name="toast_priority">приоритет</string>
+    <string name="toast_period">периуд</string>
+    <string name="toast_left">бойцу слева</string>
+    <string name="toast_break">остановить</string>
+    <string name="toast_skipped">Пропущенно</string>
+    <string name="pref_anywhere_description">Нажатие на пустую область для старта отсчета времени</string>
+    <string name="pref_behavior">Режим</string>
+    <string name="pref_looks">Внешний вид</string>
+    <string name="pref_anywhere_to_start" translatable="false">Любая область для начала</string>
+</resources>
