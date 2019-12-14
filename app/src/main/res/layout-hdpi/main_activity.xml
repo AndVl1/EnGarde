@@ -40,6 +40,20 @@
                 android:background="@color/yellow_primary"/>
 
         <!--Red Card Button-->
+        <Button
+                android:id="@+id/redCardButton"
+                android:layout_width="35dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:onClick="showCardDialog"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:layout_marginRight="100dp"
+                android:layout_marginEnd="100dp"
+                android:background="@color/red_primary"/>
+    </RelativeLayout>
         <RelativeLayout
 
                 android:id="@+id/scoreLayout"
@@ -192,20 +206,6 @@
             </RelativeLayout>
 
         </RelativeLayout>
-        <Button
-                android:layout_marginRight="100dp"
-                android:id="@+id/redCardButton"
-                android:layout_width="35dp"
-                android:layout_height="50dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:onClick="showCardDialog"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:layout_marginEnd="100dp"
-                android:background="@color/red_primary"/>
-    </RelativeLayout>
 
     <RelativeLayout
             android:id="@+id/timerLayout"
