@@ -21,33 +21,36 @@
         android:onClick="onClickTimer">
 
         <!--Yellow Card Button-->
-        <com.cengalabs.flatui.views.FlatButton
-            android:id="@+id/yellowCardButton"
-            android:layout_width="35dp"
-            android:layout_height="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="110dp"
-            android:layout_marginRight="110dp"
-            android:clickable="true"
-            android:onClick="showCardDialog"
-            flatui:theme="@array/flat_yellow"
-            android:paddingRight="20dp"
-            android:paddingLeft="20dp" />
+        <Button
+                android:id="@+id/yellowCardButton"
+                android:layout_width="35dp"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="110dp"
+                android:layout_marginRight="110dp"
+                android:background="@color/yellow_primary"
+                android:bottomLeftRadius="200dp"
+                android:bottomRightRadius="50dp"
+                android:clickable="true"
+                android:onClick="showCardDialog"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp" />
 
         <!--Red Card Button-->
-        <com.cengalabs.flatui.views.FlatButton
-            android:id="@+id/redCardButton"
-            android:layout_width="35dp"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="110dp"
-            android:layout_marginEnd="110dp"
-            android:onClick="showCardDialog"
-            flatui:theme="@array/flat_red"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"/>
+        <Button
+                android:id="@+id/redCardButton"
+                android:layout_width="35dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="110dp"
+                android:layout_marginEnd="110dp"
+                android:onClick="showCardDialog"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:background="@color/red_primary" />
+
     </RelativeLayout>
 
     <RelativeLayout

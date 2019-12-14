@@ -3,15 +3,12 @@ package com.andvl1.engrade
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.preference.PreferenceManager
-import android.widget.RelativeLayout
 import android.view.animation.Animation
 import android.media.Ringtone
 import android.os.Vibrator
 import android.os.CountDownTimer
 import android.view.MenuItem
-import android.widget.ImageView
 import java.util.*
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -22,13 +19,16 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.view.animation.AlphaAnimation
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.RingtoneManager
 import android.media.effect.Effect
 import android.os.VibrationEffect
 import android.util.Log
 import android.view.Menu
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.DialogFragment
+import com.cengalabs.flatui.views.FlatButton
+import com.cengalabs.flatui.views.FlatSeekBar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private var mActionUndo: MenuItem? = null
     private var mMainLayout: RelativeLayout? = null
     private var mSnackBar: Snackbar? = null
+    private var flatYellow = intArrayOf(R.color.yellow_light, R.color.yellow_primary, R.color.yellow_dark, R.color.yellow_light)
+    private var flatRed = intArrayOf(R.color.red_darker, R.color.red_dark, R.color.red_primary, R.color.red_light)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         var state: Bundle? = savedInstanceState
@@ -467,6 +469,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun endSection() {
         mTimer!!.text = "0:00.00"
         mTimeRemaining = 0

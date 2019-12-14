@@ -13,237 +13,237 @@
     android:onClick="onClickTimer">
 
     <RelativeLayout
-        android:id="@+id/cardLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:longClickable="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
-
-        <!--Yellow Card Button-->
-        <com.cengalabs.flatui.views.FlatButton
-            android:id="@+id/yellowCardButton"
-            android:layout_width="35dp"
-            android:layout_height="50dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:clickable="true"
-            android:onClick="showCardDialog"
-            flatui:theme="@array/flat_yellow"
-            android:paddingRight="20dp"
-            android:paddingLeft="20dp"
-            android:layout_marginLeft="100dp"
-            android:layout_marginStart="100dp" />
-
-        <!--Red Card Button-->
-        <com.cengalabs.flatui.views.FlatButton
-            android:id="@+id/redCardButton"
-            android:layout_width="35dp"
+            android:id="@+id/cardLayout"
+            android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:onClick="showCardDialog"
-            flatui:theme="@array/flat_red"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:layout_marginRight="100dp"
-            android:layout_marginEnd="100dp" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/scoreLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="150dp">
-
-        <!--Fencer One Score-->
-        <TextView
-            android:id="@+id/scoreOne"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:longClickable="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/doubleTouchButton"
-            android:clickable="true"
-            android:freezesText="true"
-            android:gravity="center"
-            android:longClickable="true"
-            android:onClick="addScore"
-            android:padding="20dp"
-            android:text="@string/fencer_one_score"
-            android:textColor="@color/red_score"
-            android:textSize="50sp"
-            android:layout_toLeftOf="@+id/doubleTouchButton" />
-
-        <!--Fencer Two Score-->
-        <TextView
-            android:id="@+id/scoreTwo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/doubleTouchButton"
-            android:clickable="true"
-            android:freezesText="true"
-            android:gravity="center"
-            android:longClickable="true"
-            android:onClick="addScore"
-            android:padding="20dp"
-            android:text="@string/fencer_two_score"
-            android:textColor="@color/green_score"
-            android:textSize="50sp"
-            android:layout_toRightOf="@+id/doubleTouchButton" />
-
-        <!--Double Touch Button-->
-        <com.cengalabs.flatui.views.FlatButton
-            android:id="@+id/doubleTouchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:clickable="true"
-            android:onClick="addScore"
-            android:text="@string/double_touch"
-            flatui:theme="@array/dark"
-            android:textSize="15sp" />
-
-        <RelativeLayout
-            android:id="@+id/penaltyLayoutLeft"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
-
-            <ImageView
-                android:id="@+id/penaltyCircleViewLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/yellow_circle"
-                android:contentDescription="@string/penalty_left"
-                android:layout_alignParentBottom="true" />
-
-            <ImageView
-                android:id="@+id/priorityCircleViewLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/priority_circle"
-                android:contentDescription="@string/priority_left"
-                android:layout_alignParentTop="true" />
-
-        </RelativeLayout>
-
-        <!--WINNER VIEWS-->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/winner"
-            android:id="@+id/winnerViewLeft"
-            android:layout_toEndOf="@+id/penaltyLayoutLeft"
-            android:layout_toRightOf="@+id/penaltyLayoutLeft"
-            android:textColor="@color/white"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/doubleTouchButton"
-            android:layout_toLeftOf="@+id/doubleTouchButton"
-            android:gravity="center"
-            android:layout_alignRight="@+id/scoreOne"
-            android:layout_alignEnd="@+id/scoreOne" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/winner"
-            android:id="@+id/winnerViewRight"
-            android:layout_toEndOf="@+id/penaltyLayoutLeft"
-            android:layout_toRightOf="@+id/penaltyLayoutLeft"
-            android:textColor="@color/white"
-            android:layout_toStartOf="@+id/doubleTouchButton"
-            android:layout_toLeftOf="@+id/doubleTouchButton"
-            android:gravity="center"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/scoreTwo"
-            android:layout_alignStart="@+id/scoreTwo" />
-
-        <RelativeLayout
-            android:id="@+id/penaltyLayoutRight"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true">
 
-            <ImageView
-                android:id="@+id/penaltyCircleViewRight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/yellow_circle"
-                android:contentDescription="@string/penalty_left"
-                android:layout_alignParentBottom="true" />
+        <!--Yellow Card Button-->
+        <Button
+                android:id="@+id/yellowCardButton"
+                android:layout_width="35dp"
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:onClick="showCardDialog"
+                android:paddingRight="20dp"
+                android:paddingLeft="20dp"
+                android:layout_marginLeft="100dp"
+                android:layout_marginStart="100dp"
+                android:background="@color/yellow_primary"/>
 
-            <ImageView
-                android:id="@+id/priorityCircleViewRight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <!--Red Card Button-->
+        <RelativeLayout
 
-                android:src="@drawable/priority_circle"
-                android:contentDescription="@string/priority_left"
-                android:layout_alignParentTop="true" />
+                android:id="@+id/scoreLayout"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="150dp">
+
+            <!--Fencer One Score-->
+            <TextView
+                    android:id="@+id/scoreOne"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/doubleTouchButton"
+                    android:clickable="true"
+                    android:freezesText="true"
+                    android:gravity="center"
+                    android:longClickable="true"
+                    android:onClick="addScore"
+                    android:padding="20dp"
+                    android:text="@string/fencer_one_score"
+                    android:textColor="@color/red_score"
+                    android:textSize="50sp"
+                    android:layout_toLeftOf="@+id/doubleTouchButton" />
+
+            <!--Fencer Two Score-->
+            <TextView
+                    android:id="@+id/scoreTwo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/doubleTouchButton"
+                    android:clickable="true"
+                    android:freezesText="true"
+                    android:gravity="center"
+                    android:longClickable="true"
+                    android:onClick="addScore"
+                    android:padding="20dp"
+                    android:text="@string/fencer_two_score"
+                    android:textColor="@color/green_score"
+                    android:textSize="50sp"
+                    android:layout_toRightOf="@+id/doubleTouchButton" />
+
+            <!--Double Touch Button-->
+            <com.cengalabs.flatui.views.FlatButton
+                    android:id="@+id/doubleTouchButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:clickable="true"
+                    android:onClick="addScore"
+                    android:text="@string/double_touch"
+                    flatui:theme="@array/dark"
+                    android:textSize="15sp" />
+
+            <RelativeLayout
+                    android:id="@+id/penaltyLayoutLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true">
+
+                <ImageView
+                        android:id="@+id/penaltyCircleViewLeft"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/yellow_circle"
+                        android:contentDescription="@string/penalty_left"
+                        android:layout_alignParentBottom="true" />
+
+                <ImageView
+                        android:id="@+id/priorityCircleViewLeft"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/priority_circle"
+                        android:contentDescription="@string/priority_left"
+                        android:layout_alignParentTop="true" />
+
+            </RelativeLayout>
+
+            <!--WINNER VIEWS-->
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/winner"
+                    android:id="@+id/winnerViewLeft"
+                    android:layout_toEndOf="@+id/penaltyLayoutLeft"
+                    android:layout_toRightOf="@+id/penaltyLayoutLeft"
+                    android:textColor="@color/white"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/doubleTouchButton"
+                    android:layout_toLeftOf="@+id/doubleTouchButton"
+                    android:gravity="center"
+                    android:layout_alignRight="@+id/scoreOne"
+                    android:layout_alignEnd="@+id/scoreOne" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/winner"
+                    android:id="@+id/winnerViewRight"
+                    android:layout_toEndOf="@+id/penaltyLayoutLeft"
+                    android:layout_toRightOf="@+id/penaltyLayoutLeft"
+                    android:textColor="@color/white"
+                    android:layout_toStartOf="@+id/doubleTouchButton"
+                    android:layout_toLeftOf="@+id/doubleTouchButton"
+                    android:gravity="center"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignLeft="@+id/scoreTwo"
+                    android:layout_alignStart="@+id/scoreTwo" />
+
+            <RelativeLayout
+                    android:id="@+id/penaltyLayoutRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true">
+
+                <ImageView
+                        android:id="@+id/penaltyCircleViewRight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/yellow_circle"
+                        android:contentDescription="@string/penalty_left"
+                        android:layout_alignParentBottom="true" />
+
+                <ImageView
+                        android:id="@+id/priorityCircleViewRight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:src="@drawable/priority_circle"
+                        android:contentDescription="@string/priority_left"
+                        android:layout_alignParentTop="true" />
+            </RelativeLayout>
+
         </RelativeLayout>
-
+        <Button
+                android:layout_marginRight="100dp"
+                android:id="@+id/redCardButton"
+                android:layout_width="35dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:onClick="showCardDialog"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:layout_marginEnd="100dp"
+                android:background="@color/red_primary"/>
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/timerLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+            android:id="@+id/timerLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
 
         <!--Timer-->
         <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:clickable="true"
-            android:gravity="center_horizontal"
-            android:onClick="onClickTimer"
-            android:padding="20dp"
-            android:text="@string/timer_default"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@android:color/white"
-            android:textSize="70sp"
-            android:typeface="sans" />
+                android:id="@+id/timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:gravity="center_horizontal"
+                android:onClick="onClickTimer"
+                android:padding="20dp"
+                android:text="@string/timer_default"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:textSize="70sp"
+                android:typeface="sans" />
 
         <!--Period Indicator-->
         <TextView
-            android:id="@+id/periodView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/timer"
-            android:layout_centerHorizontal="true"
-            android:text="@string/period"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white" />
+                android:id="@+id/periodView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/timer"
+                android:layout_centerHorizontal="true"
+                android:text="@string/period"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
     </RelativeLayout>
 
     <!--Penalty Indicators-->
