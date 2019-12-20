@@ -7,8 +7,6 @@
     <string name="action_undo">Отменить последнее</string>
     <string name="activity_settings">Настройки</string>
     <string name="double_touch">Двойной</string>
-    <string name="fencer_one_score">0</string>
-    <string name="fencer_two_score">0</string>
     <string name="penalty_card">Карта</string>
     <string name="pref_black">AMOLED тема</string>
     <string name="pref_black_summary">Экономие энергии у AMOLED экранов</string>
@@ -52,6 +50,6 @@
     <string name="toast_unable" translatable="false">Невозможно</string>
     <string name="toast_give" translatable="false">присвоить</string>
     <string name="toast_gave" translatable="false">Присвоен</string>
-    <string name="period" translatable="false">Периуд</string>
+    <string name="period" translatable="false">Период</string>
     <string name="pref_about">О приложении</string>
 </resources>

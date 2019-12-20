@@ -31,6 +31,7 @@ import com.cengalabs.flatui.views.FlatButton
 import com.cengalabs.flatui.views.FlatSeekBar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 200)
@@ -79,8 +80,6 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private var mActionUndo: MenuItem? = null
     private var mMainLayout: RelativeLayout? = null
     private var mSnackBar: Snackbar? = null
-    private var flatYellow = intArrayOf(R.color.yellow_light, R.color.yellow_primary, R.color.yellow_dark, R.color.yellow_light)
-    private var flatRed = intArrayOf(R.color.red_darker, R.color.red_dark, R.color.red_primary, R.color.red_light)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         var state: Bundle? = savedInstanceState
@@ -369,7 +368,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
 
     private fun undoAction(action: Int?) {
         pauseTimer()
-        Toast.makeText(applicationContext, "$action number", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(applicationContext, "$action number", Toast.LENGTH_SHORT).show()
         when (action) {
             0 -> {
                 subScore(leftFencer)
@@ -452,7 +451,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_SIGNAL_OFF)
             mTimer!!.setTextColor(Color.WHITE)
 //            mVibrator!!.vibrate(mStartVibrationPattern, -1)
-            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+//            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // keep screen awake when timer is running
             mCountDownTimer = object : CountDownTimer(time!!, 10) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -477,7 +476,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
-        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
+//        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
         mRinger!!.play()
         mTimerRunning = false
 
@@ -748,8 +747,17 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
 
     private fun loadSettings() {
         val mSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        mWeapon = try {
+            Integer.parseInt(mSharedPreferences.getString("pref_weapon", "0")!!)
+        } catch (e : Exception) {
+            val wp = mSharedPreferences.getString("pref_weapon", "0")!!
+            if (wp == "сабля") {
+                0
+            } else {
+                1
+            }
+        }
         mMode = Integer.parseInt(mSharedPreferences.getString("pref_mode", "5")!!)
-        mWeapon = Integer.parseInt(mSharedPreferences.getString("pref_weapon", "0")!!)
         when  {
             mMode == 5 -> mMaxPeriods = 1
             mMode == 15 && mWeapon == 1 -> mMaxPeriods = 3
@@ -781,7 +789,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mRinger!!.stop()
         mVibrator!!.cancel()
         if (mTimerRunning) {
-            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+//            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             mCountDownTimer!!.cancel()
             mTimerRunning = false
 
