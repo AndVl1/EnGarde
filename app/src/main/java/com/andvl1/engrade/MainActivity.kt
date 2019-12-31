@@ -451,6 +451,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_SIGNAL_OFF)
             mTimer!!.setTextColor(Color.WHITE)
 //            mVibrator!!.vibrate(mStartVibrationPattern, -1)
+            mVibrator!!.vibrate(200)
 //            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // keep screen awake when timer is running
             mCountDownTimer = object : CountDownTimer(time!!, 10) {
@@ -476,6 +477,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
+        mVibrator!!.vibrate(3000)
 //        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
         mRinger!!.play()
         mTimerRunning = false
@@ -790,6 +792,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mVibrator!!.cancel()
         if (mTimerRunning) {
 //            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+            mVibrator!!.vibrate(200)
             mCountDownTimer!!.cancel()
             mTimerRunning = false
 
