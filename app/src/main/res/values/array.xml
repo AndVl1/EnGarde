@@ -19,4 +19,9 @@
         <item name="weapon_sabre">@string/sabre</item>
         <item name="weapon_foil_epee">@string/epee_foil</item>
     </string-array>
+
+    <string-array name="mode_weapons_values">
+        <item name="value_sabre">0</item>
+        <item name="value_foil_epee">1</item>
+    </string-array>
 </resources>

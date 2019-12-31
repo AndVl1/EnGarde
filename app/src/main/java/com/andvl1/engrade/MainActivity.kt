@@ -3,15 +3,12 @@ package com.andvl1.engrade
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.preference.PreferenceManager
-import android.widget.RelativeLayout
 import android.view.animation.Animation
 import android.media.Ringtone
 import android.os.Vibrator
 import android.os.CountDownTimer
 import android.view.MenuItem
-import android.widget.ImageView
 import java.util.*
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -22,15 +19,19 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.view.animation.AlphaAnimation
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.RingtoneManager
 import android.media.effect.Effect
 import android.os.VibrationEffect
 import android.util.Log
 import android.view.Menu
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.DialogFragment
+import com.cengalabs.flatui.views.FlatButton
+import com.cengalabs.flatui.views.FlatSeekBar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 200)
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private var mPeriodNumber: Int = 0
     private var mNextSectionType: Int = 0
     private var mMode: Int = 0
+    private var mWeapon: Int = 0 // 0 - sabre, 1 - foil/epee
     private var mMaxPeriods: Int = 0
     private var mRecentActionArray: IntArray? = null
     private var mPreviousPeriodNumbersArray: IntArray? = null
@@ -266,9 +268,6 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         updateAll()
         resetOver()
         resetWinner()
-//        if (mSnackBar != null) {
-//            mSnackBar
-//        }
     }
 
     private fun resetWinner() {
@@ -369,7 +368,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
 
     private fun undoAction(action: Int?) {
         pauseTimer()
-        Toast.makeText(applicationContext, "$action number", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(applicationContext, "$action number", Toast.LENGTH_SHORT).show()
         when (action) {
             0 -> {
                 subScore(leftFencer)
@@ -452,7 +451,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_SIGNAL_OFF)
             mTimer!!.setTextColor(Color.WHITE)
 //            mVibrator!!.vibrate(mStartVibrationPattern, -1)
-            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+//            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // keep screen awake when timer is running
             mCountDownTimer = object : CountDownTimer(time!!, 10) {
                 override fun onTick(millisUntilFinished: Long) {
@@ -469,6 +468,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun endSection() {
         mTimer!!.text = "0:00.00"
         mTimeRemaining = 0
@@ -476,7 +476,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
-        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
+//        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
         mRinger!!.play()
         mTimerRunning = false
 
@@ -684,6 +684,10 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
                         resources.getString(R.string.toast_left)
                     )
+                    if (mWeapon == 0 && leftFencer.score == 8 && rightFencer.score < 8) {
+                        mTimeRemaining = mBreakLength
+                        mInBreak = true
+                    }
                     mIsOver = if (leftFencer.score >= mMode || mInPriority) {
                         leftFencer.makeWinner(rightFencer.score)
                         true
@@ -696,6 +700,10 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                         resources.getString(R.string.toast_gave), "", resources.getString(R.string.toast_touch),
                         resources.getString(R.string.toast_right)
                     )
+                    if (mWeapon == 0 && rightFencer.score == 8 && leftFencer.score < 8) {
+                        mTimeRemaining = mBreakLength
+                        mInBreak = true
+                    }
                     mIsOver = if (rightFencer.score >= mMode || mInPriority) {
                         rightFencer.makeWinner(rightFencer.score)
                         true
@@ -739,10 +747,21 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
 
     private fun loadSettings() {
         val mSharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        mWeapon = try {
+            Integer.parseInt(mSharedPreferences.getString("pref_weapon", "0")!!)
+        } catch (e : Exception) {
+            val wp = mSharedPreferences.getString("pref_weapon", "0")!!
+            if (wp == "сабля") {
+                0
+            } else {
+                1
+            }
+        }
         mMode = Integer.parseInt(mSharedPreferences.getString("pref_mode", "5")!!)
-        when (mMode) {
-            5 -> mMaxPeriods = 1
-            15 -> mMaxPeriods = 3
+        when  {
+            mMode == 5 -> mMaxPeriods = 1
+            mMode == 15 && mWeapon == 1 -> mMaxPeriods = 3
+            mMode == 15 && mWeapon == 0 -> mMaxPeriods = 2
         }
         mShowDouble = mSharedPreferences.getBoolean("pref_show_double", true)
 
@@ -770,7 +789,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mRinger!!.stop()
         mVibrator!!.cancel()
         if (mTimerRunning) {
-            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+//            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             mCountDownTimer!!.cancel()
             mTimerRunning = false
 

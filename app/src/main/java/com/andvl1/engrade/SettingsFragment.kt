@@ -7,8 +7,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-    }
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

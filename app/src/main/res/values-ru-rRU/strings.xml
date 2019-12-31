@@ -7,8 +7,6 @@
     <string name="action_undo">Отменить последнее</string>
     <string name="activity_settings">Настройки</string>
     <string name="double_touch">Двойной</string>
-    <string name="fencer_one_score">0</string>
-    <string name="fencer_two_score">0</string>
     <string name="penalty_card">Карта</string>
     <string name="pref_black">AMOLED тема</string>
     <string name="pref_black_summary">Экономие энергии у AMOLED экранов</string>
@@ -26,12 +24,12 @@
     <string name="red_card_dialog">Дать красную карту …</string>
     <string name="rest">Перерыв</string>
     <string name="toast_card">Карта</string>
-    <string name="toast_double">Двойной</string>
+    <string name="toast_double">двойной</string>
     <string name="winner">ПОБЕДИТЕЛЬ</string>
     <string name="toast_yellow">желтая</string>
-    <string name="toast_winner_determined">--победитель уже определен--</string>
+    <string name="toast_winner_determined">" -- победитель уже определен"</string>
     <string name="yellow_card">Желтая карта</string>
-    <string name="yellow_card_dialog">Дать жултую карту …</string>
+    <string name="yellow_card_dialog">Дать жёлтую карту …</string>
     <string name="toast_touch">удар</string>
     <string name="toast_skip">пропустить</string>
     <string name="toast_right">бойцу справа</string>
@@ -49,4 +47,9 @@
     <string name="sabre">Сабля</string>
     <string name="pref_weapon">Оружие</string>
     <string name="pref_choose_weapon">Выбирете оружие</string>
+    <string name="toast_unable" translatable="false">Невозможно</string>
+    <string name="toast_give" translatable="false">присвоить</string>
+    <string name="toast_gave" translatable="false">Присвоен</string>
+    <string name="period" translatable="false">Период</string>
+    <string name="pref_about">О приложении</string>
 </resources>
