@@ -580,6 +580,11 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         }
     }
 
+    fun startPoole(menuItem: MenuItem) {
+        val pooleIntent = Intent(applicationContext, PooleInit::class.java)
+        startActivity(pooleIntent)
+    }
+
     private fun resetScores() {
         leftFencer.resetScore()
         rightFencer.resetScore()

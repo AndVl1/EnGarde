@@ -30,7 +30,7 @@
 
     <string name="toast_gave">Gave</string>
     <string name="toast_skipped">Skipped</string>
-<!--    <string name="toast_undid" translatable="false">Undid</string>-->
+    <!--    <string name="toast_undid" translatable="false">Undid</string>-->
     <string name="toast_unable">Can\'t</string>
     <string name="toast_give">give</string>
     <string name="toast_skip">skip</string>
@@ -72,5 +72,7 @@
     <string name="sabre">Sabre</string>
     <string name="pref_weapon">Weapon</string>
     <string name="pref_choose_weapon">Choose a weapon</string>
+
+    <string name="start_poole">Start poole</string>
 
 </resources>
