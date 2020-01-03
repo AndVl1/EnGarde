@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -68,7 +67,7 @@ class PooleInit : AppCompatActivity() {
                 .setNeutralButton("Ok") { _, _ -> }
                 .show()
         } else {
-            val table = Intent(applicationContext, Table::class.java)
+            val intent = Intent(applicationContext, Table::class.java)
             val poole = arrayListOf(mName1!!.text.toString(), mName2!!.text.toString(),
                 mName3!!.text.toString(), mName4!!.text.toString(), mName5!!.text.toString())
             if (amount == 6) {
@@ -77,8 +76,8 @@ class PooleInit : AppCompatActivity() {
                 poole.add(mName6!!.text.toString())
                 poole.add(mName7!!.text.toString())
             }
-            table.putExtra("names", poole)
-            startActivity(table)
+            intent.putExtra("names", poole)
+            startActivity(intent)
         }
     }
 

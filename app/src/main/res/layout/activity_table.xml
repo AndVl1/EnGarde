@@ -6,4 +6,692 @@
         android:layout_height="match_parent"
         tools:context=".Table">
 
+    <TableLayout
+            android:id="@+id/pooleTable"
+            android:layout_width="406dp"
+            android:layout_height="481dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <TableRow
+                android:id="@+id/row1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|center_horizontal">
+
+            <TextView
+                    android:id="@+id/first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            <TextView
+                    android:id="@+id/names"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Names" />
+
+            <TextView
+                    android:id="@+id/ath1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1" />
+
+            <TextView
+                    android:id="@+id/ath2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2" />
+
+            <TextView
+                    android:id="@+id/ath3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3" />
+
+            <TextView
+                    android:id="@+id/ath4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4" />
+
+            <TextView
+                    android:id="@+id/ath5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5" />
+
+            <TextView
+                    android:id="@+id/ath6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6" />
+
+            <TextView
+                    android:id="@+id/ath7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7" />
+
+            <TextView
+                    android:id="@+id/victs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="V/M" />
+
+            <TextView
+                    android:id="@+id/scored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hits Scored" />
+
+            <TextView
+                    android:id="@+id/rcv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hits Recieved" />
+
+            <TextView
+                    android:id="@+id/diff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Diffenence" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath1Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1" />
+
+            <TextView
+                    android:id="@+id/athName1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/b1-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b1-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/VM1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath2Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2" />
+
+            <TextView
+                    android:id="@+id/athName2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/b2-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b2-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/VM2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|center_horizontal">
+
+            <TextView
+                    android:id="@+id/ath3Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3" />
+
+        <TextView
+                android:id="@+id/athName3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+        <TextView
+                android:id="@+id/b3-1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+            <TextView
+                    android:id="@+id/b3-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+        <TextView
+                android:id="@+id/b3-3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="||" />
+
+        <TextView
+                android:id="@+id/b3-4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+        <TextView
+                android:id="@+id/b3-5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+        <TextView
+                android:id="@+id/b3-6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+        <TextView
+                android:id="@+id/b3-7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-" />
+
+        <TextView
+                android:id="@+id/VM3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0" />
+
+        <TextView
+                android:id="@+id/scored3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0" />
+
+        <TextView
+                android:id="@+id/rcv3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0" />
+
+        <TextView
+                android:id="@+id/diff3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0" />
+
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath4Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4" />
+
+            <TextView
+                    android:id="@+id/athName4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/b4-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b4-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/VM4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow5"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath5Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5" />
+
+            <TextView
+                    android:id="@+id/athName5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/b5-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b5-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/VM5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow6"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath6Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6" />
+
+            <TextView
+                    android:id="@+id/athName6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b6-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/b6-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/VM6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+        <TableRow
+                android:id="@+id/athRow7"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+
+            <TextView
+                    android:id="@+id/ath7Ver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="7" />
+
+            <TextView
+                    android:id="@+id/athName7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-" />
+
+            <TextView
+                    android:id="@+id/b7-7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="||" />
+
+            <TextView
+                    android:id="@+id/VM7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/scored7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/rcv7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            <TextView
+                    android:id="@+id/diff7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+        </TableRow>
+
+    </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
