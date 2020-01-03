@@ -47,8 +47,7 @@
             android:layout_marginStart="7dp"
             android:layout_marginTop="-262dp"
             android:layout_marginEnd="7dp"
-            android:layout_marginBottom="27dp"
-            android:onClick="moveToNext">
+            android:layout_marginBottom="27dp">
 
         <EditText
                 android:id="@+id/name1"

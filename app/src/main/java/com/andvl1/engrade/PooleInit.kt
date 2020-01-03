@@ -19,7 +19,6 @@ class PooleInit : AppCompatActivity() {
     private var mName5 :TextView?     = null
     private var mName6 :TextView?     = null
     private var mName7 :TextView?     = null
-    private var mNextButton :FloatingActionButton?  = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +31,6 @@ class PooleInit : AppCompatActivity() {
         mName5 = findViewById(R.id.name5)
         mName6 = findViewById(R.id.name6)
         mName7 = findViewById(R.id.name7)
-        mNextButton = findViewById(R.id.nextButton)
     }
 
     fun selectAmount(view: View) {
@@ -77,6 +75,7 @@ class PooleInit : AppCompatActivity() {
                 poole.add(mName7!!.text.toString())
             }
             intent.putExtra("names", poole)
+            intent.putExtra("amount", amount)
             startActivity(intent)
         }
     }
