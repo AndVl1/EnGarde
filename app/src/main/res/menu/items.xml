@@ -22,9 +22,4 @@
             android:orderInCategory="1"
             android:title="@string/action_skip_section"
             android:onClick="skipSection" app:showAsAction="never"/>
-    <item
-            android:id="@+id/start_poole"
-            android:orderInCategory="3"
-            android:title="@string/start_poole"
-            android:onClick="startPoole" app:showAsAction="never"/>
 </menu>

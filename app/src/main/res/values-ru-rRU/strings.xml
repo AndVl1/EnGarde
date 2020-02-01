@@ -53,4 +53,6 @@
     <string name="period" translatable="false">Период</string>
     <string name="pref_about">О приложении</string>
     <string name="start_poole">Инициализировать группу</string>
+    <string name="notification_timer">Таймер</string>
+    <string name="notification_timer_descr">Уведомление истечения таймера</string>
 </resources>
