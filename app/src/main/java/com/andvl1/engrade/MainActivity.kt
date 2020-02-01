@@ -711,6 +711,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     if (mWeapon == 0 && leftFencer.score == 8 && rightFencer.score < 8) {
                         mTimeRemaining = mBreakLength
                         mInBreak = true
+                        mInPeriod = false
                     }
                     mIsOver = if (leftFencer.score >= mMode || mInPriority) {
                         leftFencer.makeWinner(rightFencer.score)
@@ -727,6 +728,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     if (mWeapon == 0 && rightFencer.score == 8 && leftFencer.score < 8) {
                         mTimeRemaining = mBreakLength
                         mInBreak = true
+                        mInPeriod = false
                     }
                     mIsOver = if (rightFencer.score >= mMode || mInPriority) {
                         rightFencer.makeWinner(rightFencer.score)
