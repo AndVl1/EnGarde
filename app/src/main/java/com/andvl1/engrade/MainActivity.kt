@@ -1,34 +1,31 @@
 package com.andvl1.engrade
 
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.view.View
 import androidx.preference.PreferenceManager
 import android.view.animation.Animation
 import android.media.Ringtone
-import android.os.Vibrator
-import android.os.CountDownTimer
 import android.view.MenuItem
 import java.util.*
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.view.WindowManager
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.view.animation.AlphaAnimation
 import android.content.Intent
-import android.content.res.Configuration
 import android.media.RingtoneManager
-import android.media.effect.Effect
-import android.os.VibrationEffect
-import android.util.Log
+import android.os.*
 import android.view.Menu
 import android.widget.*
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.DialogFragment
-import com.cengalabs.flatui.views.FlatButton
-import com.cengalabs.flatui.views.FlatSeekBar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import java.lang.Exception
@@ -80,6 +77,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private var mActionUndo: MenuItem? = null
     private var mMainLayout: RelativeLayout? = null
     private var mSnackBar: Snackbar? = null
+    private var ncNumber = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         var state: Bundle? = savedInstanceState
@@ -451,6 +449,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
             toneGenerator.startTone(ToneGenerator.TONE_CDMA_SIGNAL_OFF)
             mTimer!!.setTextColor(Color.WHITE)
 //            mVibrator!!.vibrate(mStartVibrationPattern, -1)
+            mVibrator!!.vibrate(200)
 //            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // keep screen awake when timer is running
             mCountDownTimer = object : CountDownTimer(time!!, 10) {
@@ -459,9 +458,33 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     mTimeRemaining = millisUntilFinished
                 }
 
+                @SuppressLint("NewApi")
                 override fun onFinish() {
                     endSection()
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // turn screen-awake off when timer is expired
+
+                    //Notification
+                    createNotificationTimerChannel()
+
+                    val resultIntent = Intent(this@MainActivity, MainActivity::class.java)
+                    resultIntent.action = Intent.ACTION_MAIN
+                    resultIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+                    val resultPendingIntent = PendingIntent.getActivity(this@MainActivity, 0,
+                        resultIntent, 0)
+
+                    val mBuilder = NotificationCompat.Builder(this@MainActivity, R.string.notification_timer.toString())
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("Timer")
+                        .setContentText("Timer expired")
+                        .setPriority(NotificationCompat.PRIORITY_MAX)
+                        .setContentIntent(resultPendingIntent)
+                        .setAutoCancel(true)
+
+
+                    with(NotificationManagerCompat.from(this@MainActivity)) {
+                        // notificationId is a unique int for each notification that you must define
+                        notify(ncNumber++, mBuilder.build())
+                    }
                 }
             }.start()
             mTimerRunning = true
@@ -476,6 +499,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
+        mVibrator!!.vibrate(3000)
 //        mVibrator!!.vibrate(VibrationEffect.createOneShot(200, 30))
         mRinger!!.play()
         mTimerRunning = false
@@ -687,6 +711,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     if (mWeapon == 0 && leftFencer.score == 8 && rightFencer.score < 8) {
                         mTimeRemaining = mBreakLength
                         mInBreak = true
+                        mInPeriod = false
                     }
                     mIsOver = if (leftFencer.score >= mMode || mInPriority) {
                         leftFencer.makeWinner(rightFencer.score)
@@ -703,6 +728,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
                     if (mWeapon == 0 && rightFencer.score == 8 && leftFencer.score < 8) {
                         mTimeRemaining = mBreakLength
                         mInBreak = true
+                        mInPeriod = false
                     }
                     mIsOver = if (rightFencer.score >= mMode || mInPriority) {
                         rightFencer.makeWinner(rightFencer.score)
@@ -790,6 +816,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
         mVibrator!!.cancel()
         if (mTimerRunning) {
 //            mVibrator!!.vibrate(VibrationEffect.createOneShot(5, 10))
+            mVibrator!!.vibrate(200)
             mCountDownTimer!!.cancel()
             mTimerRunning = false
 
@@ -959,5 +986,22 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
 
         mSnackBar!!.setText(text)
         mSnackBar!!.show()
+    }
+
+    private fun createNotificationTimerChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.notification_timer)
+            val descriptionText = getString(R.string.notification_timer_descr)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(R.string.notification_timer.toString(), name, importance).apply {
+                description = descriptionText
+            }
+            channel.enableVibration(false)
+            channel.enableLights(false)
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 }
