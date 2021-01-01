@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "863902477849",
+    "firebase_url": "https://en-garde-c01af.firebaseio.com",
+    "project_id": "en-garde-c01af",
+    "storage_bucket": "en-garde-c01af.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863902477849:android:d8d28d948d59e5b5e70488",
+        "android_client_info": {
+          "package_name": "com.andvl1.engrade"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "863902477849-bbr2rmo1pn6vqhk2t0d11vtemknqlun5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHAxIN_baNY4uWz4co5YnegkBzQODfbtA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "863902477849-bbr2rmo1pn6vqhk2t0d11vtemknqlun5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -25,6 +25,7 @@ import android.view.Menu
 import android.widget.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -495,7 +496,7 @@ class MainActivity : AppCompatActivity(), CardAlertFragment.CardAlertListener{
     private fun endSection() {
         mTimer!!.text = "0:00.00"
         mTimeRemaining = 0
-        mTimer!!.setTextColor(resources.getColor(R.color.red_timer, applicationContext.theme)) // change timer to red
+        mTimer!!.setTextColor(ContextCompat.getColor(applicationContext, R.color.red_timer))// change timer to red
         // mTimer!!.setTextColor(resources.getColor(R.color.red_timer)); // change timer to red
         mTimer!!.animation = mBlink
 //        mVibrator!!.vibrate(mEndVibrationPattern, -1)
