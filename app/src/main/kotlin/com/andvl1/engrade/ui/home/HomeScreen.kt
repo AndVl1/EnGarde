@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(component: HomeComponent) {
     val state by component.state.subscribeAsState()

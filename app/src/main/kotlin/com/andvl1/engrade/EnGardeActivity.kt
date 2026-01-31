@@ -11,7 +11,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.room.Room
+import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.SettingsRepository
+import com.andvl1.engrade.data.db.EnGardeDatabase
+import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.platform.NotificationHelper
 import com.andvl1.engrade.platform.SoundManager
 import com.andvl1.engrade.ui.root.DefaultRootComponent
@@ -27,8 +31,17 @@ class EnGardeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Initialize Room database
+        val database = Room.databaseBuilder(
+            applicationContext,
+            EnGardeDatabase::class.java,
+            "engarde.db"
+        ).build()
+
         // Create dependencies manually (no DI framework)
         val settingsRepository = SettingsRepository(applicationContext)
+        val poolRepository = PoolRepository(database)
+        val poolEngine = PoolEngine()
         soundManager = SoundManager(applicationContext)
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -42,6 +55,8 @@ class EnGardeActivity : ComponentActivity() {
         val rootComponent = DefaultRootComponent(
             componentContext = defaultComponentContext(),
             settingsRepository = settingsRepository,
+            poolRepository = poolRepository,
+            poolEngine = poolEngine,
             soundManager = soundManager,
             notificationHelper = notificationHelper,
             notificationPendingIntent = pendingIntent

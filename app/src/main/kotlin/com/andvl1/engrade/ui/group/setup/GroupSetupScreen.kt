@@ -11,6 +11,7 @@ import com.andvl1.engrade.domain.model.FencerInput
 import com.andvl1.engrade.domain.model.Weapon
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSetupScreen(component: GroupSetupComponent) {
     val state by component.state.subscribeAsState()

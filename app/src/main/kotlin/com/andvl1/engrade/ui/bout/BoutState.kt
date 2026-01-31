@@ -5,6 +5,8 @@ import com.andvl1.engrade.domain.model.*
 data class BoutState(
     val leftFencer: FencerState = FencerState(),
     val rightFencer: FencerState = FencerState(),
+    val leftFencerName: String = "Left",
+    val rightFencerName: String = "Right",
     val timeRemainingMs: Long = 180_000L,
     val periodNumber: Int = 1,
     val currentSection: SectionType = SectionType.PERIOD,

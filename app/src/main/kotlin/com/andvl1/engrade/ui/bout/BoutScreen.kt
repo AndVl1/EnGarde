@@ -108,6 +108,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Left fencer
                     FencerScoreCard(
                         fencer = state.value.leftFencer,
+                        fencerName = state.value.leftFencerName,
                         side = FencerSide.LEFT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.LeftScored) },
@@ -119,6 +120,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Right fencer
                     FencerScoreCard(
                         fencer = state.value.rightFencer,
+                        fencerName = state.value.rightFencerName,
                         side = FencerSide.RIGHT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.RightScored) },
@@ -161,6 +163,7 @@ fun BoutScreen(component: BoutComponent) {
 @Composable
 fun FencerScoreCard(
     fencer: FencerState,
+    fencerName: String,
     side: FencerSide,
     modifier: Modifier = Modifier,
     onScoreClick: () -> Unit,
@@ -170,11 +173,22 @@ fun FencerScoreCard(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Fencer name
+        Text(
+            fencerName,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Winner indicator
         if (fencer.isWinner) {
             Text(
                 "ПОБЕДИТЕЛЬ",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = Color.Green
             )
         }
