@@ -1,8 +1,11 @@
 package com.andvl1.engrade.ui.bout
 
+import android.app.PendingIntent
 import com.andvl1.engrade.data.SettingsRepository
 import com.andvl1.engrade.domain.*
 import com.andvl1.engrade.domain.model.*
+import com.andvl1.engrade.platform.NotificationHelper
+import com.andvl1.engrade.platform.SoundManager
 import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -17,6 +20,9 @@ interface BoutComponent {
 class DefaultBoutComponent(
     componentContext: ComponentContext,
     private val settingsRepository: SettingsRepository,
+    private val soundManager: SoundManager,
+    private val notificationHelper: NotificationHelper,
+    private val notificationPendingIntent: PendingIntent,
     private val onNavigateToSettings: () -> Unit
 ) : BoutComponent, ComponentContext by componentContext {
 
@@ -59,17 +65,11 @@ class DefaultBoutComponent(
     private fun handleTimerClick() {
         val currentState = _state.value
 
-        if (currentState.currentSection in listOf(SectionType.PERIOD, SectionType.BREAK, SectionType.PRIORITY)) {
-            // During a section - toggle timer
-            if (currentState.isTimerRunning) {
-                pauseTimer()
-            } else {
-                startTimer()
-            }
+        // Toggle timer during any section
+        if (currentState.isTimerRunning) {
+            pauseTimer()
         } else {
-            // Between sections - proceed to next
-            engine.proceedToNextSection()
-            updateState()
+            startTimer()
         }
     }
 
@@ -110,7 +110,10 @@ class DefaultBoutComponent(
         val result = engine.endSection()
         updateState()
 
-        // Handle result in UI (notifications, sounds would be triggered via state change)
+        // Play sound and show notification
+        soundManager.vibrateEnd()
+        soundManager.playAlarm()
+        notificationHelper.showTimerExpiredNotification(notificationPendingIntent)
     }
 
     private fun handleLeftScore() {
@@ -168,7 +171,7 @@ class DefaultBoutComponent(
     }
 
     private fun handleSkipSection() {
-        if (engine.isOver) {
+        if (!engine.isOver) {
             engine.skipSection()
             updateState()
         }

@@ -12,3 +12,6 @@
 /build
 /captures
 .externalNativeBuild
+
+# Firebase credentials
+google-services.json

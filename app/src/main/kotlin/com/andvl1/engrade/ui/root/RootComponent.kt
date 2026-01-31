@@ -1,6 +1,9 @@
 package com.andvl1.engrade.ui.root
 
+import android.app.PendingIntent
 import com.andvl1.engrade.data.SettingsRepository
+import com.andvl1.engrade.platform.NotificationHelper
+import com.andvl1.engrade.platform.SoundManager
 import com.andvl1.engrade.ui.bout.BoutComponent
 import com.andvl1.engrade.ui.bout.DefaultBoutComponent
 import com.andvl1.engrade.ui.settings.DefaultSettingsComponent
@@ -33,7 +36,10 @@ interface RootComponent {
 
 class DefaultRootComponent(
     componentContext: ComponentContext,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val soundManager: SoundManager,
+    private val notificationHelper: NotificationHelper,
+    private val notificationPendingIntent: PendingIntent
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<RootComponent.Config>()
@@ -55,6 +61,9 @@ class DefaultRootComponent(
             DefaultBoutComponent(
                 componentContext = context,
                 settingsRepository = settingsRepository,
+                soundManager = soundManager,
+                notificationHelper = notificationHelper,
+                notificationPendingIntent = notificationPendingIntent,
                 onNavigateToSettings = ::navigateToSettings
             )
         )

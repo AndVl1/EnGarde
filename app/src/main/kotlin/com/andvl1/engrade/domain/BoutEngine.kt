@@ -113,12 +113,13 @@ class BoutEngine(
 
     /**
      * Add double touch (both fencers score).
-     * NOT allowed when both are at (mode - 1).
+     * NOT allowed when both are at (mode - 1), except in PRIORITY section.
      */
     fun addDoubleTouch(): ScoreResult {
-        // Prevent double touch when both at mode-1
+        // Prevent double touch when both at mode-1 (except in PRIORITY)
         if (_leftFencer.score == _rightFencer.score &&
-            _leftFencer.score == config.mode - 1
+            _leftFencer.score == config.mode - 1 &&
+            _currentSection != SectionType.PRIORITY
         ) {
             return ScoreResult.DoubleNotAllowed
         }
@@ -276,12 +277,10 @@ class BoutEngine(
     }
 
     private fun handleRegulationEnd(): SectionEndResult {
-        // Next period will also be regulation time
+        // Toggle between period and break
         _nextSection = if (_currentSection == SectionType.PERIOD) {
-            _currentSection = SectionType.BREAK
             SectionType.BREAK
         } else {
-            _currentSection = SectionType.PERIOD
             SectionType.PERIOD
         }
 
@@ -354,7 +353,7 @@ class BoutEngine(
      * Only allowed if bout is not over.
      */
     fun skipSection(): SkipResult {
-        if (_isOver) {
+        if (!_isOver) {
             // Save state for undo
             val action = UndoAction.SectionSkipped(
                 previousTime = _timeRemaining,
