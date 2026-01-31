@@ -191,16 +191,26 @@ class PdfExporter(private val context: Context) {
 
         val linePaint = Paint().apply {
             strokeWidth = 1f
+            style = Paint.Style.STROKE
             isAntiAlias = true
         }
+
+        val diagonalPaint = Paint().apply {
+            style = Paint.Style.FILL
+            color = android.graphics.Color.LTGRAY
+            isAntiAlias = true
+        }
+
+        val cellHeight = 20f
 
         // Header row
         var x = MARGIN + nameColWidth
         for (col in matrix.indices) {
-            canvas.drawText("${col + 1}", x + 10f, y + 15f, headerPaint)
+            canvas.drawRect(x, y, x + cellSize, y + cellHeight, linePaint)
+            canvas.drawText("${col + 1}", x + 14f, y + 15f, headerPaint)
             x += cellSize
         }
-        y += 20f
+        y += cellHeight
 
         // Matrix rows
         for (rowIndex in matrix.indices) {
@@ -215,8 +225,13 @@ class PdfExporter(private val context: Context) {
             for (colIndex in matrix[rowIndex].indices) {
                 val cell = matrix[rowIndex][colIndex]
 
+                // Diagonal cell (fencer vs self)
+                if (cell == null) {
+                    canvas.drawRect(x, y, x + cellSize, y + cellHeight, diagonalPaint)
+                }
+
                 // Draw cell border
-                canvas.drawRect(x, y, x + cellSize, y + 20f, linePaint)
+                canvas.drawRect(x, y, x + cellSize, y + cellHeight, linePaint)
 
                 // Draw cell content
                 if (cell != null && cell.leftScore != null && cell.rightScore != null) {
@@ -228,7 +243,7 @@ class PdfExporter(private val context: Context) {
                 x += cellSize
             }
 
-            y += 20f
+            y += cellHeight
         }
 
         return y
@@ -254,6 +269,7 @@ class PdfExporter(private val context: Context) {
 
         val linePaint = Paint().apply {
             strokeWidth = 1f
+            style = Paint.Style.STROKE
             isAntiAlias = true
         }
 

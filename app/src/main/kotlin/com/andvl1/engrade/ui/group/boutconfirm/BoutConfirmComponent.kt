@@ -23,6 +23,7 @@ data class BoutConfirmState(
 
 sealed class BoutConfirmEvent {
     data object StartBout : BoutConfirmEvent()
+    data object SwapSides : BoutConfirmEvent()
     data object Cancel : BoutConfirmEvent()
 }
 
@@ -82,6 +83,12 @@ class DefaultBoutConfirmComponent(
                     _state.value.rightName,
                     _state.value.mode,
                     _state.value.weapon
+                )
+            }
+            BoutConfirmEvent.SwapSides -> {
+                _state.value = _state.value.copy(
+                    leftName = _state.value.rightName,
+                    rightName = _state.value.leftName
                 )
             }
             BoutConfirmEvent.Cancel -> onBack()

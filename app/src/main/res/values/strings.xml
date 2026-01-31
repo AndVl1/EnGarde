@@ -130,6 +130,7 @@
 
     <!-- BoutConfirm -->
     <string name="bout_confirm_title">Подтверждение боя</string>
+    <string name="swap_sides">Поменять стороны</string>
     <string name="start_bout">Начать бой</string>
     <string name="left_lane">Левая дорожка</string>
     <string name="right_lane">Правая дорожка</string>

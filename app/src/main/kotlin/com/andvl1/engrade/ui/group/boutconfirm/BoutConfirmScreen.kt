@@ -1,6 +1,8 @@
 package com.andvl1.engrade.ui.group.boutconfirm
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,15 +61,19 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        stringResource(R.string.vs),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Swap sides button
+                    FilledTonalIconButton(
+                        onClick = { component.onEvent(BoutConfirmEvent.SwapSides) }
+                    ) {
+                        Icon(
+                            Icons.Default.SwapHoriz,
+                            contentDescription = stringResource(R.string.swap_sides)
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         stringResource(R.string.right_lane),
