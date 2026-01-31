@@ -10,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,10 +24,10 @@ fun BoutsListScreen(component: BoutsListComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("All Bouts") },
+                title = { Text(stringResource(R.string.all_bouts)) },
                 navigationIcon = {
                     IconButton(onClick = { component.onEvent(BoutsListEvent.NavigateBack) }) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.action_settings))
                     }
                 }
             )
@@ -131,7 +133,7 @@ fun BoutListItem(
                 }
             } else {
                 Text(
-                    "Pending",
+                    stringResource(R.string.pending),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

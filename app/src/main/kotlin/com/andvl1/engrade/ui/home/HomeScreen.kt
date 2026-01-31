@@ -8,8 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,10 +22,10 @@ fun HomeScreen(component: HomeComponent) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("EnGarde") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = { component.onEvent(HomeEvent.NavigateToSettings) }) {
-                        Icon(Icons.Default.Settings, "Settings")
+                        Icon(Icons.Default.Settings, stringResource(R.string.action_settings))
                     }
                 }
             )
@@ -38,7 +40,7 @@ fun HomeScreen(component: HomeComponent) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
             Text(
-                text = "Select Mode",
+                text = stringResource(R.string.select_mode),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -52,7 +54,7 @@ fun HomeScreen(component: HomeComponent) {
                     .height(80.dp)
             ) {
                 Text(
-                    text = "Single Bout",
+                    text = stringResource(R.string.single_bout),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -64,7 +66,7 @@ fun HomeScreen(component: HomeComponent) {
                     .height(80.dp)
             ) {
                 Text(
-                    text = "Group Stage",
+                    text = stringResource(R.string.group_stage),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -77,7 +79,7 @@ fun HomeScreen(component: HomeComponent) {
                         .height(80.dp)
                 ) {
                     Text(
-                        text = "Continue Active Pool",
+                        text = stringResource(R.string.continue_pool),
                         style = MaterialTheme.typography.titleLarge
                     )
                 }

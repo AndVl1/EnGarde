@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @Composable
@@ -22,7 +24,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Bout Result",
+            stringResource(R.string.bout_result_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
@@ -115,7 +117,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Text("Continue", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.continue_text), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

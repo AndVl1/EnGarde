@@ -1,12 +1,16 @@
 package com.andvl1.engrade.ui.group.setup
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.FencerInput
 import com.andvl1.engrade.domain.model.Weapon
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -18,17 +22,18 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Group Setup") })
+            CenterAlignedTopAppBar(title = { Text(stringResource(R.string.group_setup)) })
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Fencer Count")
+            Text(stringResource(R.string.fencer_count))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 (5..8).forEach { count ->
                     FilterChip(
@@ -39,7 +44,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                 }
             }
 
-            Text("Mode")
+            Text(stringResource(R.string.bout_mode))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(4, 5).forEach { mode ->
                     FilterChip(
@@ -50,7 +55,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                 }
             }
 
-            Text("Weapon")
+            Text(stringResource(R.string.weapon_label))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Weapon.entries.forEach { weapon ->
                     FilterChip(
@@ -63,19 +68,52 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
 
             HorizontalDivider()
 
-            Text("Fencers", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.participants), style = MaterialTheme.typography.titleMedium)
 
             state.fencers.forEachIndexed { index, fencer ->
-                OutlinedTextField(
-                    value = fencer.name,
-                    onValueChange = {
-                        component.onEvent(
-                            GroupSetupEvent.UpdateFencer(index, fencer.copy(name = it))
-                        )
-                    },
-                    label = { Text("Fencer ${index + 1}") },
+                Card(
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = fencer.name,
+                            onValueChange = {
+                                component.onEvent(
+                                    GroupSetupEvent.UpdateFencer(index, fencer.copy(name = it))
+                                )
+                            },
+                            label = { Text(stringResource(R.string.fencer_name, index + 1)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        OutlinedTextField(
+                            value = fencer.organization ?: "",
+                            onValueChange = {
+                                component.onEvent(
+                                    GroupSetupEvent.UpdateFencer(index, fencer.copy(organization = it.ifBlank { null }))
+                                )
+                            },
+                            label = { Text(stringResource(R.string.organization)) },
+                            placeholder = { Text(stringResource(R.string.organization)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        OutlinedTextField(
+                            value = fencer.region ?: "",
+                            onValueChange = {
+                                component.onEvent(
+                                    GroupSetupEvent.UpdateFencer(index, fencer.copy(region = it.ifBlank { null }))
+                                )
+                            },
+                            label = { Text(stringResource(R.string.region)) },
+                            placeholder = { Text(stringResource(R.string.region)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -90,7 +128,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                 if (state.isCreating) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Create Pool")
+                    Text(stringResource(R.string.create_group))
                 }
             }
         }

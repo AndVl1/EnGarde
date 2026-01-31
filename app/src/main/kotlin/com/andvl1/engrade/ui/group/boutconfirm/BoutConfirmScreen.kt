@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @Composable
@@ -31,7 +33,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                "Bout #${state.boutNumber}",
+                stringResource(R.string.bout_number, state.boutNumber),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -46,7 +48,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Left Lane",
+                        stringResource(R.string.left_lane),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -60,7 +62,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        "vs",
+                        stringResource(R.string.vs),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -68,7 +70,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        "Right Lane",
+                        stringResource(R.string.right_lane),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -89,7 +91,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Start Bout", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.start_bout), style = MaterialTheme.typography.titleMedium)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -100,7 +102,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
