@@ -10,15 +10,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
@@ -30,15 +33,18 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Group Stage") },
+                title = { Text(stringResource(R.string.group_stage_title)) },
                 navigationIcon = {
                     IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateBack) }) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.action_settings))
                     }
                 },
                 actions = {
+                    IconButton(onClick = { component.onEvent(GroupDashboardEvent.ExportPdf) }) {
+                        Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf))
+                    }
                     IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateToBoutsList) }) {
-                        Icon(Icons.Default.List, "Bouts List")
+                        Icon(Icons.Default.List, stringResource(R.string.bouts_list_title))
                     }
                 }
             )
@@ -66,7 +72,7 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 Card {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Progress: ${state.completedBoutsCount} / ${state.totalBoutsCount} bouts",
+                            stringResource(R.string.bouts_progress, state.completedBoutsCount, state.totalBoutsCount),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -89,12 +95,12 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                             .fillMaxWidth()
                             .height(56.dp)
                     ) {
-                        Text("Start Next Bout", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.start_next_bout), style = MaterialTheme.typography.titleMedium)
                     }
                 }
 
                 // FIE Result Matrix
-                Text("Result Matrix", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.result_matrix), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
                 MatrixTable(
                     matrix = state.matrix,
@@ -103,7 +109,7 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 )
 
                 // Rankings Table
-                Text("Rankings", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.rankings), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
                 RankingsTable(rankings = state.rankings)
             }

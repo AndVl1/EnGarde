@@ -42,6 +42,7 @@ class EnGardeActivity : ComponentActivity() {
         val settingsRepository = SettingsRepository(applicationContext)
         val poolRepository = PoolRepository(database)
         val poolEngine = PoolEngine()
+        val pdfExporter = com.andvl1.engrade.platform.PdfExporter(applicationContext)
         soundManager = SoundManager(applicationContext)
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -57,6 +58,7 @@ class EnGardeActivity : ComponentActivity() {
             settingsRepository = settingsRepository,
             poolRepository = poolRepository,
             poolEngine = poolEngine,
+            pdfExporter = pdfExporter,
             soundManager = soundManager,
             notificationHelper = notificationHelper,
             notificationPendingIntent = pendingIntent

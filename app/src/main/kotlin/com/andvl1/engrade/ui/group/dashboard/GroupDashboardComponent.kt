@@ -5,11 +5,14 @@ import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutResultData
 import com.andvl1.engrade.domain.model.FencerRanking
 import com.andvl1.engrade.domain.model.MatrixCell
+import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 interface GroupDashboardComponent {
     val state: Value<GroupDashboardState>
@@ -44,6 +47,7 @@ sealed class GroupDashboardEvent {
     data object StartNextBout : GroupDashboardEvent()
     data object NavigateToBoutsList : GroupDashboardEvent()
     data object NavigateBack : GroupDashboardEvent()
+    data object ExportPdf : GroupDashboardEvent()
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
     data object DismissEditScoreDialog : GroupDashboardEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
@@ -54,6 +58,7 @@ class DefaultGroupDashboardComponent(
     private val poolId: Long,
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
+    private val pdfExporter: PdfExporter,
     private val onNavigateToBoutConfirm: (Long, Long) -> Unit,
     private val onNavigateToBoutsList: (Long) -> Unit,
     private val onBack: () -> Unit
@@ -179,6 +184,46 @@ class DefaultGroupDashboardComponent(
                 onNavigateToBoutsList(poolId)
             }
             GroupDashboardEvent.NavigateBack -> onBack()
+            GroupDashboardEvent.ExportPdf -> {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val pool = poolRepository.getPoolById(poolId)
+                            val fencers = poolRepository.getPoolFencersWithNames(poolId)
+                            val bouts = poolRepository.getPoolBoutsWithNames(poolId)
+
+                            // Collect current snapshot of data
+                            var poolEntity: com.andvl1.engrade.data.db.entity.PoolEntity? = null
+                            pool.collect { poolEntity = it }
+
+                            var fencersList: List<com.andvl1.engrade.data.PoolFencerWithName> = emptyList()
+                            fencers.collect { fencersList = it }
+
+                            var boutsList: List<com.andvl1.engrade.data.PoolBoutWithNames> = emptyList()
+                            bouts.collect { boutsList = it }
+
+                            val currentState = _state.value
+
+                            poolEntity?.let { p ->
+                                val pdfFile = pdfExporter.exportPoolProtocol(
+                                    pool = p,
+                                    fencers = fencersList,
+                                    bouts = boutsList,
+                                    rankings = currentState.rankings,
+                                    matrix = currentState.matrix
+                                )
+
+                                withContext(Dispatchers.Main) {
+                                    pdfExporter.sharePdf(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // Handle error - could show toast or dialog
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
             is GroupDashboardEvent.ShowEditScoreDialog -> {
                 // TODO: implement edit score dialog
             }

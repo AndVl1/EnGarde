@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">En Garde</string>
+
+    <string name="activity_settings">Settings</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_skip_section">Skip</string>
+
+    <string name="double_touch">Double</string>
+
+    <string name="winner">WINNER</string>
+    <string name="period">Period</string>
+    <string name="rest">Break</string>
+    <string name="priority">Priority</string>
+
+    <string name="penalty_card">Penalty card</string>
+    <string name="yellow_card">Yellow card</string>
+    <string name="red_card">Red card</string>
+
+    <string name="yellow_card_dialog">Give yellow card to &#8230;</string>
+    <string name="red_card_dialog">Give red card to &#8230;</string>
+
+    <string name="toast_gave">Gave</string>
+    <string name="toast_skipped">Skipped</string>
+    <string name="toast_unable">Can\'t</string>
+    <string name="toast_give">give</string>
+    <string name="toast_skip">skip</string>
+    <string name="toast_touch">touch</string>
+    <string name="toast_card">card</string>
+    <string name="toast_period">period</string>
+    <string name="toast_break">break</string>
+    <string name="toast_yellow">yellow</string>
+    <string name="toast_red">red</string>
+    <string name="toast_left">to left fencer</string>
+    <string name="toast_right">to right fencer</string>
+    <string name="toast_double">double</string>
+    <string name="toast_priority">priority</string>
+    <string name="toast_winner_determined">--a winner has already been determined.</string>
+
+    <string name="pref_behavior">Behavior</string>
+    <string name="pref_mode">Bout mode</string>
+    <string name="pref_choose_mode">Choose a mode</string>
+    <string name="pref_mode_summary">Choose the bout length</string>
+    <string name="pref_mode_5touch">Five touches (one period)</string>
+    <string name="pref_mode_15touch">Fifteen touches  (three periods)</string>
+    <string name="pref_anywhere_to_start">Anywhere to start</string>
+    <string name="pref_anywhere_description">Touch on empty space to start the timer</string>
+
+    <string name="pref_show_double">Show double touch button</string>
+
+    <string name="pref_looks">Looks</string>
+    <string name="pref_black">AMOLED black mode</string>
+    <string name="pref_black_summary">Saves battery on AMOLED devices</string>
+
+    <string name="pref_about">About</string>
+    <string name="pref_version">Version</string>
+
+    <string name="priority_left">Priority to the left</string>
+    <string name="priority_right">Priority to the right</string>
+    <string name="epee_foil">Epee/Foil</string>
+    <string name="sabre">Sabre</string>
+    <string name="pref_weapon">Weapon</string>
+    <string name="pref_choose_weapon">Choose a weapon</string>
+
+    <string name="start_poole">Start pool</string>
+
+    <string name="notification_timer">Timer</string>
+    <string name="notification_timer_descr">Notification of timer ending</string>
+
+    <!-- Home Screen -->
+    <string name="select_mode">Select Mode</string>
+    <string name="single_bout">Single Bout</string>
+    <string name="group_stage">Group Stage</string>
+    <string name="continue_pool">Continue Pool</string>
+
+    <!-- BoutScreen (additional strings) -->
+    <string name="period_n">Period %d</string>
+    <string name="break_n">Break %d</string>
+    <string name="card_left">Card to Left</string>
+    <string name="card_right">Card to Right</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- GroupSetup -->
+    <string name="create_group">Create Pool</string>
+    <string name="group_settings">Pool Settings</string>
+    <string name="fencer_count">Fencer Count</string>
+    <string name="bout_mode">Bout Mode</string>
+    <string name="weapon_label">Weapon</string>
+    <string name="touches_4">4 touches</string>
+    <string name="touches_5">5 touches</string>
+    <string name="participants">Participants</string>
+    <string name="fencer_name">Fencer %d Name</string>
+    <string name="organization">Organization</string>
+    <string name="region">Region</string>
+    <string name="name_required">All names must be filled</string>
+    <string name="duplicate_names">Names must not duplicate</string>
+
+    <!-- GroupDashboard -->
+    <string name="pool_title">Pool</string>
+    <string name="bout_number">Bout #%d</string>
+    <string name="vs">vs</string>
+    <string name="start_next_bout">Start Next Bout</string>
+    <string name="bouts_progress">Completed %1$d of %2$d</string>
+    <string name="current_bout">Current Bout</string>
+    <string name="next_bout">Next Up</string>
+    <string name="export_pdf">Export PDF</string>
+    <string name="bouts_list_title">Bouts List</string>
+    <string name="forfeit">Forfeit</string>
+    <string name="exclude">Exclude</string>
+    <string name="edit_score">Edit Score</string>
+    <string name="victories">V</string>
+    <string name="vm_percent">V/M%%</string>
+    <string name="touches_delivered">TD</string>
+    <string name="touches_received">TR</string>
+    <string name="index">Ind</string>
+    <string name="place">Place</string>
+    <string name="all_bouts_completed">All bouts completed</string>
+    <string name="pool_completed">Pool completed</string>
+
+    <!-- BoutConfirm -->
+    <string name="bout_confirm_title">Bout Confirmation</string>
+    <string name="start_bout">Start Bout</string>
+    <string name="left_lane">Left Lane</string>
+    <string name="right_lane">Right Lane</string>
+
+    <!-- BoutResult -->
+    <string name="bout_result_title">Bout Result</string>
+    <string name="continue_text">Continue</string>
+    <string name="victory_short">V%d</string>
+    <string name="defeat_short">D%d</string>
+
+    <!-- BoutsList -->
+    <string name="all_bouts">All Bouts</string>
+    <string name="pending">Pending</string>
+    <string name="completed">Completed</string>
+
+    <!-- Dialogs -->
+    <string name="confirm_forfeit">Confirm Forfeit</string>
+    <string name="confirm_exclude">Confirm Exclusion</string>
+    <string name="exclude_warning">All bouts of this fencer will be annulled</string>
+    <string name="forfeit_question">Who did not appear?</string>
+    <string name="left_fencer">Left Fencer</string>
+    <string name="right_fencer">Right Fencer</string>
+    <string name="save">Save</string>
+    <string name="confirm">Confirm</string>
+    <string name="group_setup">Group Setup</string>
+    <string name="group_stage_title">Group Stage</string>
+    <string name="progress">Progress</string>
+    <string name="result_matrix">Result Matrix</string>
+    <string name="rankings">Rankings</string>
+</resources>

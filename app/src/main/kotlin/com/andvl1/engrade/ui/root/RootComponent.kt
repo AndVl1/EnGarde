@@ -5,6 +5,7 @@ import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.SettingsRepository
 import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.platform.NotificationHelper
+import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.SoundManager
 import com.andvl1.engrade.ui.bout.BoutComponent
 import com.andvl1.engrade.ui.bout.DefaultBoutComponent
@@ -89,6 +90,7 @@ class DefaultRootComponent(
     private val settingsRepository: SettingsRepository,
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
+    private val pdfExporter: PdfExporter,
     private val soundManager: SoundManager,
     private val notificationHelper: NotificationHelper,
     private val notificationPendingIntent: PendingIntent
@@ -154,6 +156,7 @@ class DefaultRootComponent(
                 poolId = config.poolId,
                 poolRepository = poolRepository,
                 poolEngine = poolEngine,
+                pdfExporter = pdfExporter,
                 onNavigateToBoutConfirm = { poolId, boutId ->
                     navigation.push(RootComponent.Config.BoutConfirm(poolId, boutId))
                 },
