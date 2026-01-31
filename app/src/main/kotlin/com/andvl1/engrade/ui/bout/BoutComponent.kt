@@ -11,6 +11,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 
 interface BoutComponent {
     val state: Value<BoutState>
@@ -36,15 +37,13 @@ class DefaultBoutComponent(
     override val state: Value<BoutState> = _state
 
     init {
-        // Load settings and initialize engine
+        // Initialize engine once with initial config
         scope.launch {
-            settingsRepository.boutConfigFlow.collect { config ->
-                // Recreate engine with new config
-                currentConfig = config
-                engine = BoutEngine(config)
-                engine.resetAll()
-                updateState()
-            }
+            val initialConfig = settingsRepository.boutConfigFlow.first()
+            currentConfig = initialConfig
+            engine = BoutEngine(initialConfig)
+            engine.resetAll()
+            updateState()
         }
     }
 
