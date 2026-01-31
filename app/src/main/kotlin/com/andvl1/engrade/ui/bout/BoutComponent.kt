@@ -30,6 +30,7 @@ class DefaultBoutComponent(
 
     private var engine: BoutEngine = BoutEngine(BoutConfig.DEFAULT)
     private var timerJob: Job? = null
+    private var currentConfig: BoutConfig = BoutConfig.DEFAULT
 
     private val _state = MutableValue(BoutState())
     override val state: Value<BoutState> = _state
@@ -39,6 +40,7 @@ class DefaultBoutComponent(
         scope.launch {
             settingsRepository.boutConfigFlow.collect { config ->
                 // Recreate engine with new config
+                currentConfig = config
                 engine = BoutEngine(config)
                 engine.resetAll()
                 updateState()
@@ -178,7 +180,7 @@ class DefaultBoutComponent(
     }
 
     private fun updateState() {
-        _state.value = BoutState(
+        _state.value = _state.value.copy(
             leftFencer = engine.leftFencer,
             rightFencer = engine.rightFencer,
             timeRemainingMs = engine.timeRemaining,
@@ -187,8 +189,7 @@ class DefaultBoutComponent(
             isTimerRunning = timerJob?.isActive == true,
             isOver = engine.isOver,
             canUndo = engine.canUndo,
-            config = _state.value.config,
-            showCardDialog = _state.value.showCardDialog
+            config = currentConfig
         )
     }
 }

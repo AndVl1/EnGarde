@@ -58,8 +58,19 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreLeft(): ScoreResult {
+        // Save state before making changes
+        val previousSection = _currentSection
+        val previousNextSection = _nextSection
+        val previousTime = _timeRemaining
+
         _leftFencer = _leftFencer.incrementScore()
-        _undoStack.addLast(UndoAction.LeftScored)
+        _undoStack.addLast(
+            UndoAction.LeftScored(
+                previousSection = previousSection,
+                previousNextSection = previousNextSection,
+                previousTime = previousTime
+            )
+        )
 
         // Sabre break-at-8 rule
         if (config.weapon == Weapon.SABRE &&
@@ -87,8 +98,19 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreRight(): ScoreResult {
+        // Save state before making changes
+        val previousSection = _currentSection
+        val previousNextSection = _nextSection
+        val previousTime = _timeRemaining
+
         _rightFencer = _rightFencer.incrementScore()
-        _undoStack.addLast(UndoAction.RightScored)
+        _undoStack.addLast(
+            UndoAction.RightScored(
+                previousSection = previousSection,
+                previousNextSection = previousNextSection,
+                previousTime = previousTime
+            )
+        )
 
         // Sabre break-at-8 rule
         if (config.weapon == Weapon.SABRE &&
@@ -124,9 +146,20 @@ class BoutEngine(
             return ScoreResult.DoubleNotAllowed
         }
 
+        // Save state before making changes
+        val previousSection = _currentSection
+        val previousNextSection = _nextSection
+        val previousTime = _timeRemaining
+
         _leftFencer = _leftFencer.incrementScore()
         _rightFencer = _rightFencer.incrementScore()
-        _undoStack.addLast(UndoAction.BothScored)
+        _undoStack.addLast(
+            UndoAction.BothScored(
+                previousSection = previousSection,
+                previousNextSection = previousNextSection,
+                previousTime = previousTime
+            )
+        )
 
         // Check for winner
         when {
@@ -383,6 +416,10 @@ class BoutEngine(
                 if (_leftFencer.isWinner) {
                     _leftFencer = _leftFencer.withoutWinner()
                 }
+                // Restore section state
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 _isOver = false
                 UndoResult.Undone
             }
@@ -391,6 +428,10 @@ class BoutEngine(
                 if (_rightFencer.isWinner) {
                     _rightFencer = _rightFencer.withoutWinner()
                 }
+                // Restore section state
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 _isOver = false
                 UndoResult.Undone
             }
@@ -399,6 +440,10 @@ class BoutEngine(
                 _rightFencer = _rightFencer.decrementScore()
                 if (_leftFencer.isWinner) _leftFencer = _leftFencer.withoutWinner()
                 if (_rightFencer.isWinner) _rightFencer = _rightFencer.withoutWinner()
+                // Restore section state
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 _isOver = false
                 UndoResult.Undone
             }

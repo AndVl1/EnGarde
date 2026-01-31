@@ -9,13 +9,25 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class UndoAction {
     @Serializable
-    data object LeftScored : UndoAction()  // 0
+    data class LeftScored(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 0
 
     @Serializable
-    data object RightScored : UndoAction()  // 1
+    data class RightScored(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 1
 
     @Serializable
-    data object BothScored : UndoAction()  // 2
+    data class BothScored(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 2
 
     @Serializable
     data object LeftYellowCard : UndoAction()  // 3
