@@ -78,16 +78,47 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedTextField(
-                            value = fencer.name,
-                            onValueChange = {
-                                component.onEvent(
-                                    GroupSetupEvent.UpdateFencer(index, fencer.copy(name = it))
-                                )
-                            },
-                            label = { Text(stringResource(R.string.fencer_name, index + 1)) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        // Name field with autocomplete
+                        Box {
+                            OutlinedTextField(
+                                value = fencer.name,
+                                onValueChange = { newName ->
+                                    component.onEvent(
+                                        GroupSetupEvent.UpdateFencer(index, fencer.copy(name = newName))
+                                    )
+                                    component.onEvent(
+                                        GroupSetupEvent.SearchFencerName(index, newName)
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.fencer_name, index + 1)) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            // Suggestions dropdown
+                            DropdownMenu(
+                                expanded = state.activeSuggestionIndex == index && state.suggestions.isNotEmpty(),
+                                onDismissRequest = { component.onEvent(GroupSetupEvent.DismissSuggestions) },
+                                modifier = Modifier.fillMaxWidth(0.9f)
+                            ) {
+                                state.suggestions.forEach { suggestion ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Column {
+                                                Text(suggestion.name, style = MaterialTheme.typography.bodyMedium)
+                                                suggestion.organization?.let {
+                                                    Text(it, style = MaterialTheme.typography.bodySmall)
+                                                }
+                                            }
+                                        },
+                                        onClick = {
+                                            component.onEvent(
+                                                GroupSetupEvent.SelectSuggestion(index, suggestion)
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        }
 
                         OutlinedTextField(
                             value = fencer.organization ?: "",

@@ -11,6 +11,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -27,11 +28,13 @@ data class GroupDashboardState(
     val matrix: List<List<MatrixCell?>> = emptyList(),
     val rankings: List<FencerRanking> = emptyList(),
     val fencerNames: Map<Int, String> = emptyMap(),
+    val excludedSeeds: Set<Int> = emptySet(),
     val completedBoutsCount: Int = 0,
     val totalBoutsCount: Int = 0,
     val currentBoutInfo: String? = null,
     val nextBoutInfo: String? = null,
     val showEditScoreDialog: EditScoreDialogState? = null,
+    val showForfeitDialog: ForfeitDialogState? = null,
     val isLoading: Boolean = true
 )
 
@@ -43,6 +46,14 @@ data class EditScoreDialogState(
     val rightScore: Int
 )
 
+data class ForfeitDialogState(
+    val boutId: Long,
+    val leftName: String,
+    val rightName: String,
+    val leftSeed: Int,
+    val rightSeed: Int
+)
+
 sealed class GroupDashboardEvent {
     data object StartNextBout : GroupDashboardEvent()
     data object NavigateToBoutsList : GroupDashboardEvent()
@@ -51,6 +62,10 @@ sealed class GroupDashboardEvent {
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
     data object DismissEditScoreDialog : GroupDashboardEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
+    data object ShowForfeitDialog : GroupDashboardEvent()
+    data object DismissForfeitDialog : GroupDashboardEvent()
+    data class RecordForfeit(val boutId: Long, val absentSide: String) : GroupDashboardEvent()
+    data class ExcludeFencer(val seedNumber: Int) : GroupDashboardEvent()
 }
 
 class DefaultGroupDashboardComponent(
@@ -74,7 +89,6 @@ class DefaultGroupDashboardComponent(
 
     private fun loadPoolData() {
         scope.launch {
-            // Get pool info
             poolRepository.getPoolById(poolId).collect { pool ->
                 pool?.let {
                     _state.value = _state.value.copy(
@@ -86,31 +100,35 @@ class DefaultGroupDashboardComponent(
         }
 
         scope.launch {
-            // Get fencers
             poolRepository.getPoolFencersWithNames(poolId).collect { poolFencers ->
                 val fencerNames = poolFencers.associate {
                     it.poolFencer.seedNumber to it.fencerName
                 }
+                val excludedSeeds = poolFencers
+                    .filter { it.poolFencer.excluded }
+                    .map { it.poolFencer.seedNumber }
+                    .toSet()
                 _state.value = _state.value.copy(
                     fencerCount = poolFencers.size,
-                    fencerNames = fencerNames
+                    fencerNames = fencerNames,
+                    excludedSeeds = excludedSeeds
                 )
                 recalculateStandings()
             }
         }
 
         scope.launch {
-            // Get bouts and recalculate on changes
             poolRepository.getPoolBoutsWithNames(poolId).collect { bouts ->
                 val completed = bouts.count { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
                 val total = bouts.size
 
-                val currentBout = bouts.firstOrNull { it.bout.status == "PENDING" }
+                val pendingBouts = bouts.filter { it.bout.status == "PENDING" }
+                val currentBout = pendingBouts.firstOrNull()
                 val currentInfo = currentBout?.let {
                     "Bout #${it.bout.boutOrder}: ${it.leftFencerName} vs ${it.rightFencerName}"
                 }
 
-                val nextBout = bouts.drop(1).firstOrNull { it.bout.status == "PENDING" }
+                val nextBout = pendingBouts.drop(1).firstOrNull()
                 val nextInfo = nextBout?.let {
                     "Next: ${it.leftFencerName} vs ${it.rightFencerName}"
                 }
@@ -130,43 +148,43 @@ class DefaultGroupDashboardComponent(
 
     private fun recalculateStandings() {
         scope.launch {
-            val bouts = poolRepository.getPoolBoutsWithNames(poolId)
-            bouts.collect { boutList ->
-                val completedBouts = boutList
-                    .filter { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
-                    .mapNotNull { boutWithNames ->
-                        val bout = boutWithNames.bout
-                        bout.leftScore?.let { leftScore ->
-                            bout.rightScore?.let { rightScore ->
-                                BoutResultData(
-                                    leftSeed = bout.leftFencerSeed,
-                                    rightSeed = bout.rightFencerSeed,
-                                    leftScore = leftScore,
-                                    rightScore = rightScore,
-                                    status = com.andvl1.engrade.domain.model.BoutStatus.valueOf(bout.status)
-                                )
-                            }
+            val boutList = poolRepository.getPoolBoutsWithNames(poolId).first()
+            val currentState = _state.value
+
+            val completedBouts = boutList
+                .filter { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
+                .mapNotNull { boutWithNames ->
+                    val bout = boutWithNames.bout
+                    bout.leftScore?.let { leftScore ->
+                        bout.rightScore?.let { rightScore ->
+                            BoutResultData(
+                                leftSeed = bout.leftFencerSeed,
+                                rightSeed = bout.rightFencerSeed,
+                                leftScore = leftScore,
+                                rightScore = rightScore,
+                                status = com.andvl1.engrade.domain.model.BoutStatus.valueOf(bout.status)
+                            )
                         }
                     }
+                }
 
-                val rankings = poolEngine.calculateRankings(
-                    fencerCount = _state.value.fencerCount,
-                    bouts = completedBouts,
-                    fencerNames = _state.value.fencerNames,
-                    excludedSeeds = emptySet()
-                )
+            val rankings = poolEngine.calculateRankings(
+                fencerCount = currentState.fencerCount,
+                bouts = completedBouts,
+                fencerNames = currentState.fencerNames,
+                excludedSeeds = currentState.excludedSeeds
+            )
 
-                val matrix = poolEngine.buildMatrix(
-                    fencerCount = _state.value.fencerCount,
-                    bouts = completedBouts,
-                    excludedSeeds = emptySet()
-                )
+            val matrix = poolEngine.buildMatrix(
+                fencerCount = currentState.fencerCount,
+                bouts = completedBouts,
+                excludedSeeds = currentState.excludedSeeds
+            )
 
-                _state.value = _state.value.copy(
-                    rankings = rankings,
-                    matrix = matrix
-                )
-            }
+            _state.value = _state.value.copy(
+                rankings = rankings,
+                matrix = matrix
+            )
         }
     }
 
@@ -188,20 +206,9 @@ class DefaultGroupDashboardComponent(
                 scope.launch {
                     withContext(Dispatchers.IO) {
                         try {
-                            val pool = poolRepository.getPoolById(poolId)
-                            val fencers = poolRepository.getPoolFencersWithNames(poolId)
-                            val bouts = poolRepository.getPoolBoutsWithNames(poolId)
-
-                            // Collect current snapshot of data
-                            var poolEntity: com.andvl1.engrade.data.db.entity.PoolEntity? = null
-                            pool.collect { poolEntity = it }
-
-                            var fencersList: List<com.andvl1.engrade.data.PoolFencerWithName> = emptyList()
-                            fencers.collect { fencersList = it }
-
-                            var boutsList: List<com.andvl1.engrade.data.PoolBoutWithNames> = emptyList()
-                            bouts.collect { boutsList = it }
-
+                            val poolEntity = poolRepository.getPoolById(poolId).first()
+                            val fencersList = poolRepository.getPoolFencersWithNames(poolId).first()
+                            val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
                             val currentState = _state.value
 
                             poolEntity?.let { p ->
@@ -218,14 +225,27 @@ class DefaultGroupDashboardComponent(
                                 }
                             }
                         } catch (e: Exception) {
-                            // Handle error - could show toast or dialog
                             e.printStackTrace()
                         }
                     }
                 }
             }
             is GroupDashboardEvent.ShowEditScoreDialog -> {
-                // TODO: implement edit score dialog
+                scope.launch {
+                    val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
+                    val bout = boutsList.find { it.bout.id == event.boutId }
+                    bout?.let {
+                        _state.value = _state.value.copy(
+                            showEditScoreDialog = EditScoreDialogState(
+                                boutId = it.bout.id,
+                                leftName = it.leftFencerName,
+                                rightName = it.rightFencerName,
+                                leftScore = it.bout.leftScore ?: 0,
+                                rightScore = it.bout.rightScore ?: 0
+                            )
+                        )
+                    }
+                }
             }
             GroupDashboardEvent.DismissEditScoreDialog -> {
                 _state.value = _state.value.copy(showEditScoreDialog = null)
@@ -238,6 +258,44 @@ class DefaultGroupDashboardComponent(
                         rightScore = event.rightScore
                     )
                     _state.value = _state.value.copy(showEditScoreDialog = null)
+                }
+            }
+            GroupDashboardEvent.ShowForfeitDialog -> {
+                scope.launch {
+                    val nextBout = poolRepository.getNextPendingBout(poolId)
+                    nextBout?.let { bout ->
+                        val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
+                        val boutWithNames = boutsList.find { it.bout.id == bout.id }
+                        boutWithNames?.let {
+                            _state.value = _state.value.copy(
+                                showForfeitDialog = ForfeitDialogState(
+                                    boutId = it.bout.id,
+                                    leftName = it.leftFencerName,
+                                    rightName = it.rightFencerName,
+                                    leftSeed = it.bout.leftFencerSeed,
+                                    rightSeed = it.bout.rightFencerSeed
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            GroupDashboardEvent.DismissForfeitDialog -> {
+                _state.value = _state.value.copy(showForfeitDialog = null)
+            }
+            is GroupDashboardEvent.RecordForfeit -> {
+                scope.launch {
+                    poolRepository.recordForfeit(
+                        boutId = event.boutId,
+                        absentSide = event.absentSide,
+                        maxScore = _state.value.mode
+                    )
+                    _state.value = _state.value.copy(showForfeitDialog = null)
+                }
+            }
+            is GroupDashboardEvent.ExcludeFencer -> {
+                scope.launch {
+                    poolRepository.excludeFencer(poolId, event.seedNumber)
                 }
             }
         }

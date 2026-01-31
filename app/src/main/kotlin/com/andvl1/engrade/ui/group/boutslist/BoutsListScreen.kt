@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
+import com.andvl1.engrade.ui.group.dashboard.EditScoreDialog
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,7 @@ fun BoutsListScreen(component: BoutsListComponent) {
                 title = { Text(stringResource(R.string.all_bouts)) },
                 navigationIcon = {
                     IconButton(onClick = { component.onEvent(BoutsListEvent.NavigateBack) }) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.action_settings))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
                     }
                 }
             )
@@ -59,13 +60,24 @@ fun BoutsListScreen(component: BoutsListComponent) {
                         rightScore = boutWithNames.bout.rightScore,
                         status = boutWithNames.bout.status,
                         onClick = {
-                            if (boutWithNames.bout.status == "COMPLETED") {
+                            if (boutWithNames.bout.status == "COMPLETED" || boutWithNames.bout.status == "FORFEIT") {
                                 component.onEvent(BoutsListEvent.BoutClicked(boutWithNames.bout.id))
                             }
                         }
                     )
                 }
             }
+        }
+
+        // Edit Score Dialog
+        state.showEditScoreDialog?.let { dialog ->
+            EditScoreDialog(
+                dialog = dialog,
+                onDismiss = { component.onEvent(BoutsListEvent.DismissEditScoreDialog) },
+                onSave = { leftScore, rightScore ->
+                    component.onEvent(BoutsListEvent.UpdateBoutScore(dialog.boutId, leftScore, rightScore))
+                }
+            )
         }
     }
 }
@@ -82,7 +94,7 @@ fun BoutListItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = if (status == "COMPLETED") onClick else ({})
+        onClick = if (status == "COMPLETED" || status == "FORFEIT") onClick else ({})
     ) {
         Row(
             modifier = Modifier

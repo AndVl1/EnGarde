@@ -85,6 +85,7 @@ interface RootComponent {
     }
 }
 
+@OptIn(com.arkivanov.decompose.DelicateDecomposeApi::class)
 class DefaultRootComponent(
     componentContext: ComponentContext,
     private val settingsRepository: SettingsRepository,
@@ -234,9 +235,8 @@ class DefaultRootComponent(
                 winner = config.winner,
                 poolRepository = poolRepository,
                 onContinue = {
-                    // Pop bout result and pool bout, return to dashboard
-                    navigation.pop()
-                    navigation.pop()
+                    // Pop back to dashboard: remove BoutResult and BoutConfirm
+                    navigation.popWhile { it !is RootComponent.Config.GroupDashboard }
                 }
             )
         )

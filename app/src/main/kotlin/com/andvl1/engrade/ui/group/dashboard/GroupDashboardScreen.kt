@@ -4,21 +4,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
@@ -36,7 +37,7 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 title = { Text(stringResource(R.string.group_stage_title)) },
                 navigationIcon = {
                     IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateBack) }) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.action_settings))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
                     }
                 },
                 actions = {
@@ -44,8 +45,9 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                         Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf))
                     }
                     IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateToBoutsList) }) {
-                        Icon(Icons.Default.List, stringResource(R.string.bouts_list_title))
+                        Icon(Icons.AutoMirrored.Filled.List, stringResource(R.string.bouts_list_title))
                     }
+                    OverflowMenu(component = component, state = state)
                 }
             )
         }
@@ -87,15 +89,26 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                     }
                 }
 
-                // Start next bout button
+                // Action buttons
                 if (state.currentBoutInfo != null) {
-                    Button(
-                        onClick = { component.onEvent(GroupDashboardEvent.StartNextBout) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(R.string.start_next_bout), style = MaterialTheme.typography.titleMedium)
+                        Button(
+                            onClick = { component.onEvent(GroupDashboardEvent.StartNextBout) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                        ) {
+                            Text(stringResource(R.string.start_next_bout))
+                        }
+                        OutlinedButton(
+                            onClick = { component.onEvent(GroupDashboardEvent.ShowForfeitDialog) },
+                            modifier = Modifier.height(56.dp)
+                        ) {
+                            Text(stringResource(R.string.forfeit))
+                        }
                     }
                 }
 
@@ -114,7 +127,193 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 RankingsTable(rankings = state.rankings)
             }
         }
+
+        // Edit Score Dialog
+        state.showEditScoreDialog?.let { dialog ->
+            EditScoreDialog(
+                dialog = dialog,
+                onDismiss = { component.onEvent(GroupDashboardEvent.DismissEditScoreDialog) },
+                onSave = { leftScore, rightScore ->
+                    component.onEvent(GroupDashboardEvent.UpdateBoutScore(dialog.boutId, leftScore, rightScore))
+                }
+            )
+        }
+
+        // Forfeit Dialog
+        state.showForfeitDialog?.let { dialog ->
+            ForfeitDialog(
+                dialog = dialog,
+                onDismiss = { component.onEvent(GroupDashboardEvent.DismissForfeitDialog) },
+                onForfeit = { absentSide ->
+                    component.onEvent(GroupDashboardEvent.RecordForfeit(dialog.boutId, absentSide))
+                }
+            )
+        }
     }
+}
+
+@Composable
+private fun OverflowMenu(component: GroupDashboardComponent, state: GroupDashboardState) {
+    var expanded by remember { mutableStateOf(false) }
+    var showExcludeDialog by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Default.MoreVert, contentDescription = null)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.exclude)) },
+                onClick = {
+                    expanded = false
+                    showExcludeDialog = true
+                }
+            )
+        }
+    }
+
+    if (showExcludeDialog) {
+        ExcludeFencerDialog(
+            fencerNames = state.fencerNames,
+            excludedSeeds = state.excludedSeeds,
+            onDismiss = { showExcludeDialog = false },
+            onExclude = { seedNumber ->
+                showExcludeDialog = false
+                component.onEvent(GroupDashboardEvent.ExcludeFencer(seedNumber))
+            }
+        )
+    }
+}
+
+@Composable
+fun EditScoreDialog(
+    dialog: EditScoreDialogState,
+    onDismiss: () -> Unit,
+    onSave: (Int, Int) -> Unit
+) {
+    var leftScore by remember { mutableStateOf(dialog.leftScore.toString()) }
+    var rightScore by remember { mutableStateOf(dialog.rightScore.toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_score)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = leftScore,
+                    onValueChange = { leftScore = it },
+                    label = { Text(dialog.leftName) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = rightScore,
+                    onValueChange = { rightScore = it },
+                    label = { Text(dialog.rightName) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val left = leftScore.toIntOrNull() ?: 0
+                    val right = rightScore.toIntOrNull() ?: 0
+                    onSave(left, right)
+                }
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun ForfeitDialog(
+    dialog: ForfeitDialogState,
+    onDismiss: () -> Unit,
+    onForfeit: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.confirm_forfeit)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.forfeit_question))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { onForfeit("LEFT") },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(dialog.leftName)
+                    }
+                    OutlinedButton(
+                        onClick = { onForfeit("RIGHT") },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(dialog.rightName)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun ExcludeFencerDialog(
+    fencerNames: Map<Int, String>,
+    excludedSeeds: Set<Int>,
+    onDismiss: () -> Unit,
+    onExclude: (Int) -> Unit
+) {
+    val activeSeeds = fencerNames.keys.filter { it !in excludedSeeds }.sorted()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.confirm_exclude)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    stringResource(R.string.exclude_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                activeSeeds.forEach { seed ->
+                    TextButton(
+                        onClick = { onExclude(seed) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("${seed}. ${fencerNames[seed] ?: ""}")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable

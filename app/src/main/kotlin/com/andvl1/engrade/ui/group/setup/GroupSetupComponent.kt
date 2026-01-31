@@ -1,12 +1,14 @@
 package com.andvl1.engrade.ui.group.setup
 
 import com.andvl1.engrade.data.PoolRepository
+import com.andvl1.engrade.data.db.entity.FencerEntity
 import com.andvl1.engrade.domain.model.FencerInput
 import com.andvl1.engrade.domain.model.Weapon
 import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 interface GroupSetupComponent {
@@ -19,6 +21,8 @@ data class GroupSetupState(
     val mode: Int = 5,
     val weapon: Weapon = Weapon.SABRE,
     val fencers: List<FencerInput> = List(5) { FencerInput("") },
+    val suggestions: List<FencerEntity> = emptyList(),
+    val activeSuggestionIndex: Int = -1,
     val isCreating: Boolean = false
 )
 
@@ -27,6 +31,9 @@ sealed class GroupSetupEvent {
     data class SetMode(val mode: Int) : GroupSetupEvent()
     data class SetWeapon(val weapon: Weapon) : GroupSetupEvent()
     data class UpdateFencer(val index: Int, val input: FencerInput) : GroupSetupEvent()
+    data class SearchFencerName(val index: Int, val query: String) : GroupSetupEvent()
+    data class SelectSuggestion(val index: Int, val fencer: FencerEntity) : GroupSetupEvent()
+    data object DismissSuggestions : GroupSetupEvent()
     data object CreatePool : GroupSetupEvent()
     data object NavigateBack : GroupSetupEvent()
 }
@@ -41,6 +48,7 @@ class DefaultGroupSetupComponent(
     private val scope = componentScope()
     private val _state = MutableValue(GroupSetupState())
     override val state: Value<GroupSetupState> = _state
+    private var searchJob: Job? = null
 
     override fun onEvent(event: GroupSetupEvent) {
         when (event) {
@@ -62,6 +70,43 @@ class DefaultGroupSetupComponent(
                 val updatedFencers = _state.value.fencers.toMutableList()
                 updatedFencers[event.index] = event.input
                 _state.value = _state.value.copy(fencers = updatedFencers)
+            }
+            is GroupSetupEvent.SearchFencerName -> {
+                searchJob?.cancel()
+                if (event.query.length >= 2) {
+                    _state.value = _state.value.copy(activeSuggestionIndex = event.index)
+                    searchJob = scope.launch {
+                        poolRepository.searchFencers(event.query).collect { fencers ->
+                            _state.value = _state.value.copy(suggestions = fencers)
+                        }
+                    }
+                } else {
+                    _state.value = _state.value.copy(
+                        suggestions = emptyList(),
+                        activeSuggestionIndex = -1
+                    )
+                }
+            }
+            is GroupSetupEvent.SelectSuggestion -> {
+                val updatedFencers = _state.value.fencers.toMutableList()
+                updatedFencers[event.index] = FencerInput(
+                    name = event.fencer.name,
+                    organization = event.fencer.organization,
+                    region = event.fencer.region
+                )
+                _state.value = _state.value.copy(
+                    fencers = updatedFencers,
+                    suggestions = emptyList(),
+                    activeSuggestionIndex = -1
+                )
+                searchJob?.cancel()
+            }
+            GroupSetupEvent.DismissSuggestions -> {
+                _state.value = _state.value.copy(
+                    suggestions = emptyList(),
+                    activeSuggestionIndex = -1
+                )
+                searchJob?.cancel()
             }
             GroupSetupEvent.CreatePool -> {
                 scope.launch {
