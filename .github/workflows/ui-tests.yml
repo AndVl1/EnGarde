@@ -57,14 +57,6 @@ jobs:
             app/build/reports/androidTests/connected/
             app/build/outputs/androidTest-results/connected/
 
-      - name: Upload Allure results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results
-          path: app/build/outputs/allure-results/
-          if-no-files-found: ignore
-
       - name: Publish test report
         if: always()
         uses: mikepenz/action-junit-report@v4
