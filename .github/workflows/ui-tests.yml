@@ -46,19 +46,16 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
-
-      - name: Pull Allure results from device
-        if: always()
-        run: |
-          mkdir -p allure-results
-          adb pull /sdcard/Download/allure-results/ allure-results/ || true
+          script: |
+            ./gradlew connectedDebugAndroidTest || true
+            mkdir -p allure-results
+            adb pull /sdcard/Download/allure-results/ allure-results/ || true
 
       - name: Generate Allure report
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
-          allure_results: allure-results
+          allure_results: allure-results/allure-results
           allure_report: allure-report
           gh_pages: gh-pages
           allure_history: allure-history
@@ -85,6 +82,6 @@ jobs:
         if: always()
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: '**/build/outputs/androidTest-results/connected/*.xml'
+          report_paths: '**/build/outputs/androidTest-results/connected/**/*.xml'
           check_name: 'UI Test Results'
           fail_on_failure: true
