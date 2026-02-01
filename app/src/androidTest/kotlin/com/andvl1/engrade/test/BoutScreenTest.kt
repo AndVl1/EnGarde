@@ -4,8 +4,13 @@ import com.andvl1.engrade.base.BaseTest
 import com.andvl1.engrade.page.BoutPage
 import com.andvl1.engrade.page.HomePage
 import com.atiurin.ultron.extensions.*
+import io.qameta.allure.kotlin.Allure.step
+import io.qameta.allure.kotlin.Epic
+import io.qameta.allure.kotlin.Feature
 import org.junit.Test
 
+@Epic("Bout")
+@Feature("Bout Screen")
 class BoutScreenTest : BaseTest() {
 
     private fun navigateToBout() {
@@ -16,120 +21,199 @@ class BoutScreenTest : BaseTest() {
 
     @Test
     fun boutScreen_initialState() {
-        navigateToBout()
-        BoutPage {
-            timerBox.assertIsDisplayed()
-            leftScoreButton.assertIsDisplayed()
-            rightScoreButton.assertIsDisplayed()
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
-            rightScore.withUseUnmergedTree(true).assertTextContains("0")
-            leftName.withUseUnmergedTree(true).assertExists()
-            rightName.withUseUnmergedTree(true).assertExists()
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Verify initial bout state") {
+            BoutPage {
+                timerBox.assertIsDisplayed()
+                leftScoreButton.assertIsDisplayed()
+                rightScoreButton.assertIsDisplayed()
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+                rightScore.withUseUnmergedTree(true).assertTextContains("0")
+                leftName.withUseUnmergedTree(true).assertExists()
+                rightName.withUseUnmergedTree(true).assertExists()
+            }
         }
     }
 
     @Test
     fun boutScreen_leftScoreIncrement() {
-        navigateToBout()
-        BoutPage {
-            leftScoreButton.click()
-            leftScore.withUseUnmergedTree(true).assertTextContains("1")
-            rightScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Increment left fencer score") {
+            BoutPage {
+                leftScoreButton.click()
+            }
+        }
+        step("Verify left score increased to 1, right score remains 0") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("1")
+                rightScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 
     @Test
     fun boutScreen_rightScoreIncrement() {
-        navigateToBout()
-        BoutPage {
-            rightScoreButton.click()
-            rightScore.withUseUnmergedTree(true).assertTextContains("1")
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Increment right fencer score") {
+            BoutPage {
+                rightScoreButton.click()
+            }
+        }
+        step("Verify right score increased to 1, left score remains 0") {
+            BoutPage {
+                rightScore.withUseUnmergedTree(true).assertTextContains("1")
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 
     @Test
     fun boutScreen_undoAction() {
-        navigateToBout()
-        BoutPage {
-            leftScoreButton.click()
-            leftScore.withUseUnmergedTree(true).assertTextContains("1")
-            undoButton.click()
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Increment left fencer score") {
+            BoutPage {
+                leftScoreButton.click()
+                leftScore.withUseUnmergedTree(true).assertTextContains("1")
+            }
+        }
+        step("Undo last action") {
+            BoutPage {
+                undoButton.click()
+            }
+        }
+        step("Verify score reset to 0") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 
     @Test
     fun boutScreen_resetBout() {
-        navigateToBout()
-        BoutPage {
-            leftScoreButton.click()
-            rightScoreButton.click()
-            leftScore.withUseUnmergedTree(true).assertTextContains("1")
-            rightScore.withUseUnmergedTree(true).assertTextContains("1")
-            resetButton.click()
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
-            rightScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Add scores for both fencers") {
+            BoutPage {
+                leftScoreButton.click()
+                rightScoreButton.click()
+                leftScore.withUseUnmergedTree(true).assertTextContains("1")
+                rightScore.withUseUnmergedTree(true).assertTextContains("1")
+            }
+        }
+        step("Reset bout") {
+            BoutPage {
+                resetButton.click()
+            }
+        }
+        step("Verify both scores reset to 0") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+                rightScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 
     @Test
     fun boutScreen_boutEndsByMaxScore() {
-        navigateToBout()
-        BoutPage {
-            // Score 5 touches for left fencer (default mode = 5)
-            repeat(5) {
-                leftScoreButton.click()
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Score 5 touches for left fencer") {
+            BoutPage {
+                repeat(5) {
+                    leftScoreButton.click()
+                }
             }
-            leftScore.withUseUnmergedTree(true).assertTextContains("5")
-            leftWinner.withUseUnmergedTree(true).assertIsDisplayed()
+        }
+        step("Verify bout ended with left fencer as winner") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("5")
+                leftWinner.withUseUnmergedTree(true).assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun boutScreen_skipSection() {
-        navigateToBout()
-        BoutPage {
-            skipSectionButton.click()
-            // After skip, section should change
-            sectionTitle.assertIsDisplayed()
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Skip current section") {
+            BoutPage {
+                skipSectionButton.click()
+            }
+        }
+        step("Verify section changed") {
+            BoutPage {
+                sectionTitle.assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun boutScreen_yellowCard() {
-        navigateToBout()
-        BoutPage {
-            leftCardButton.click()
-            yellowCardButton.assertIsDisplayed()
-            yellowCardButton.click()
-            // Yellow card doesn't add penalty score
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Open card dialog and select yellow card") {
+            BoutPage {
+                leftCardButton.click()
+                yellowCardButton.assertIsDisplayed()
+                yellowCardButton.click()
+            }
+        }
+        step("Verify yellow card does not add penalty score") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 
     @Test
     fun boutScreen_redCard() {
-        navigateToBout()
-        BoutPage {
-            leftCardButton.click()
-            redCardButton.assertIsDisplayed()
-            redCardButton.click()
-            // Red card gives penalty point to opponent
-            rightScore.withUseUnmergedTree(true).assertTextContains("1")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Open card dialog and select red card") {
+            BoutPage {
+                leftCardButton.click()
+                redCardButton.assertIsDisplayed()
+                redCardButton.click()
+            }
+        }
+        step("Verify red card gives penalty point to opponent") {
+            BoutPage {
+                rightScore.withUseUnmergedTree(true).assertTextContains("1")
+            }
         }
     }
 
     @Test
     fun boutScreen_cancelCardDialog() {
-        navigateToBout()
-        BoutPage {
-            leftCardButton.click()
-            yellowCardButton.assertIsDisplayed()
-            cancelCardButton.click()
-            // Dialog should be dismissed, scores unchanged
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
-            rightScore.withUseUnmergedTree(true).assertTextContains("0")
+        step("Navigate to bout screen") {
+            navigateToBout()
+        }
+        step("Open card dialog and cancel") {
+            BoutPage {
+                leftCardButton.click()
+                yellowCardButton.assertIsDisplayed()
+                cancelCardButton.click()
+            }
+        }
+        step("Verify scores remain unchanged") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+                rightScore.withUseUnmergedTree(true).assertTextContains("0")
+            }
         }
     }
 }

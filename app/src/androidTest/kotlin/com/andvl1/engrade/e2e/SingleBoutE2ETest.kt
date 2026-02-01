@@ -5,63 +5,89 @@ import com.andvl1.engrade.page.BoutPage
 import com.andvl1.engrade.page.HomePage
 import com.andvl1.engrade.page.SettingsPage
 import com.atiurin.ultron.extensions.*
+import io.qameta.allure.kotlin.Epic
+import io.qameta.allure.kotlin.Feature
+import io.qameta.allure.kotlin.Allure.step
 import org.junit.Test
 
+@Epic("E2E")
+@Feature("Single Bout Flow")
 class SingleBoutE2ETest : BaseTest() {
 
     @Test
     fun fullBoutCycle_leftWins() {
-        // Start from home
-        HomePage {
-            singleBoutButton.click()
+        step("Start from home and navigate to single bout") {
+            HomePage {
+                singleBoutButton.click()
+            }
         }
 
-        // Score 5 touches for left fencer
-        BoutPage {
-            leftScore.withUseUnmergedTree(true).assertTextContains("0")
-            rightScore.withUseUnmergedTree(true).assertTextContains("0")
-
-            repeat(5) {
-                leftScoreButton.click()
+        step("Verify initial scores are 0-0") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("0")
+                rightScore.withUseUnmergedTree(true).assertTextContains("0")
             }
+        }
 
-            leftScore.withUseUnmergedTree(true).assertTextContains("5")
-            leftWinner.withUseUnmergedTree(true).assertIsDisplayed()
+        step("Score 5 touches for left fencer") {
+            BoutPage {
+                repeat(5) {
+                    leftScoreButton.click()
+                }
+            }
+        }
+
+        step("Verify left fencer wins with score 5") {
+            BoutPage {
+                leftScore.withUseUnmergedTree(true).assertTextContains("5")
+                leftWinner.withUseUnmergedTree(true).assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun fullBoutCycle_rightWins() {
-        HomePage {
-            singleBoutButton.click()
+        step("Start from home and navigate to single bout") {
+            HomePage {
+                singleBoutButton.click()
+            }
         }
 
-        BoutPage {
-            repeat(5) {
-                rightScoreButton.click()
+        step("Score 5 touches for right fencer") {
+            BoutPage {
+                repeat(5) {
+                    rightScoreButton.click()
+                }
             }
+        }
 
-            rightScore.withUseUnmergedTree(true).assertTextContains("5")
-            rightWinner.withUseUnmergedTree(true).assertIsDisplayed()
+        step("Verify right fencer wins with score 5") {
+            BoutPage {
+                rightScore.withUseUnmergedTree(true).assertTextContains("5")
+                rightWinner.withUseUnmergedTree(true).assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun settingsAndBack_navigation() {
-        // Home → Settings
-        HomePage {
-            settingsButton.click()
+        step("Navigate from Home to Settings") {
+            HomePage {
+                settingsButton.click()
+            }
         }
 
-        // Switch weapon
-        SettingsPage {
-            foilEpeeChip.click()
-            backButton.click()
+        step("Switch weapon and go back") {
+            SettingsPage {
+                foilEpeeChip.click()
+                backButton.click()
+            }
         }
 
-        // Back to Home
-        HomePage {
-            singleBoutButton.assertIsDisplayed()
+        step("Verify returned to Home screen") {
+            HomePage {
+                singleBoutButton.assertIsDisplayed()
+            }
         }
     }
 }

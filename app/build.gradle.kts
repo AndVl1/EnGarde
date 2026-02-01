@@ -19,7 +19,7 @@ android {
         versionCode = 3
         versionName = "1.0.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.atiurin.ultron.allure.UltronAllureTestRunner"
 
         vectorDrawables {
             useSupportLibrary = true

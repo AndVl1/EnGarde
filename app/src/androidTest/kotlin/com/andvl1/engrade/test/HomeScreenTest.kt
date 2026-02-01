@@ -6,49 +6,68 @@ import com.andvl1.engrade.page.GroupSetupPage
 import com.andvl1.engrade.page.HomePage
 import com.andvl1.engrade.page.SettingsPage
 import com.atiurin.ultron.extensions.*
+import io.qameta.allure.kotlin.Allure.step
+import io.qameta.allure.kotlin.Epic
+import io.qameta.allure.kotlin.Feature
 import org.junit.Test
 
+@Epic("Navigation")
+@Feature("Home Screen")
 class HomeScreenTest : BaseTest() {
 
     @Test
     fun homeScreen_displaysAllButtons() {
-        HomePage {
-            singleBoutButton.assertIsDisplayed()
-            groupStageButton.assertIsDisplayed()
-            settingsButton.assertIsDisplayed()
+        step("Verify all navigation buttons are displayed on home screen") {
+            HomePage {
+                singleBoutButton.assertIsDisplayed()
+                groupStageButton.assertIsDisplayed()
+                settingsButton.assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun homeScreen_navigateToSingleBout() {
-        HomePage {
-            singleBoutButton.click()
+        step("Click single bout button") {
+            HomePage {
+                singleBoutButton.click()
+            }
         }
-        BoutPage {
-            timerBox.assertIsDisplayed()
-            leftScoreButton.assertIsDisplayed()
-            rightScoreButton.assertIsDisplayed()
+        step("Verify bout screen is displayed") {
+            BoutPage {
+                timerBox.assertIsDisplayed()
+                leftScoreButton.assertIsDisplayed()
+                rightScoreButton.assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun homeScreen_navigateToGroupStage() {
-        HomePage {
-            groupStageButton.click()
+        step("Click group stage button") {
+            HomePage {
+                groupStageButton.click()
+            }
         }
-        GroupSetupPage {
-            createButton.assertExists()
+        step("Verify group setup screen is displayed") {
+            GroupSetupPage {
+                createButton.assertExists()
+            }
         }
     }
 
     @Test
     fun homeScreen_navigateToSettings() {
-        HomePage {
-            settingsButton.click()
+        step("Click settings button") {
+            HomePage {
+                settingsButton.click()
+            }
         }
-        SettingsPage {
-            sabreChip.assertIsDisplayed()
-            foilEpeeChip.assertIsDisplayed()
+        step("Verify settings screen is displayed") {
+            SettingsPage {
+                sabreChip.assertIsDisplayed()
+                foilEpeeChip.assertIsDisplayed()
+            }
         }
     }
 }

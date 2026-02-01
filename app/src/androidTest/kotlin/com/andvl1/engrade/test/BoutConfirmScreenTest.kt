@@ -7,8 +7,13 @@ import com.andvl1.engrade.page.GroupDashboardPage
 import com.andvl1.engrade.page.GroupSetupPage
 import com.andvl1.engrade.page.HomePage
 import com.atiurin.ultron.extensions.*
+import io.qameta.allure.kotlin.Allure.step
+import io.qameta.allure.kotlin.Epic
+import io.qameta.allure.kotlin.Feature
 import org.junit.Test
 
+@Epic("Group Stage")
+@Feature("Bout Confirm")
 class BoutConfirmScreenTest : BaseTest() {
 
     private fun navigateToBoutConfirm() {
@@ -37,50 +42,74 @@ class BoutConfirmScreenTest : BaseTest() {
 
     @Test
     fun boutConfirm_displaysParticipants() {
-        navigateToBoutConfirm()
-        BoutConfirmPage {
-            boutNumber.assertIsDisplayed()
-            leftName.assertIsDisplayed()
-            rightName.assertIsDisplayed()
-            startButton.assertIsDisplayed()
-            cancelButton.assertIsDisplayed()
-            swapButton.assertIsDisplayed()
+        step("Navigate to bout confirm screen") {
+            navigateToBoutConfirm()
+        }
+        step("Verify all bout confirm elements are displayed") {
+            BoutConfirmPage {
+                boutNumber.assertIsDisplayed()
+                leftName.assertIsDisplayed()
+                rightName.assertIsDisplayed()
+                startButton.assertIsDisplayed()
+                cancelButton.assertIsDisplayed()
+                swapButton.assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun boutConfirm_swapSides() {
-        navigateToBoutConfirm()
-        BoutConfirmPage {
-            val leftNameBefore = leftName.getText() ?: ""
-            val rightNameBefore = rightName.getText() ?: ""
-            swapButton.click()
-            leftName.assertTextContains(rightNameBefore)
-            rightName.assertTextContains(leftNameBefore)
+        step("Navigate to bout confirm screen") {
+            navigateToBoutConfirm()
+        }
+        step("Get initial fencer names") {
+            BoutConfirmPage {
+                val leftNameBefore = leftName.getText() ?: ""
+                val rightNameBefore = rightName.getText() ?: ""
+                step("Click swap button") {
+                    swapButton.click()
+                }
+                step("Verify fencer positions are swapped") {
+                    leftName.assertTextContains(rightNameBefore)
+                    rightName.assertTextContains(leftNameBefore)
+                }
+            }
         }
     }
 
     @Test
     fun boutConfirm_startBout() {
-        navigateToBoutConfirm()
-        BoutConfirmPage {
-            startButton.click()
+        step("Navigate to bout confirm screen") {
+            navigateToBoutConfirm()
         }
-        BoutPage {
-            timerBox.assertIsDisplayed()
-            leftScoreButton.assertIsDisplayed()
-            rightScoreButton.assertIsDisplayed()
+        step("Click start button") {
+            BoutConfirmPage {
+                startButton.click()
+            }
+        }
+        step("Verify bout screen is displayed") {
+            BoutPage {
+                timerBox.assertIsDisplayed()
+                leftScoreButton.assertIsDisplayed()
+                rightScoreButton.assertIsDisplayed()
+            }
         }
     }
 
     @Test
     fun boutConfirm_cancel() {
-        navigateToBoutConfirm()
-        BoutConfirmPage {
-            cancelButton.click()
+        step("Navigate to bout confirm screen") {
+            navigateToBoutConfirm()
         }
-        GroupDashboardPage {
-            startBoutButton.assertIsDisplayed()
+        step("Click cancel button") {
+            BoutConfirmPage {
+                cancelButton.click()
+            }
+        }
+        step("Verify returned to dashboard") {
+            GroupDashboardPage {
+                startBoutButton.assertIsDisplayed()
+            }
         }
     }
 }
