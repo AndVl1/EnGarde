@@ -36,7 +36,7 @@ object FieBoutOrder {
             }
 
             // Rotate: move last element to front
-            positions.add(0, positions.removeLast())
+            positions.add(0, positions.removeAt(positions.size - 1))
         }
 
         // Filter out bouts with dummy fencer (if odd count)
