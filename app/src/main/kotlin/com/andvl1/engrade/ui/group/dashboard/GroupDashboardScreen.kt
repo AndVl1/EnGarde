@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,15 +37,24 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
             TopAppBar(
                 title = { Text(stringResource(R.string.group_stage_title)) },
                 navigationIcon = {
-                    IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateBack) }) {
+                    IconButton(
+                        onClick = { component.onEvent(GroupDashboardEvent.NavigateBack) },
+                        modifier = Modifier.testTag("dashboard_button_back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
                     }
                 },
                 actions = {
-                    IconButton(onClick = { component.onEvent(GroupDashboardEvent.ExportPdf) }) {
+                    IconButton(
+                        onClick = { component.onEvent(GroupDashboardEvent.ExportPdf) },
+                        modifier = Modifier.testTag("dashboard_button_exportPdf")
+                    ) {
                         Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf))
                     }
-                    IconButton(onClick = { component.onEvent(GroupDashboardEvent.NavigateToBoutsList) }) {
+                    IconButton(
+                        onClick = { component.onEvent(GroupDashboardEvent.NavigateToBoutsList) },
+                        modifier = Modifier.testTag("dashboard_button_boutsList")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.List, stringResource(R.string.bouts_list_title))
                     }
                     OverflowMenu(component = component, state = state)
@@ -59,7 +69,7 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.testTag("dashboard_loading"))
             }
         } else {
             Column(
@@ -74,9 +84,10 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 Card {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            stringResource(R.string.bouts_progress, state.completedBoutsCount, state.totalBoutsCount),
+                            text = stringResource(R.string.bouts_progress, state.completedBoutsCount, state.totalBoutsCount),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.testTag("dashboard_text_progress")
                         )
                         state.currentBoutInfo?.let {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -100,12 +111,15 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                             modifier = Modifier
                                 .weight(1f)
                                 .height(56.dp)
+                                .testTag("dashboard_button_startBout")
                         ) {
                             Text(stringResource(R.string.start_next_bout))
                         }
                         OutlinedButton(
                             onClick = { component.onEvent(GroupDashboardEvent.ShowForfeitDialog) },
-                            modifier = Modifier.height(56.dp)
+                            modifier = Modifier
+                                .height(56.dp)
+                                .testTag("dashboard_button_forfeit")
                         ) {
                             Text(stringResource(R.string.forfeit))
                         }
@@ -113,7 +127,12 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 }
 
                 // FIE Result Matrix
-                Text(stringResource(R.string.result_matrix), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.result_matrix),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.testTag("dashboard_text_matrixTitle")
+                )
 
                 MatrixTable(
                     matrix = state.matrix,
@@ -122,7 +141,12 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 )
 
                 // Rankings Table
-                Text(stringResource(R.string.rankings), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(R.string.rankings),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.testTag("dashboard_text_rankingsTitle")
+                )
 
                 RankingsTable(rankings = state.rankings)
             }

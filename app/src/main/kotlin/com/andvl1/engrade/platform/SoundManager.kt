@@ -80,7 +80,7 @@ class SoundManager(private val context: Context) {
     }
 
     fun release() {
-        toneGenerator.release()
         stopAll()
+        toneGenerator.release()
     }
 }

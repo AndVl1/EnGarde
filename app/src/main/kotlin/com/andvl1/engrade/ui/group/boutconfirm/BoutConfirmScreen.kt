@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,7 +25,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.testTag("boutConfirm_loading"))
         }
     } else {
         Column(
@@ -35,9 +36,10 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                stringResource(R.string.bout_number, state.boutNumber),
+                text = stringResource(R.string.bout_number, state.boutNumber),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("boutConfirm_text_boutNumber")
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -55,17 +57,19 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        state.leftName,
+                        text = state.leftName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("boutConfirm_text_leftName")
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Swap sides button
                     FilledTonalIconButton(
-                        onClick = { component.onEvent(BoutConfirmEvent.SwapSides) }
+                        onClick = { component.onEvent(BoutConfirmEvent.SwapSides) },
+                        modifier = Modifier.testTag("boutConfirm_button_swap")
                     ) {
                         Icon(
                             Icons.Default.SwapHoriz,
@@ -81,10 +85,11 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        state.rightName,
+                        text = state.rightName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("boutConfirm_text_rightName")
                     )
                 }
             }
@@ -96,6 +101,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .testTag("boutConfirm_button_start")
             ) {
                 Text(stringResource(R.string.start_bout), style = MaterialTheme.typography.titleMedium)
             }
@@ -107,6 +113,7 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .testTag("boutConfirm_button_cancel")
             ) {
                 Text(stringResource(R.string.cancel))
             }

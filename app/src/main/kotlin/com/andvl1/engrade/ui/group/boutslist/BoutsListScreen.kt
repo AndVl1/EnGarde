@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,7 +28,10 @@ fun BoutsListScreen(component: BoutsListComponent) {
             TopAppBar(
                 title = { Text(stringResource(R.string.all_bouts)) },
                 navigationIcon = {
-                    IconButton(onClick = { component.onEvent(BoutsListEvent.NavigateBack) }) {
+                    IconButton(
+                        onClick = { component.onEvent(BoutsListEvent.NavigateBack) },
+                        modifier = Modifier.testTag("boutsList_button_back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
                     }
                 }
@@ -41,13 +45,14 @@ fun BoutsListScreen(component: BoutsListComponent) {
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.testTag("boutsList_loading"))
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(padding)
+                    .testTag("boutsList_list"),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -93,7 +98,9 @@ fun BoutListItem(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("boutsList_item_$boutNumber"),
         onClick = if (status == "COMPLETED" || status == "FORFEIT") onClick else ({})
     ) {
         Row(
@@ -145,9 +152,10 @@ fun BoutListItem(
                 }
             } else {
                 Text(
-                    stringResource(R.string.pending),
+                    text = stringResource(R.string.pending),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("boutsList_text_pending")
                 )
             }
         }

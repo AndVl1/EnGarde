@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,9 +25,10 @@ fun BoutResultScreen(component: BoutResultComponent) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            stringResource(R.string.bout_result_title),
+            text = stringResource(R.string.bout_result_title),
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.testTag("boutResult_text_title")
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -45,7 +47,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        state.leftName,
+                        text = state.leftName,
                         style = if (state.winner == "LEFT") {
                             MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         } else {
@@ -55,18 +57,20 @@ fun BoutResultScreen(component: BoutResultComponent) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurface
-                        }
+                        },
+                        modifier = Modifier.testTag("boutResult_text_leftName")
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        if (state.winner == "LEFT") "V${state.leftScore}" else "D${state.leftScore}",
+                        text = if (state.winner == "LEFT") "V${state.leftScore}" else "D${state.leftScore}",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (state.winner == "LEFT") {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.error
-                        }
+                        },
+                        modifier = Modifier.testTag("boutResult_text_leftScore")
                     )
                 }
 
@@ -82,7 +86,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        state.rightName,
+                        text = state.rightName,
                         style = if (state.winner == "RIGHT") {
                             MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         } else {
@@ -92,18 +96,20 @@ fun BoutResultScreen(component: BoutResultComponent) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurface
-                        }
+                        },
+                        modifier = Modifier.testTag("boutResult_text_rightName")
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        if (state.winner == "RIGHT") "V${state.rightScore}" else "D${state.rightScore}",
+                        text = if (state.winner == "RIGHT") "V${state.rightScore}" else "D${state.rightScore}",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (state.winner == "RIGHT") {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.error
-                        }
+                        },
+                        modifier = Modifier.testTag("boutResult_text_rightScore")
                     )
                 }
             }
@@ -116,6 +122,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
+                .testTag("boutResult_button_continue")
         ) {
             Text(stringResource(R.string.continue_text), style = MaterialTheme.typography.titleMedium)
         }

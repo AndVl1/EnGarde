@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,10 @@ fun HomeScreen(component: HomeComponent) {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    IconButton(onClick = { component.onEvent(HomeEvent.NavigateToSettings) }) {
+                    IconButton(
+                        onClick = { component.onEvent(HomeEvent.NavigateToSettings) },
+                        modifier = Modifier.testTag("home_button_settings")
+                    ) {
                         Icon(Icons.Default.Settings, stringResource(R.string.action_settings))
                     }
                 }
@@ -42,7 +46,8 @@ fun HomeScreen(component: HomeComponent) {
             Text(
                 text = stringResource(R.string.select_mode),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("home_text_title")
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -52,6 +57,7 @@ fun HomeScreen(component: HomeComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
+                    .testTag("home_button_singleBout")
             ) {
                 Text(
                     text = stringResource(R.string.single_bout),
@@ -64,6 +70,7 @@ fun HomeScreen(component: HomeComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
+                    .testTag("home_button_groupStage")
             ) {
                 Text(
                     text = stringResource(R.string.group_stage),
@@ -77,6 +84,7 @@ fun HomeScreen(component: HomeComponent) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp)
+                        .testTag("home_button_continuePool")
                 ) {
                     Text(
                         text = stringResource(R.string.continue_pool),

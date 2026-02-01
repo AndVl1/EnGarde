@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
@@ -39,7 +40,8 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.fencerCount == count,
                         onClick = { component.onEvent(GroupSetupEvent.SetFencerCount(count)) },
-                        label = { Text("$count") }
+                        label = { Text("$count") },
+                        modifier = Modifier.testTag("groupSetup_chip_count_$count")
                     )
                 }
             }
@@ -50,7 +52,8 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.mode == mode,
                         onClick = { component.onEvent(GroupSetupEvent.SetMode(mode)) },
-                        label = { Text("$mode") }
+                        label = { Text("$mode") },
+                        modifier = Modifier.testTag("groupSetup_chip_mode_$mode")
                     )
                 }
             }
@@ -61,7 +64,8 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.weapon == weapon,
                         onClick = { component.onEvent(GroupSetupEvent.SetWeapon(weapon)) },
-                        label = { Text(weapon.name) }
+                        label = { Text(weapon.name) },
+                        modifier = Modifier.testTag("groupSetup_chip_weapon_${weapon.name}")
                     )
                 }
             }
@@ -91,7 +95,9 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                                     )
                                 },
                                 label = { Text(stringResource(R.string.fencer_name, index + 1)) },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("groupSetup_input_name_$index")
                             )
 
                             // Suggestions dropdown
@@ -129,7 +135,9 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                             },
                             label = { Text(stringResource(R.string.organization)) },
                             placeholder = { Text(stringResource(R.string.organization)) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("groupSetup_input_org_$index")
                         )
 
                         OutlinedTextField(
@@ -141,7 +149,9 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                             },
                             label = { Text(stringResource(R.string.region)) },
                             placeholder = { Text(stringResource(R.string.region)) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("groupSetup_input_region_$index")
                         )
                     }
                 }
@@ -155,6 +165,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .testTag("groupSetup_button_create")
             ) {
                 if (state.isCreating) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
