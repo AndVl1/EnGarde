@@ -85,4 +85,5 @@ jobs:
         with:
           report_paths: '**/build/outputs/androidTest-results/connected/**/*.xml'
           check_name: 'UI Test Results'
+          include_passed: true
           fail_on_failure: true
