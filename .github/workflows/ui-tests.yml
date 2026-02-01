@@ -51,14 +51,15 @@ jobs:
             mkdir -p allure-results
             adb pull /sdcard/Download/allure-results/ allure-results/ || true
 
-      - name: Generate Allure report
-        uses: simple-elf/allure-report-action@master
+      - name: Install Allure CLI
         if: always()
-        with:
-          allure_results: allure-results/allure-results
-          allure_report: allure-report
-          gh_pages: gh-pages
-          allure_history: allure-history
+        run: |
+          curl -sL https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz | tar -xz
+          echo "$PWD/allure-2.32.0/bin" >> $GITHUB_PATH
+
+      - name: Generate Allure report
+        if: always()
+        run: allure generate allure-results/allure-results -o allure-report --single-file --clean
 
       - name: Upload Allure report
         if: always()
