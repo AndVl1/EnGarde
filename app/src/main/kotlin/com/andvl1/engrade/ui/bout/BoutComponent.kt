@@ -24,6 +24,10 @@ class DefaultBoutComponent(
     private val soundManager: SoundManager,
     private val notificationHelper: NotificationHelper,
     private val notificationPendingIntent: PendingIntent,
+    private val leftFencerName: String = "",
+    private val rightFencerName: String = "",
+    private val overrideConfig: BoutConfig? = null,
+    private val onBoutFinished: ((leftScore: Int, rightScore: Int, winner: FencerSide) -> Unit)? = null,
     private val onNavigateToSettings: () -> Unit
 ) : BoutComponent, ComponentContext by componentContext {
 
@@ -32,6 +36,7 @@ class DefaultBoutComponent(
     private var engine: BoutEngine = BoutEngine(BoutConfig.DEFAULT)
     private var timerJob: Job? = null
     private var currentConfig: BoutConfig = BoutConfig.DEFAULT
+    private var finishedCallbackFired = false
 
     private val _state = MutableValue(BoutState())
     override val state: Value<BoutState> = _state
@@ -39,7 +44,7 @@ class DefaultBoutComponent(
     init {
         // Initialize engine once with initial config
         scope.launch {
-            val initialConfig = settingsRepository.boutConfigFlow.first()
+            val initialConfig = overrideConfig ?: settingsRepository.boutConfigFlow.first()
             currentConfig = initialConfig
             engine = BoutEngine(initialConfig)
             engine.resetAll()
@@ -179,9 +184,14 @@ class DefaultBoutComponent(
     }
 
     private fun updateState() {
+        val displayLeftName = leftFencerName.ifBlank { "Left" }
+        val displayRightName = rightFencerName.ifBlank { "Right" }
+
         _state.value = _state.value.copy(
             leftFencer = engine.leftFencer,
             rightFencer = engine.rightFencer,
+            leftFencerName = displayLeftName,
+            rightFencerName = displayRightName,
             timeRemainingMs = engine.timeRemaining,
             periodNumber = engine.periodNumber,
             currentSection = engine.currentSection,
@@ -190,5 +200,14 @@ class DefaultBoutComponent(
             canUndo = engine.canUndo,
             config = currentConfig
         )
+
+        // Trigger callback when bout finishes
+        if (engine.isOver && !finishedCallbackFired && onBoutFinished != null) {
+            finishedCallbackFired = true
+            val leftScore = engine.leftFencer.score
+            val rightScore = engine.rightFencer.score
+            val winner = if (leftScore > rightScore) FencerSide.LEFT else FencerSide.RIGHT
+            onBoutFinished(leftScore, rightScore, winner)
+        }
     }
 }

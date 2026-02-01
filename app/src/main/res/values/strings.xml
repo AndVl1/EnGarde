@@ -77,4 +77,87 @@
 
     <string name="notification_timer">Timer</string>
     <string name="notification_timer_descr">Notification of timer ending</string>
+
+    <!-- Home Screen -->
+    <string name="select_mode">Выберите режим</string>
+    <string name="single_bout">Одиночный бой</string>
+    <string name="group_stage">Групповой этап</string>
+    <string name="continue_pool">Продолжить группу</string>
+
+    <!-- BoutScreen (additional strings) -->
+    <string name="period_n">Период %d</string>
+    <string name="break_n">Перерыв %d</string>
+    <string name="card_left">Карточка левому</string>
+    <string name="card_right">Карточка правому</string>
+    <string name="cancel">Отмена</string>
+
+    <!-- GroupSetup -->
+    <string name="create_group">Создать группу</string>
+    <string name="group_settings">Настройки группы</string>
+    <string name="fencer_count">Количество участников</string>
+    <string name="bout_mode">Режим боя</string>
+    <string name="weapon_label">Оружие</string>
+    <string name="touches_4">4 удара</string>
+    <string name="touches_5">5 ударов</string>
+    <string name="participants">Участники</string>
+    <string name="fencer_name">Имя фехтовальщика %d</string>
+    <string name="organization">Организация</string>
+    <string name="region">Регион</string>
+    <string name="name_required">Все имена должны быть заполнены</string>
+    <string name="duplicate_names">Имена не должны повторяться</string>
+
+    <!-- GroupDashboard -->
+    <string name="pool_title">Группа</string>
+    <string name="bout_number">Бой #%d</string>
+    <string name="vs">vs</string>
+    <string name="start_next_bout">Начать следующий бой</string>
+    <string name="bouts_progress">Проведено %1$d из %2$d</string>
+    <string name="current_bout">Текущий бой</string>
+    <string name="next_bout">Готовится</string>
+    <string name="export_pdf">Экспорт PDF</string>
+    <string name="bouts_list_title">Список боёв</string>
+    <string name="forfeit">Неявка</string>
+    <string name="exclude">Исключить</string>
+    <string name="edit_score">Редактировать счёт</string>
+    <string name="victories">V</string>
+    <string name="vm_percent">V/M%%</string>
+    <string name="touches_delivered">TD</string>
+    <string name="touches_received">TR</string>
+    <string name="index">Ind</string>
+    <string name="place">Место</string>
+    <string name="all_bouts_completed">Все бои завершены</string>
+    <string name="pool_completed">Группа завершена</string>
+
+    <!-- BoutConfirm -->
+    <string name="bout_confirm_title">Подтверждение боя</string>
+    <string name="swap_sides">Поменять стороны</string>
+    <string name="start_bout">Начать бой</string>
+    <string name="left_lane">Левая дорожка</string>
+    <string name="right_lane">Правая дорожка</string>
+
+    <!-- BoutResult -->
+    <string name="bout_result_title">Результат боя</string>
+    <string name="continue_text">Далее</string>
+    <string name="victory_short">V%d</string>
+    <string name="defeat_short">D%d</string>
+
+    <!-- BoutsList -->
+    <string name="all_bouts">Все бои</string>
+    <string name="pending">Ожидание</string>
+    <string name="completed">Завершён</string>
+
+    <!-- Dialogs -->
+    <string name="confirm_forfeit">Подтвердить неявку</string>
+    <string name="confirm_exclude">Подтвердить исключение</string>
+    <string name="exclude_warning">Все бои этого спортсмена будут аннулированы</string>
+    <string name="forfeit_question">Кто не явился?</string>
+    <string name="left_fencer">Левый фехтовальщик</string>
+    <string name="right_fencer">Правый фехтовальщик</string>
+    <string name="save">Сохранить</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="group_setup">Создание группы</string>
+    <string name="group_stage_title">Групповой этап</string>
+    <string name="progress">Прогресс</string>
+    <string name="result_matrix">Матрица результатов</string>
+    <string name="rankings">Ранжирование</string>
 </resources>

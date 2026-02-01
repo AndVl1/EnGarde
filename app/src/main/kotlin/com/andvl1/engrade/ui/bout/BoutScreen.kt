@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.*
 import com.andvl1.engrade.ui.theme.RedTimer
 import com.andvl1.engrade.ui.theme.Yellow
@@ -30,9 +32,9 @@ fun BoutScreen(component: BoutComponent) {
                 title = {
                     Text(
                         when (state.value.currentSection) {
-                            SectionType.PERIOD -> "Период ${state.value.periodNumber}"
-                            SectionType.BREAK -> "Перерыв ${state.value.periodNumber}"
-                            SectionType.PRIORITY -> "Приоритет"
+                            SectionType.PERIOD -> stringResource(R.string.period_n, state.value.periodNumber)
+                            SectionType.BREAK -> stringResource(R.string.break_n, state.value.periodNumber)
+                            SectionType.PRIORITY -> stringResource(R.string.priority)
                         }
                     )
                 },
@@ -108,6 +110,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Left fencer
                     FencerScoreCard(
                         fencer = state.value.leftFencer,
+                        fencerName = state.value.leftFencerName,
                         side = FencerSide.LEFT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.LeftScored) },
@@ -119,6 +122,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Right fencer
                     FencerScoreCard(
                         fencer = state.value.rightFencer,
+                        fencerName = state.value.rightFencerName,
                         side = FencerSide.RIGHT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.RightScored) },
@@ -137,7 +141,7 @@ fun BoutScreen(component: BoutComponent) {
                             .padding(horizontal = 32.dp)
                             .height(56.dp)
                     ) {
-                        Text("Обоюдный укол", style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(R.string.double_touch), style = MaterialTheme.typography.titleLarge)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -161,6 +165,7 @@ fun BoutScreen(component: BoutComponent) {
 @Composable
 fun FencerScoreCard(
     fencer: FencerState,
+    fencerName: String,
     side: FencerSide,
     modifier: Modifier = Modifier,
     onScoreClick: () -> Unit,
@@ -170,11 +175,22 @@ fun FencerScoreCard(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Fencer name
+        Text(
+            fencerName,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Winner indicator
         if (fencer.isWinner) {
             Text(
-                "ПОБЕДИТЕЛЬ",
-                style = MaterialTheme.typography.titleMedium,
+                stringResource(R.string.winner),
+                style = MaterialTheme.typography.titleSmall,
                 color = Color.Green
             )
         }
@@ -249,8 +265,8 @@ fun CardDialog(
         title = {
             Text(
                 when (fencerSide) {
-                    FencerSide.LEFT -> "Карточка левому"
-                    FencerSide.RIGHT -> "Карточка правому"
+                    FencerSide.LEFT -> stringResource(R.string.card_left)
+                    FencerSide.RIGHT -> stringResource(R.string.card_right)
                 }
             )
         },
@@ -261,7 +277,7 @@ fun CardDialog(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Yellow)
                 ) {
-                    Text("Жёлтая карточка", color = Color.Black)
+                    Text(stringResource(R.string.yellow_card), color = Color.Black)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -271,14 +287,14 @@ fun CardDialog(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
-                    Text("Красная карточка")
+                    Text(stringResource(R.string.red_card))
                 }
             }
         },
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
