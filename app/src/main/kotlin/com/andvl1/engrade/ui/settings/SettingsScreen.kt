@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.domain.model.Weapon
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -23,7 +24,10 @@ fun SettingsScreen(component: SettingsComponent) {
             TopAppBar(
                 title = { Text("Настройки") },
                 navigationIcon = {
-                    IconButton(onClick = { component.onEvent(SettingsEvent.BackPressed) }) {
+                    IconButton(
+                        onClick = { component.onEvent(SettingsEvent.BackPressed) },
+                        modifier = Modifier.testTag("settings_button_back")
+                    ) {
                         Icon(Icons.Default.ArrowBack, "Back")
                     }
                 }
@@ -48,13 +52,17 @@ fun SettingsScreen(component: SettingsComponent) {
                     selected = state.value.weapon == Weapon.SABRE,
                     onClick = { component.onEvent(SettingsEvent.WeaponChanged(Weapon.SABRE)) },
                     label = { Text("Сабля") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("settings_chip_sabre")
                 )
                 FilterChip(
                     selected = state.value.weapon == Weapon.FOIL_EPEE,
                     onClick = { component.onEvent(SettingsEvent.WeaponChanged(Weapon.FOIL_EPEE)) },
                     label = { Text("Рапира/Шпага") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("settings_chip_foilEpee")
                 )
             }
 
@@ -70,13 +78,17 @@ fun SettingsScreen(component: SettingsComponent) {
                     selected = state.value.mode == 5,
                     onClick = { component.onEvent(SettingsEvent.ModeChanged(5)) },
                     label = { Text("До 5") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("settings_chip_mode5")
                 )
                 FilterChip(
                     selected = state.value.mode == 15,
                     onClick = { component.onEvent(SettingsEvent.ModeChanged(15)) },
                     label = { Text("До 15") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("settings_chip_mode15")
                 )
             }
 
@@ -91,7 +103,8 @@ fun SettingsScreen(component: SettingsComponent) {
                 Text("Показывать кнопку обоюдного укола")
                 Switch(
                     checked = state.value.showDouble,
-                    onCheckedChange = { component.onEvent(SettingsEvent.ShowDoubleChanged(it)) }
+                    onCheckedChange = { component.onEvent(SettingsEvent.ShowDoubleChanged(it)) },
+                    modifier = Modifier.testTag("settings_switch_showDouble")
                 )
             }
 
@@ -104,7 +117,8 @@ fun SettingsScreen(component: SettingsComponent) {
                 Text("Запуск таймера касанием по экрану")
                 Switch(
                     checked = state.value.anywhereToStart,
-                    onCheckedChange = { component.onEvent(SettingsEvent.AnywhereToStartChanged(it)) }
+                    onCheckedChange = { component.onEvent(SettingsEvent.AnywhereToStartChanged(it)) },
+                    modifier = Modifier.testTag("settings_switch_anywhereToStart")
                 )
             }
 
@@ -117,7 +131,8 @@ fun SettingsScreen(component: SettingsComponent) {
                 Text("Чёрный фон (AMOLED)")
                 Switch(
                     checked = state.value.blackBackground,
-                    onCheckedChange = { component.onEvent(SettingsEvent.BlackBackgroundChanged(it)) }
+                    onCheckedChange = { component.onEvent(SettingsEvent.BlackBackgroundChanged(it)) },
+                    modifier = Modifier.testTag("settings_switch_blackBackground")
                 )
             }
         }

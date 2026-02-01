@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,33 +32,46 @@ fun BoutScreen(component: BoutComponent) {
             TopAppBar(
                 title = {
                     Text(
-                        when (state.value.currentSection) {
+                        text = when (state.value.currentSection) {
                             SectionType.PERIOD -> stringResource(R.string.period_n, state.value.periodNumber)
                             SectionType.BREAK -> stringResource(R.string.break_n, state.value.periodNumber)
                             SectionType.PRIORITY -> stringResource(R.string.priority)
-                        }
+                        },
+                        modifier = Modifier.testTag("bout_text_sectionTitle")
                     )
                 },
                 actions = {
                     // Undo button
                     if (state.value.canUndo) {
-                        IconButton(onClick = { component.onEvent(BoutEvent.Undo) }) {
+                        IconButton(
+                            onClick = { component.onEvent(BoutEvent.Undo) },
+                            modifier = Modifier.testTag("bout_button_undo")
+                        ) {
                             Icon(Icons.Default.Undo, "Undo")
                         }
                     }
 
                     // Skip section
-                    IconButton(onClick = { component.onEvent(BoutEvent.SkipSection) }) {
+                    IconButton(
+                        onClick = { component.onEvent(BoutEvent.SkipSection) },
+                        modifier = Modifier.testTag("bout_button_skipSection")
+                    ) {
                         Icon(Icons.Default.SkipNext, "Skip Section")
                     }
 
                     // Reset
-                    IconButton(onClick = { component.onEvent(BoutEvent.Reset) }) {
+                    IconButton(
+                        onClick = { component.onEvent(BoutEvent.Reset) },
+                        modifier = Modifier.testTag("bout_button_reset")
+                    ) {
                         Icon(Icons.Default.Refresh, "Reset")
                     }
 
                     // Settings
-                    IconButton(onClick = { component.onEvent(BoutEvent.OpenSettings) }) {
+                    IconButton(
+                        onClick = { component.onEvent(BoutEvent.OpenSettings) },
+                        modifier = Modifier.testTag("bout_button_settings")
+                    ) {
                         Icon(Icons.Default.Settings, "Settings")
                     }
                 }
@@ -86,14 +100,16 @@ fun BoutScreen(component: BoutComponent) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .clickable { component.onEvent(BoutEvent.TimerClicked) },
+                        .clickable { component.onEvent(BoutEvent.TimerClicked) }
+                        .testTag("bout_box_timer"),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = formatTime(state.value.timeRemainingMs),
                         style = MaterialTheme.typography.displayLarge,
                         color = if (state.value.timeRemainingMs == 0L) RedTimer else Color.White,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("bout_text_timer")
                     )
                 }
 
@@ -140,6 +156,7 @@ fun BoutScreen(component: BoutComponent) {
                             .fillMaxWidth()
                             .padding(horizontal = 32.dp)
                             .height(56.dp)
+                            .testTag("bout_button_doubleTouch")
                     ) {
                         Text(stringResource(R.string.double_touch), style = MaterialTheme.typography.titleLarge)
                     }
@@ -171,6 +188,8 @@ fun FencerScoreCard(
     onScoreClick: () -> Unit,
     onCardClick: () -> Unit
 ) {
+    val sideTag = side.name.lowercase()
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -181,7 +200,8 @@ fun FencerScoreCard(
             style = MaterialTheme.typography.titleMedium,
             color = Color.White,
             textAlign = TextAlign.Center,
-            maxLines = 1
+            maxLines = 1,
+            modifier = Modifier.testTag("bout_text_${sideTag}Name")
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -191,7 +211,8 @@ fun FencerScoreCard(
             Text(
                 stringResource(R.string.winner),
                 style = MaterialTheme.typography.titleSmall,
-                color = Color.Green
+                color = Color.Green,
+                modifier = Modifier.testTag("bout_text_${sideTag}Winner")
             )
         }
 
@@ -200,7 +221,9 @@ fun FencerScoreCard(
         // Score (clickable)
         Surface(
             onClick = onScoreClick,
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier
+                .size(120.dp)
+                .testTag("bout_button_${sideTag}Score"),
             shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 4.dp
@@ -209,7 +232,8 @@ fun FencerScoreCard(
                 Text(
                     text = fencer.score.toString(),
                     style = MaterialTheme.typography.displayMedium,
-                    color = Color.White
+                    color = Color.White,
+                    modifier = Modifier.testTag("bout_text_${sideTag}Score")
                 )
             }
         }
@@ -231,10 +255,21 @@ fun FencerScoreCard(
                             shape = MaterialTheme.shapes.small
                         )
                         .clickable(onClick = onCardClick)
+                        .testTag("bout_button_${sideTag}Card")
+                        .then(
+                            if (fencer.hasYellowCard) {
+                                Modifier.testTag("bout_indicator_${sideTag}YellowCard")
+                            } else {
+                                Modifier.testTag("bout_indicator_${sideTag}RedCard")
+                            }
+                        )
                 )
             } else {
                 // Invisible placeholder or card button
-                IconButton(onClick = onCardClick) {
+                IconButton(
+                    onClick = onCardClick,
+                    modifier = Modifier.testTag("bout_button_${sideTag}Card")
+                ) {
                     Icon(Icons.Default.Flag, "Give Card", tint = Color.Gray)
                 }
             }
@@ -248,6 +283,7 @@ fun FencerScoreCard(
                             color = Color.Green,
                             shape = MaterialTheme.shapes.small
                         )
+                        .testTag("bout_indicator_${sideTag}Priority")
                 )
             }
         }
@@ -262,6 +298,7 @@ fun CardDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("bout_dialog_card"),
         title = {
             Text(
                 when (fencerSide) {
@@ -274,7 +311,9 @@ fun CardDialog(
             Column {
                 Button(
                     onClick = { onCardSelected(CardType.YELLOW) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("bout_button_yellowCard"),
                     colors = ButtonDefaults.buttonColors(containerColor = Yellow)
                 ) {
                     Text(stringResource(R.string.yellow_card), color = Color.Black)
@@ -284,7 +323,9 @@ fun CardDialog(
 
                 Button(
                     onClick = { onCardSelected(CardType.RED) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("bout_button_redCard"),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
                     Text(stringResource(R.string.red_card))
@@ -293,7 +334,10 @@ fun CardDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("bout_button_cancelCard")
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }
