@@ -46,29 +46,7 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          script: |
-            ./gradlew connectedDebugAndroidTest || true
-            mkdir -p allure-results
-            adb pull /sdcard/Download/allure-results/ allure-results/ || true
-
-      - name: Install Allure CLI
-        if: always()
-        run: |
-          curl -sL https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz | tar -xz
-          echo "$PWD/allure-2.32.0/bin" >> $GITHUB_PATH
-
-      - name: Generate Allure report
-        if: always()
-        run: allure generate allure-results/allure-results -o allure-report --single-file --clean
-
-      - name: Upload Allure report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: allure-report/
-          if-no-files-found: ignore
-          retention-days: 30
+          script: ./gradlew connectedDebugAndroidTest
 
       - name: Upload test results
         if: always()
@@ -79,11 +57,18 @@ jobs:
             app/build/reports/androidTests/connected/
             app/build/outputs/androidTest-results/connected/
 
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: app/build/outputs/allure-results/
+          if-no-files-found: ignore
+
       - name: Publish test report
         if: always()
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: '**/build/outputs/androidTest-results/connected/**/*.xml'
+          report_paths: '**/build/outputs/androidTest-results/connected/*.xml'
           check_name: 'UI Test Results'
-          include_passed: true
           fail_on_failure: true
