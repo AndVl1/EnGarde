@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.andvl1.engrade"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.andvl1.engrade"
@@ -41,10 +41,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
     }
@@ -55,6 +51,12 @@ android {
             excludes += "/META-INF/LICENSE.md"
             excludes += "/META-INF/LICENSE-notice.md"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
