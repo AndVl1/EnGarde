@@ -364,13 +364,14 @@ fun MatrixTable(
     val cellSize = 60.dp
     val nameColumnWidth = 120.dp
 
-    // M5 fix: horizontalScroll must be applied BEFORE fillMaxWidth so that the
-    // measurement is unconstrained horizontally, allowing the content to exceed
-    // the screen width and become scrollable.
+    // M5 fix: horizontalScroll on the outer Row with NO fillMaxWidth — fillMaxWidth
+    // would constrain content to screen width and disable scrolling. Fixed-size cells
+    // (nameColumnWidth + fencerCount * cellSize) naturally exceed screen width for 5+
+    // fencers, which activates the scroll.
+    val scrollState = rememberScrollState()
     Row(
         modifier = Modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth()
+            .horizontalScroll(scrollState)
     ) {
         // First column - fencer names (sticky-like: scrolls with content)
         Column {
