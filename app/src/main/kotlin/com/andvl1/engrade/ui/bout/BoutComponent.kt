@@ -53,7 +53,10 @@ class DefaultBoutComponent(
         }
 
         // Pause timer when app goes to background — referee must resume manually.
-        lifecycle.doOnStop { pauseTimer() }
+        lifecycle.doOnStop {
+            android.util.Log.d("M4DEBUG", "doOnStop callback fired, calling pauseTimer()")
+            pauseTimer()
+        }
     }
 
     override fun onEvent(event: BoutEvent) {
@@ -113,6 +116,7 @@ class DefaultBoutComponent(
     }
 
     private fun pauseTimer() {
+        android.util.Log.d("M4DEBUG", "pauseTimer() called, timerJob?.isActive=${timerJob?.isActive}")
         timerJob?.cancel()
         _state.value = _state.value.copy(isTimerRunning = false)
     }
