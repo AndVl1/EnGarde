@@ -402,6 +402,39 @@ class BoutEngine(
         }
     }
 
+    // === INTERNAL HELPERS ===
+
+    /**
+     * Recomputes _isOver and winner flags from the current score/section state.
+     * Called after any undo that affects scores, so the bout status stays consistent.
+     *
+     * A bout is still over if:
+     *  - left score >= mode, OR
+     *  - right score >= mode, OR
+     *  - the current section is PRIORITY (any score difference settles it — but
+     *    PRIORITY winner is only set by endSection/handlePriorityEnd, not here).
+     * If neither condition holds, isOver becomes false and all winner flags are cleared.
+     */
+    private fun recomputeOverState() {
+        when {
+            _leftFencer.score >= config.mode -> {
+                _leftFencer = _leftFencer.withWinner()
+                _rightFencer = _rightFencer.withoutWinner()
+                _isOver = true
+            }
+            _rightFencer.score >= config.mode -> {
+                _rightFencer = _rightFencer.withWinner()
+                _leftFencer = _leftFencer.withoutWinner()
+                _isOver = true
+            }
+            else -> {
+                _isOver = false
+                _leftFencer = _leftFencer.withoutWinner()
+                _rightFencer = _rightFencer.withoutWinner()
+            }
+        }
+    }
+
     // === UNDO ===
 
     /**
@@ -454,7 +487,7 @@ class BoutEngine(
             is UndoAction.LeftRedCard -> {
                 _leftFencer = _leftFencer.withoutRedCard()
                 _rightFencer = _rightFencer.decrementScore()
-                _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.RightYellowCard -> {
@@ -464,7 +497,7 @@ class BoutEngine(
             is UndoAction.RightRedCard -> {
                 _rightFencer = _rightFencer.withoutRedCard()
                 _leftFencer = _leftFencer.decrementScore()
-                _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.SectionSkipped -> {

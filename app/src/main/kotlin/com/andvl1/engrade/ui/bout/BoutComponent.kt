@@ -10,6 +10,7 @@ import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.doOnStop
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 
@@ -50,6 +51,9 @@ class DefaultBoutComponent(
             engine.resetAll()
             updateState()
         }
+
+        // Pause timer when app goes to background — referee must resume manually.
+        lifecycle.doOnStop { pauseTimer() }
     }
 
     override fun onEvent(event: BoutEvent) {
@@ -89,7 +93,9 @@ class DefaultBoutComponent(
             _state.value = _state.value.copy(isTimerRunning = true)
 
             while (isActive) {
-                delay(10) // 10ms precision like original
+                // 100ms ticks (10 Hz) — time is computed from a wall-clock timestamp
+                // so accuracy is not affected by tick frequency.
+                delay(100)
 
                 val elapsed = System.currentTimeMillis() - startTime
                 val newRemaining = maxOf(0L, initialRemaining - elapsed)
@@ -113,7 +119,7 @@ class DefaultBoutComponent(
 
     private fun handleTimerExpired() {
         pauseTimer()
-        val result = engine.endSection()
+        engine.endSection()
         updateState()
 
         // Play sound and show notification
@@ -136,10 +142,7 @@ class DefaultBoutComponent(
 
     private fun handleDoubleTouch() {
         pauseTimer()
-        val result = engine.addDoubleTouch()
-        if (result is ScoreResult.DoubleNotAllowed) {
-            // Show toast in UI layer
-        }
+        engine.addDoubleTouch()
         updateState()
     }
 

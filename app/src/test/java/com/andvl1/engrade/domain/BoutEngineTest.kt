@@ -7,7 +7,6 @@ import com.andvl1.engrade.domain.model.Weapon
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -493,7 +492,6 @@ class BoutEngineTest {
     // === H4: BUG — undo красной карточки в завершённом бою ===
 
     @Test
-    @Ignore("H4 - будет включён после фикса")
     fun `undo red card in finished bout should recompute isOver`() {
         // H4: после undo карты в завершённом бою статус isOver должен пересчитываться.
         // Текущий баг: undo красной карточки жёстко ставит isOver=false,
