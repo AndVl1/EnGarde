@@ -41,3 +41,11 @@
 -keepattributes *Annotation*
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
+
+# Room
+-keep class com.andvl1.engrade.data.db.** { *; }
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao interface * { *; }
+-keepclassmembers class * {
+    @androidx.room.* <fields>;
+}

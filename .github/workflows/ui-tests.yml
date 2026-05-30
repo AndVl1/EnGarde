@@ -20,6 +20,16 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Copy dummy google-services.json for CI
         run: cp .github/google-services-dummy.json app/google-services.json
 
@@ -48,6 +58,10 @@ jobs:
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest
 
+      - name: Pull Allure results from emulator
+        if: always()
+        run: adb pull /sdcard/Download/allure-results/ app/build/outputs/allure-results/ || true
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,6 +83,6 @@ jobs:
         if: always()
         uses: mikepenz/action-junit-report@v4
         with:
-          report_paths: '**/build/outputs/androidTest-results/connected/*.xml'
+          report_paths: '**/build/outputs/androidTest-results/connected/**/*.xml'
           check_name: 'UI Test Results'
           fail_on_failure: true
