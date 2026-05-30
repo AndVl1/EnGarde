@@ -372,6 +372,7 @@ fun MatrixTable(
     Row(
         modifier = Modifier
             .horizontalScroll(scrollState)
+            .testTag("dashboard_matrix")
     ) {
         // First column - fencer names (sticky-like: scrolls with content)
         Column {
@@ -413,7 +414,8 @@ fun MatrixTable(
                         modifier = Modifier
                             .size(cellSize)
                             .border(1.dp, Color.Gray)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .testTag("matrix_header_col_$col"),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("$col", fontWeight = FontWeight.Bold)
