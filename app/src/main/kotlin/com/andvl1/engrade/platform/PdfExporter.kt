@@ -301,7 +301,7 @@ class PdfExporter(private val context: Context) {
             canvas.drawText("${ranking.victories}", x, y + 15f, bodyPaint)
             x += colWidths[2]
 
-            canvas.drawText(String.format("%.1f", ranking.vmPercent), x, y + 15f, bodyPaint)
+            canvas.drawText(String.format(Locale.US, "%.1f", ranking.vmPercent), x, y + 15f, bodyPaint)
             x += colWidths[3]
 
             canvas.drawText("${ranking.touchesDelivered}", x, y + 15f, bodyPaint)

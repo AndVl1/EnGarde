@@ -26,13 +26,28 @@ import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupDashboardScreen(component: GroupDashboardComponent) {
     val state by component.state.subscribeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // M2: Show export error as Snackbar
+    val exportError = state.exportError
+    LaunchedEffect(exportError) {
+        if (exportError != null) {
+            snackbarHostState.showSnackbar(
+                message = exportError,
+                duration = SnackbarDuration.Long
+            )
+            component.onEvent(GroupDashboardEvent.DismissExportError)
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.group_stage_title)) },
@@ -349,12 +364,15 @@ fun MatrixTable(
     val cellSize = 60.dp
     val nameColumnWidth = 120.dp
 
+    // M5 fix: horizontalScroll must be applied BEFORE fillMaxWidth so that the
+    // measurement is unconstrained horizontally, allowing the content to exceed
+    // the screen width and become scrollable.
     Row(
         modifier = Modifier
-            .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()
     ) {
-        // First column - fencer names (sticky)
+        // First column - fencer names (sticky-like: scrolls with content)
         Column {
             // Top-left corner cell
             Box(
@@ -385,7 +403,7 @@ fun MatrixTable(
             }
         }
 
-        // Scrollable matrix cells
+        // Matrix cells column (header + data rows)
         Column {
             // Header row with numbers
             Row {
@@ -475,7 +493,8 @@ fun RankingsTable(rankings: List<com.andvl1.engrade.domain.model.FencerRanking>)
                     Text("${ranking.place}", modifier = Modifier.weight(0.5f))
                     Text(ranking.name, modifier = Modifier.weight(2f))
                     Text("${ranking.victories}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
-                    Text("${String.format("%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                    // M8 fix: explicit Locale.US for decimal separator consistency
+                    Text("${String.format(Locale.US, "%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesDelivered}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesReceived}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     val indexSign = if (ranking.index >= 0) "+" else ""

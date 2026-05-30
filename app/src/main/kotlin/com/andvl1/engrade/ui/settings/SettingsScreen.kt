@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +28,7 @@ fun SettingsScreen(component: SettingsComponent) {
                         onClick = { component.onEvent(SettingsEvent.BackPressed) },
                         modifier = Modifier.testTag("settings_button_back")
                     ) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 }
             )
@@ -66,7 +66,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 )
             }
 
-            Divider()
+            HorizontalDivider()
 
             // Mode selection
             Text("Режим (до скольки уколов)", style = MaterialTheme.typography.titleMedium)
@@ -92,7 +92,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 )
             }
 
-            Divider()
+            HorizontalDivider()
 
             // Show double touch button
             Row(

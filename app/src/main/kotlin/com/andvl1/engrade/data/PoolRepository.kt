@@ -117,7 +117,8 @@ class PoolRepository(private val db: EnGardeDatabase) {
             db.poolFencerDao().getByPoolId(poolId)
         ) { bouts, poolFencers ->
             val fencerIds = poolFencers.map { it.fencerId }
-            val fencers = fencerIds.mapNotNull { db.fencerDao().getById(it) }
+            // Single batch query instead of N individual getById calls (H3 N+1 fix)
+            val fencers = db.fencerDao().getByIds(fencerIds)
             val fencerMap = poolFencers.associate { pf ->
                 pf.seedNumber to fencers.find { it.id == pf.fencerId }?.name
             }
