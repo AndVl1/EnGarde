@@ -15,3 +15,8 @@
 
 # Firebase credentials
 google-services.json
+
+# workflow artifacts
+build-logs/
+.work-state/
+.claude/scheduled_tasks.lock

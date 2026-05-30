@@ -90,4 +90,33 @@ Home, Settings, Single Bout (счёт/таймер/undo/карты/double-touch)
 
 ---
 
-## План улучшений — см. раздел ниже / согласование с пользователем
+## Реализация (ветка refactor/tech-debt-2026-05)
+
+Объём: полный тех-долг. Волнами по cohesion (агенты не конфликтовали на файлах), верификация между волнами.
+
+| Коммит | Что |
+|---|---|
+| `ba24537` Wave A | 78 domain unit-тестов (страховка); 54 ru-перевода (MissingTranslation 67→0); google-services.json untracked; мёртвый compose-compiler удалён; Room ProGuard; lint{}; CI (adb pull allure + recursive JUnit glob + gradle cache) |
+| `691d8db` Wave B | **C1** getPoolById→реальный id; **H5** enum через Room TypeConverter (схема БД та же, миграция не нужна); **H6** атомарный createPool; **M3** priority-победитель; **M1** mode-валидация задокументирована (4/5 — реальный UI-контракт) |
+| `6345bf3` Wave C-1 | **H4** пересчёт isOver после undo; таймер deprecated-чистка |
+| `db8409a` Wave C-2 | **H3** Dashboard combine + N+1 (getByIds); **M2** PDF-ошибки→Snackbar+Crashlytics; матрица; AutoMirrored/HorizontalDivider/Locale.US |
+| `631d099` refix | **M4** таймер реально встаёт в фоне (инкрементальный delta вместо wall-clock от стартовой точки); **M5** матрица реально скроллится (единый scrollState + фикс. ширина ячеек вместо weight(1f) — он схлопывал контент в horizontalScroll) |
+
+### Верификация — всё зелёное
+- `assembleDebug` + `assembleDebugAndroidTest`: BUILD SUCCESSFUL
+- Unit: **78 passed, 0 failed** (домен покрыт впервые)
+- Instrumented: **33/33 Ultron passed** на pixel6_api34
+- manual-qa (под caffeinate): H4/M5/M4 подтверждены на устройстве (таймер 2:51→2:51 после HOME+6с; 6-fencer матрица скроллит все колонки). Крашей нет. PDF без молчаливого проглатывания.
+
+### Первая попытка M4/M5 провалилась — manual-qa поймал
+Первый фикс M4 (doOnStop) и M5 (horizontalScroll на header) НЕ работали на устройстве. manual-qa это обнаружил, developer-mobile инструментировал (Log.d+logcat), нашёл истинные причины и переделал (`631d099`). Урок: фиксы UI/lifecycle нельзя считать готовыми без прогона на устройстве.
+
+### Развенчанные ложные CRITICAL
+- Berger-алгоритм КОРРЕКТЕН (симуляция N=5-8: все C(N,2) пары, 0 дублей). Теперь покрыт тестом.
+- compose-compiler 1.5.15 — мёртвая toml-строка. Удалена.
+
+### Требует ручных действий (вне кода)
+- GCP Console: Application/API restrictions для Firebase-ключа.
+- LOW не сделано: ручной DI без retainedComponent; PdfExporter многостраничность; BoutResult без instrumented-теста; UX Group Setup (перескок фокуса ввода).
+
+Скриншоты: `vibe-report/screens/` (audit_*, regress_*, refix_*).
