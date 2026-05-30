@@ -3,6 +3,7 @@ package com.andvl1.engrade.ui.group.dashboard
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutResultData
+import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.FencerRanking
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.andvl1.engrade.platform.PdfExporter
@@ -119,10 +120,10 @@ class DefaultGroupDashboardComponent(
 
         scope.launch {
             poolRepository.getPoolBoutsWithNames(poolId).collect { bouts ->
-                val completed = bouts.count { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
+                val completed = bouts.count { it.bout.status == BoutStatus.COMPLETED || it.bout.status == BoutStatus.FORFEIT }
                 val total = bouts.size
 
-                val pendingBouts = bouts.filter { it.bout.status == "PENDING" }
+                val pendingBouts = bouts.filter { it.bout.status == BoutStatus.PENDING }
                 val currentBout = pendingBouts.firstOrNull()
                 val currentInfo = currentBout?.let {
                     "Bout #${it.bout.boutOrder}: ${it.leftFencerName} vs ${it.rightFencerName}"
@@ -152,7 +153,7 @@ class DefaultGroupDashboardComponent(
             val currentState = _state.value
 
             val completedBouts = boutList
-                .filter { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
+                .filter { it.bout.status == BoutStatus.COMPLETED || it.bout.status == BoutStatus.FORFEIT }
                 .mapNotNull { boutWithNames ->
                     val bout = boutWithNames.bout
                     bout.leftScore?.let { leftScore ->
@@ -162,7 +163,7 @@ class DefaultGroupDashboardComponent(
                                 rightSeed = bout.rightFencerSeed,
                                 leftScore = leftScore,
                                 rightScore = rightScore,
-                                status = com.andvl1.engrade.domain.model.BoutStatus.valueOf(bout.status)
+                                status = bout.status
                             )
                         }
                     }

@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
+import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.ui.group.dashboard.EditScoreDialog
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
@@ -65,7 +66,7 @@ fun BoutsListScreen(component: BoutsListComponent) {
                         rightScore = boutWithNames.bout.rightScore,
                         status = boutWithNames.bout.status,
                         onClick = {
-                            if (boutWithNames.bout.status == "COMPLETED" || boutWithNames.bout.status == "FORFEIT") {
+                            if (boutWithNames.bout.status == BoutStatus.COMPLETED || boutWithNames.bout.status == BoutStatus.FORFEIT) {
                                 component.onEvent(BoutsListEvent.BoutClicked(boutWithNames.bout.id))
                             }
                         }
@@ -94,14 +95,14 @@ fun BoutListItem(
     rightName: String,
     leftScore: Int?,
     rightScore: Int?,
-    status: String,
+    status: BoutStatus,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("boutsList_item_$boutNumber"),
-        onClick = if (status == "COMPLETED" || status == "FORFEIT") onClick else ({})
+        onClick = if (status == BoutStatus.COMPLETED || status == BoutStatus.FORFEIT) onClick else ({})
     ) {
         Row(
             modifier = Modifier

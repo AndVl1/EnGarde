@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.andvl1.engrade.domain.model.BoutStatus
+import com.andvl1.engrade.domain.model.FencerSide
 
 @Entity(
     tableName = "pool_bout",
@@ -25,6 +27,6 @@ data class PoolBoutEntity(
     val rightFencerSeed: Int,
     val leftScore: Int? = null,
     val rightScore: Int? = null,
-    val winner: String? = null,    // "LEFT" or "RIGHT"
-    val status: String = "PENDING" // "PENDING", "COMPLETED", "FORFEIT"
+    val winner: FencerSide? = null,    // stored as TEXT matching enum.name — no schema change
+    val status: BoutStatus = BoutStatus.PENDING // stored as TEXT matching enum.name — no schema change
 )

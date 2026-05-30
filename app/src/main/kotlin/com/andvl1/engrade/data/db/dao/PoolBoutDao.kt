@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.andvl1.engrade.data.db.entity.PoolBoutEntity
+import com.andvl1.engrade.domain.model.BoutStatus
+import com.andvl1.engrade.domain.model.FencerSide
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -34,7 +36,7 @@ interface PoolBoutDao {
         SET leftScore = :leftScore, rightScore = :rightScore, winner = :winner, status = :status
         WHERE id = :boutId
     """)
-    suspend fun updateResult(boutId: Long, leftScore: Int, rightScore: Int, winner: String?, status: String)
+    suspend fun updateResult(boutId: Long, leftScore: Int, rightScore: Int, winner: FencerSide?, status: BoutStatus)
 
     @Query("""
         UPDATE pool_bout

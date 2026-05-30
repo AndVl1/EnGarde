@@ -1,12 +1,16 @@
 package com.andvl1.engrade.data
 
+import androidx.room.withTransaction
 import com.andvl1.engrade.data.db.EnGardeDatabase
 import com.andvl1.engrade.data.db.entity.FencerEntity
 import com.andvl1.engrade.data.db.entity.PoolBoutEntity
 import com.andvl1.engrade.data.db.entity.PoolEntity
 import com.andvl1.engrade.data.db.entity.PoolFencerEntity
 import com.andvl1.engrade.domain.FieBoutOrder
+import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.FencerInput
+import com.andvl1.engrade.domain.model.FencerSide
+import com.andvl1.engrade.domain.model.PoolStatus
 import com.andvl1.engrade.domain.model.Weapon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -15,72 +19,77 @@ class PoolRepository(private val db: EnGardeDatabase) {
 
     /**
      * Create a new pool with fencers and generate all bouts.
+     * All inserts are wrapped in a single Room transaction (H6).
      * Returns the pool ID.
+     *
+     * Valid modes: 4 (touches) or 5 (touches) — matches GroupSetupScreen UI options (M1).
      */
     suspend fun createPool(mode: Int, weapon: Weapon, fencers: List<FencerInput>): Long {
         require(fencers.size in 5..8) { "Pool must have 5-8 fencers" }
-        require(mode in listOf(4, 5)) { "Mode must be 4 or 5" }
+        require(mode in VALID_MODES) { "Mode must be one of $VALID_MODES" }
 
-        // Create or get fencer entities
-        val fencerIds = mutableListOf<Long>()
-        fencers.forEach { input ->
-            val existing = db.fencerDao().getByName(input.name)
-            val fencerId = if (existing != null) {
-                existing.id
-            } else {
-                db.fencerDao().insert(
-                    FencerEntity(
-                        name = input.name,
-                        organization = input.organization,
-                        region = input.region
+        return db.withTransaction {
+            // Create or get fencer entities
+            val fencerIds = mutableListOf<Long>()
+            fencers.forEach { input ->
+                val existing = db.fencerDao().getByName(input.name)
+                val fencerId = if (existing != null) {
+                    existing.id
+                } else {
+                    db.fencerDao().insert(
+                        FencerEntity(
+                            name = input.name,
+                            organization = input.organization,
+                            region = input.region
+                        )
                     )
+                }
+                fencerIds.add(fencerId)
+            }
+
+            // Create pool
+            val poolId = db.poolDao().insert(
+                PoolEntity(
+                    createdAt = System.currentTimeMillis(),
+                    mode = mode,
+                    weapon = weapon.name,
+                    status = PoolStatus.IN_PROGRESS
+                )
+            )
+
+            // Create pool fencers with seed numbers
+            val poolFencers = fencerIds.mapIndexed { index, fencerId ->
+                PoolFencerEntity(
+                    poolId = poolId,
+                    fencerId = fencerId,
+                    seedNumber = index + 1,
+                    excluded = false
                 )
             }
-            fencerIds.add(fencerId)
+            db.poolFencerDao().insertAll(poolFencers)
+
+            // Generate bouts using FIE order
+            val boutOrder = FieBoutOrder.getBoutOrder(fencers.size)
+            val bouts = boutOrder.mapIndexed { index, (left, right) ->
+                PoolBoutEntity(
+                    poolId = poolId,
+                    boutOrder = index + 1,
+                    leftFencerSeed = left,
+                    rightFencerSeed = right,
+                    status = BoutStatus.PENDING
+                )
+            }
+            db.poolBoutDao().insertAll(bouts)
+
+            poolId
         }
-
-        // Create pool
-        val poolId = db.poolDao().insert(
-            PoolEntity(
-                createdAt = System.currentTimeMillis(),
-                mode = mode,
-                weapon = weapon.name,
-                status = "IN_PROGRESS"
-            )
-        )
-
-        // Create pool fencers with seed numbers
-        val poolFencers = fencerIds.mapIndexed { index, fencerId ->
-            PoolFencerEntity(
-                poolId = poolId,
-                fencerId = fencerId,
-                seedNumber = index + 1,
-                excluded = false
-            )
-        }
-        db.poolFencerDao().insertAll(poolFencers)
-
-        // Generate bouts using FIE order
-        val boutOrder = FieBoutOrder.getBoutOrder(fencers.size)
-        val bouts = boutOrder.mapIndexed { index, (left, right) ->
-            PoolBoutEntity(
-                poolId = poolId,
-                boutOrder = index + 1,
-                leftFencerSeed = left,
-                rightFencerSeed = right,
-                status = "PENDING"
-            )
-        }
-        db.poolBoutDao().insertAll(bouts)
-
-        return poolId
     }
 
     /**
-     * Get pool by ID.
+     * Get pool by ID as a reactive Flow (C1 fix — was ignoring the parameter).
      */
     fun getPoolById(poolId: Long): Flow<PoolEntity?> =
-        db.poolDao().getActivePool() // For simplicity, returns active pool
+        db.poolDao().getByIdFlow(poolId)
 
     /**
      * Get pool fencers with names.
@@ -132,12 +141,20 @@ class PoolRepository(private val db: EnGardeDatabase) {
 
     /**
      * Record bout result (normal completion).
+     *
+     * FIE rule: draws are not allowed in pool bouts (M3).
+     * Finalizing a bout with leftScore == rightScore is rejected here at the data layer.
+     * Intermediate score editing during the bout (updateBoutScore) is not restricted
+     * since the UI may show equal scores before the final touch is scored.
      */
     suspend fun recordBoutResult(boutId: Long, leftScore: Int, rightScore: Int) {
+        require(leftScore != rightScore) {
+            "FIE: draws are not allowed in pool bouts (scores $leftScore:$rightScore are equal)"
+        }
+
         val winner = when {
-            leftScore > rightScore -> "LEFT"
-            rightScore > leftScore -> "RIGHT"
-            else -> null
+            leftScore > rightScore -> FencerSide.LEFT
+            else -> FencerSide.RIGHT
         }
 
         db.poolBoutDao().updateResult(
@@ -145,7 +162,7 @@ class PoolRepository(private val db: EnGardeDatabase) {
             leftScore = leftScore,
             rightScore = rightScore,
             winner = winner,
-            status = "COMPLETED"
+            status = BoutStatus.COMPLETED
         )
     }
 
@@ -153,10 +170,10 @@ class PoolRepository(private val db: EnGardeDatabase) {
      * Record forfeit (one fencer absent).
      */
     suspend fun recordForfeit(boutId: Long, absentSide: String, maxScore: Int) {
-        val (leftScore, rightScore, winner) = when (absentSide) {
-            "LEFT" -> Triple(0, maxScore, "RIGHT")
-            "RIGHT" -> Triple(maxScore, 0, "LEFT")
-            else -> error("Invalid absent side: $absentSide")
+        val absentFencerSide = FencerSide.valueOf(absentSide)
+        val (leftScore, rightScore, winner) = when (absentFencerSide) {
+            FencerSide.LEFT -> Triple(0, maxScore, FencerSide.RIGHT)
+            FencerSide.RIGHT -> Triple(maxScore, 0, FencerSide.LEFT)
         }
 
         db.poolBoutDao().updateResult(
@@ -164,7 +181,7 @@ class PoolRepository(private val db: EnGardeDatabase) {
             leftScore = leftScore,
             rightScore = rightScore,
             winner = winner,
-            status = "FORFEIT"
+            status = BoutStatus.FORFEIT
         )
     }
 
@@ -178,11 +195,13 @@ class PoolRepository(private val db: EnGardeDatabase) {
 
     /**
      * Update bout score (for editing completed bouts).
+     * Equal scores are allowed here since this is mid-bout editing,
+     * not final result recording. See recordBoutResult for FIE draw restriction.
      */
     suspend fun updateBoutScore(boutId: Long, leftScore: Int, rightScore: Int) {
         val winner = when {
-            leftScore > rightScore -> "LEFT"
-            rightScore > leftScore -> "RIGHT"
+            leftScore > rightScore -> FencerSide.LEFT
+            rightScore > leftScore -> FencerSide.RIGHT
             else -> null
         }
 
@@ -191,12 +210,12 @@ class PoolRepository(private val db: EnGardeDatabase) {
             leftScore = leftScore,
             rightScore = rightScore,
             winner = winner,
-            status = "COMPLETED"
+            status = BoutStatus.COMPLETED
         )
     }
 
     /**
-     * Get active pool.
+     * Get active pool (IN_PROGRESS). Used for "Continue Pool" feature.
      */
     fun getActivePool(): Flow<PoolEntity?> {
         return db.poolDao().getActivePool()
@@ -214,7 +233,12 @@ class PoolRepository(private val db: EnGardeDatabase) {
      */
     suspend fun completePool(poolId: Long) {
         val pool = db.poolDao().getById(poolId) ?: return
-        db.poolDao().update(pool.copy(status = "COMPLETED"))
+        db.poolDao().update(pool.copy(status = PoolStatus.COMPLETED))
+    }
+
+    companion object {
+        /** Valid bout mode values (touches). Matches GroupSetupScreen UI options. */
+        val VALID_MODES = listOf(4, 5)
     }
 }
 

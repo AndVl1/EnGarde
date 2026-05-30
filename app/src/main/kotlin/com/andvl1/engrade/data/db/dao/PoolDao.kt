@@ -18,6 +18,9 @@ interface PoolDao {
     @Query("SELECT * FROM pool WHERE id = :id")
     suspend fun getById(id: Long): PoolEntity?
 
+    @Query("SELECT * FROM pool WHERE id = :id")
+    fun getByIdFlow(id: Long): Flow<PoolEntity?>
+
     @Query("SELECT * FROM pool ORDER BY createdAt DESC")
     fun getAll(): Flow<List<PoolEntity>>
 
