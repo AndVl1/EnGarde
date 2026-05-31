@@ -3,6 +3,7 @@ package com.andvl1.engrade.ui.group.dashboard
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutResultData
+import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.FencerRanking
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.andvl1.engrade.platform.PdfExporter
@@ -10,7 +11,9 @@ import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,7 +38,8 @@ data class GroupDashboardState(
     val nextBoutInfo: String? = null,
     val showEditScoreDialog: EditScoreDialogState? = null,
     val showForfeitDialog: ForfeitDialogState? = null,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val exportError: String? = null
 )
 
 data class EditScoreDialogState(
@@ -59,6 +63,7 @@ sealed class GroupDashboardEvent {
     data object NavigateToBoutsList : GroupDashboardEvent()
     data object NavigateBack : GroupDashboardEvent()
     data object ExportPdf : GroupDashboardEvent()
+    data object DismissExportError : GroupDashboardEvent()
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
     data object DismissEditScoreDialog : GroupDashboardEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
@@ -87,20 +92,21 @@ class DefaultGroupDashboardComponent(
         loadPoolData()
     }
 
+    /**
+     * H3 fix: single combined flow avoids 3 separate collect{} blocks racing each other.
+     * Standings are computed in-memory from the snapshot — no extra DB reads.
+     * Race on fencerCount=0 is eliminated because combine waits for all sources before emitting.
+     */
     private fun loadPoolData() {
         scope.launch {
-            poolRepository.getPoolById(poolId).collect { pool ->
-                pool?.let {
-                    _state.value = _state.value.copy(
-                        mode = it.mode,
-                        weapon = it.weapon
-                    )
-                }
-            }
-        }
-
-        scope.launch {
-            poolRepository.getPoolFencersWithNames(poolId).collect { poolFencers ->
+            combine(
+                poolRepository.getPoolById(poolId),
+                poolRepository.getPoolFencersWithNames(poolId),
+                poolRepository.getPoolBoutsWithNames(poolId)
+            ) { pool, poolFencers, bouts ->
+                Triple(pool, poolFencers, bouts)
+            }.collect { (pool, poolFencers, bouts) ->
+                val fencerCount = poolFencers.size
                 val fencerNames = poolFencers.associate {
                     it.poolFencer.seedNumber to it.fencerName
                 }
@@ -108,83 +114,68 @@ class DefaultGroupDashboardComponent(
                     .filter { it.poolFencer.excluded }
                     .map { it.poolFencer.seedNumber }
                     .toSet()
-                _state.value = _state.value.copy(
-                    fencerCount = poolFencers.size,
-                    fencerNames = fencerNames,
-                    excludedSeeds = excludedSeeds
-                )
-                recalculateStandings()
-            }
-        }
 
-        scope.launch {
-            poolRepository.getPoolBoutsWithNames(poolId).collect { bouts ->
-                val completed = bouts.count { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
+                val completed = bouts.count {
+                    it.bout.status == BoutStatus.COMPLETED || it.bout.status == BoutStatus.FORFEIT
+                }
                 val total = bouts.size
 
-                val pendingBouts = bouts.filter { it.bout.status == "PENDING" }
+                val pendingBouts = bouts.filter { it.bout.status == BoutStatus.PENDING }
                 val currentBout = pendingBouts.firstOrNull()
                 val currentInfo = currentBout?.let {
                     "Bout #${it.bout.boutOrder}: ${it.leftFencerName} vs ${it.rightFencerName}"
                 }
-
                 val nextBout = pendingBouts.drop(1).firstOrNull()
                 val nextInfo = nextBout?.let {
                     "Next: ${it.leftFencerName} vs ${it.rightFencerName}"
                 }
 
+                // Compute standings in-memory from the same snapshot — no extra DB reads
+                val completedBouts = bouts
+                    .filter { it.bout.status == BoutStatus.COMPLETED || it.bout.status == BoutStatus.FORFEIT }
+                    .mapNotNull { boutWithNames ->
+                        val bout = boutWithNames.bout
+                        bout.leftScore?.let { leftScore ->
+                            bout.rightScore?.let { rightScore ->
+                                BoutResultData(
+                                    leftSeed = bout.leftFencerSeed,
+                                    rightSeed = bout.rightFencerSeed,
+                                    leftScore = leftScore,
+                                    rightScore = rightScore,
+                                    status = bout.status
+                                )
+                            }
+                        }
+                    }
+
+                val rankings = poolEngine.calculateRankings(
+                    fencerCount = fencerCount,
+                    bouts = completedBouts,
+                    fencerNames = fencerNames,
+                    excludedSeeds = excludedSeeds
+                )
+
+                val matrix = poolEngine.buildMatrix(
+                    fencerCount = fencerCount,
+                    bouts = completedBouts,
+                    excludedSeeds = excludedSeeds
+                )
+
                 _state.value = _state.value.copy(
+                    mode = pool?.mode ?: _state.value.mode,
+                    weapon = pool?.weapon ?: _state.value.weapon,
+                    fencerCount = fencerCount,
+                    fencerNames = fencerNames,
+                    excludedSeeds = excludedSeeds,
                     completedBoutsCount = completed,
                     totalBoutsCount = total,
                     currentBoutInfo = currentInfo,
                     nextBoutInfo = nextInfo,
+                    rankings = rankings,
+                    matrix = matrix,
                     isLoading = false
                 )
-
-                recalculateStandings()
             }
-        }
-    }
-
-    private fun recalculateStandings() {
-        scope.launch {
-            val boutList = poolRepository.getPoolBoutsWithNames(poolId).first()
-            val currentState = _state.value
-
-            val completedBouts = boutList
-                .filter { it.bout.status == "COMPLETED" || it.bout.status == "FORFEIT" }
-                .mapNotNull { boutWithNames ->
-                    val bout = boutWithNames.bout
-                    bout.leftScore?.let { leftScore ->
-                        bout.rightScore?.let { rightScore ->
-                            BoutResultData(
-                                leftSeed = bout.leftFencerSeed,
-                                rightSeed = bout.rightFencerSeed,
-                                leftScore = leftScore,
-                                rightScore = rightScore,
-                                status = com.andvl1.engrade.domain.model.BoutStatus.valueOf(bout.status)
-                            )
-                        }
-                    }
-                }
-
-            val rankings = poolEngine.calculateRankings(
-                fencerCount = currentState.fencerCount,
-                bouts = completedBouts,
-                fencerNames = currentState.fencerNames,
-                excludedSeeds = currentState.excludedSeeds
-            )
-
-            val matrix = poolEngine.buildMatrix(
-                fencerCount = currentState.fencerCount,
-                bouts = completedBouts,
-                excludedSeeds = currentState.excludedSeeds
-            )
-
-            _state.value = _state.value.copy(
-                rankings = rankings,
-                matrix = matrix
-            )
         }
     }
 
@@ -225,10 +216,19 @@ class DefaultGroupDashboardComponent(
                                 }
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            // M2 fix: log to Crashlytics and surface error to user
+                            FirebaseCrashlytics.getInstance().recordException(e)
+                            withContext(Dispatchers.Main) {
+                                _state.value = _state.value.copy(
+                                    exportError = e.message ?: "PDF export failed"
+                                )
+                            }
                         }
                     }
                 }
+            }
+            GroupDashboardEvent.DismissExportError -> {
+                _state.value = _state.value.copy(exportError = null)
             }
             is GroupDashboardEvent.ShowEditScoreDialog -> {
                 scope.launch {

@@ -2,6 +2,7 @@ package com.andvl1.engrade.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.andvl1.engrade.data.db.dao.FencerDao
 import com.andvl1.engrade.data.db.dao.PoolBoutDao
 import com.andvl1.engrade.data.db.dao.PoolDao
@@ -21,6 +22,7 @@ import com.andvl1.engrade.data.db.entity.PoolFencerEntity
     version = 1,
     exportSchema = true
 )
+@TypeConverters(Converters::class)
 abstract class EnGardeDatabase : RoomDatabase() {
     abstract fun fencerDao(): FencerDao
     abstract fun poolDao(): PoolDao

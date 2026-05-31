@@ -26,13 +26,28 @@ import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupDashboardScreen(component: GroupDashboardComponent) {
     val state by component.state.subscribeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // M2: Show export error as Snackbar
+    val exportError = state.exportError
+    LaunchedEffect(exportError) {
+        if (exportError != null) {
+            snackbarHostState.showSnackbar(
+                message = exportError,
+                duration = SnackbarDuration.Long
+            )
+            component.onEvent(GroupDashboardEvent.DismissExportError)
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.group_stage_title)) },
@@ -349,12 +364,17 @@ fun MatrixTable(
     val cellSize = 60.dp
     val nameColumnWidth = 120.dp
 
+    // M5 fix: horizontalScroll on the outer Row with NO fillMaxWidth — fillMaxWidth
+    // would constrain content to screen width and disable scrolling. Fixed-size cells
+    // (nameColumnWidth + fencerCount * cellSize) naturally exceed screen width for 5+
+    // fencers, which activates the scroll.
+    val scrollState = rememberScrollState()
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
+            .horizontalScroll(scrollState)
+            .testTag("dashboard_matrix")
     ) {
-        // First column - fencer names (sticky)
+        // First column - fencer names (sticky-like: scrolls with content)
         Column {
             // Top-left corner cell
             Box(
@@ -385,7 +405,7 @@ fun MatrixTable(
             }
         }
 
-        // Scrollable matrix cells
+        // Matrix cells column (header + data rows)
         Column {
             // Header row with numbers
             Row {
@@ -394,7 +414,8 @@ fun MatrixTable(
                         modifier = Modifier
                             .size(cellSize)
                             .border(1.dp, Color.Gray)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .testTag("matrix_header_col_$col"),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("$col", fontWeight = FontWeight.Bold)
@@ -475,7 +496,8 @@ fun RankingsTable(rankings: List<com.andvl1.engrade.domain.model.FencerRanking>)
                     Text("${ranking.place}", modifier = Modifier.weight(0.5f))
                     Text(ranking.name, modifier = Modifier.weight(2f))
                     Text("${ranking.victories}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
-                    Text("${String.format("%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                    // M8 fix: explicit Locale.US for decimal separator consistency
+                    Text("${String.format(Locale.US, "%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesDelivered}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesReceived}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     val indexSign = if (ranking.index >= 0) "+" else ""

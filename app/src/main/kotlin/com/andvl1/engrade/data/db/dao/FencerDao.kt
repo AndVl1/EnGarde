@@ -18,6 +18,9 @@ interface FencerDao {
     @Query("SELECT * FROM fencer WHERE id = :id")
     suspend fun getById(id: Long): FencerEntity?
 
+    @Query("SELECT * FROM fencer WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Long>): List<FencerEntity>
+
     @Query("SELECT * FROM fencer WHERE name = :name LIMIT 1")
     suspend fun getByName(name: String): FencerEntity?
 }

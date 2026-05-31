@@ -41,6 +41,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    lint {
+        warningsAsErrors = false
+        abortOnError = true
+        checkReleaseBuilds = false
+    }
+
     buildFeatures {
         compose = true
     }

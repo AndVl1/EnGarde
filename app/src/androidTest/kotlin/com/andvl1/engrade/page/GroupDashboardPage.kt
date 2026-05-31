@@ -14,4 +14,6 @@ object GroupDashboardPage : Page<GroupDashboardPage>() {
     val matrixTitle = hasTestTag("dashboard_text_matrixTitle")
     val rankingsTitle = hasTestTag("dashboard_text_rankingsTitle")
     val loading = hasTestTag("dashboard_loading")
+    val matrix = hasTestTag("dashboard_matrix")
+    fun matrixHeaderCol(col: Int) = hasTestTag("matrix_header_col_$col")
 }
