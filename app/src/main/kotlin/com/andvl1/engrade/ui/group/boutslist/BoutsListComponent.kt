@@ -17,7 +17,8 @@ interface BoutsListComponent {
 data class BoutsListState(
     val bouts: List<PoolBoutWithNames> = emptyList(),
     val isLoading: Boolean = true,
-    val showEditScoreDialog: EditScoreDialogState? = null
+    val showEditScoreDialog: EditScoreDialogState? = null,
+    val error: String? = null
 )
 
 sealed class BoutsListEvent {
@@ -25,6 +26,7 @@ sealed class BoutsListEvent {
     data object DismissEditScoreDialog : BoutsListEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : BoutsListEvent()
     data object NavigateBack : BoutsListEvent()
+    data object DismissError : BoutsListEvent()
 }
 
 class DefaultBoutsListComponent(
@@ -73,16 +75,26 @@ class DefaultBoutsListComponent(
                 _state.value = _state.value.copy(showEditScoreDialog = null)
             }
             is BoutsListEvent.UpdateBoutScore -> {
-                scope.launch {
-                    poolRepository.updateBoutScore(
-                        boutId = event.boutId,
-                        leftScore = event.leftScore,
-                        rightScore = event.rightScore
+                // F3: FIE — ничья запрещена; валидируем до вызова репозитория
+                if (event.leftScore == event.rightScore) {
+                    _state.value = _state.value.copy(
+                        error = "FIE: ничья в бое запрещена (${event.leftScore}:${event.rightScore})"
                     )
-                    _state.value = _state.value.copy(showEditScoreDialog = null)
+                } else {
+                    scope.launch {
+                        poolRepository.updateBoutScore(
+                            boutId = event.boutId,
+                            leftScore = event.leftScore,
+                            rightScore = event.rightScore
+                        )
+                        _state.value = _state.value.copy(showEditScoreDialog = null)
+                    }
                 }
             }
             BoutsListEvent.NavigateBack -> onBack()
+            BoutsListEvent.DismissError -> {
+                _state.value = _state.value.copy(error = null)
+            }
         }
     }
 }

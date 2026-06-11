@@ -58,6 +58,9 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreLeft(): ScoreResult {
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
         // Save state before making changes
         val previousSection = _currentSection
         val previousNextSection = _nextSection
@@ -72,15 +75,8 @@ class BoutEngine(
             )
         )
 
-        // Sabre break-at-8 rule
-        if (config.weapon == Weapon.SABRE &&
-            _leftFencer.score == 8 &&
-            _rightFencer.score < 8
-        ) {
-            _timeRemaining = config.breakLengthMs
-            _currentSection = SectionType.BREAK
-            _nextSection = SectionType.PERIOD
-        }
+        // F5: Sabre break-at-8 rule (общий helper)
+        applySabreBreakAt8IfNeeded()
 
         // Check for winner
         if (_leftFencer.score >= config.mode || _currentSection == SectionType.PRIORITY) {
@@ -98,6 +94,9 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreRight(): ScoreResult {
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
         // Save state before making changes
         val previousSection = _currentSection
         val previousNextSection = _nextSection
@@ -112,15 +111,8 @@ class BoutEngine(
             )
         )
 
-        // Sabre break-at-8 rule
-        if (config.weapon == Weapon.SABRE &&
-            _rightFencer.score == 8 &&
-            _leftFencer.score < 8
-        ) {
-            _timeRemaining = config.breakLengthMs
-            _currentSection = SectionType.BREAK
-            _nextSection = SectionType.PERIOD
-        }
+        // F5: Sabre break-at-8 rule (общий helper)
+        applySabreBreakAt8IfNeeded()
 
         // Check for winner
         if (_rightFencer.score >= config.mode || _currentSection == SectionType.PRIORITY) {
@@ -135,13 +127,21 @@ class BoutEngine(
 
     /**
      * Add double touch (both fencers score).
-     * NOT allowed when both are at (mode - 1), except in PRIORITY section.
+     * NOT allowed when both are at (mode - 1).
+     * In PRIORITY section, simultaneous action is annulled per FIE rules.
      */
     fun addDoubleTouch(): ScoreResult {
-        // Prevent double touch when both at mode-1 (except in PRIORITY)
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
+        // F2: FIE — одновременное действие в минуту приоритета аннулируется (никто не засчитывает)
+        if (_currentSection == SectionType.PRIORITY) {
+            return ScoreResult.Scored
+        }
+
+        // Prevent double touch when both at mode-1
         if (_leftFencer.score == _rightFencer.score &&
-            _leftFencer.score == config.mode - 1 &&
-            _currentSection != SectionType.PRIORITY
+            _leftFencer.score == config.mode - 1
         ) {
             return ScoreResult.DoubleNotAllowed
         }
@@ -221,6 +221,8 @@ class BoutEngine(
                 if (_rightFencer.score < config.mode) {
                     _rightFencer = _rightFencer.incrementScore()
                 }
+                // F5: штрафное очко может сработать правило сабли перерыв-на-8
+                applySabreBreakAt8IfNeeded()
                 _undoStack.addLast(UndoAction.LeftRedCard)
 
                 // Check if right fencer wins
@@ -237,6 +239,8 @@ class BoutEngine(
                 if (_leftFencer.score < config.mode) {
                     _leftFencer = _leftFencer.incrementScore()
                 }
+                // F5: штрафное очко может сработать правило сабли перерыв-на-8
+                applySabreBreakAt8IfNeeded()
                 _undoStack.addLast(UndoAction.RightRedCard)
 
                 // Check if left fencer wins
@@ -405,6 +409,28 @@ class BoutEngine(
     // === INTERNAL HELPERS ===
 
     /**
+     * F5: Sabre break-at-8 rule.
+     * Если оружие — сабля и один фехтовальщик достигает ровно 8 очков, пока другой ниже 8,
+     * срабатывает обязательный перерыв (согласно правилам ФИЭ).
+     * Вызывается из addScoreLeft, addScoreRight и giveRedCard.
+     */
+    private fun applySabreBreakAt8IfNeeded() {
+        if (config.weapon != Weapon.SABRE) return
+        when {
+            _leftFencer.score == 8 && _rightFencer.score < 8 -> {
+                _timeRemaining = config.breakLengthMs
+                _currentSection = SectionType.BREAK
+                _nextSection = SectionType.PERIOD
+            }
+            _rightFencer.score == 8 && _leftFencer.score < 8 -> {
+                _timeRemaining = config.breakLengthMs
+                _currentSection = SectionType.BREAK
+                _nextSection = SectionType.PERIOD
+            }
+        }
+    }
+
+    /**
      * Recomputes _isOver and winner flags from the current score/section state.
      * Called after any undo that affects scores, so the bout status stays consistent.
      *
@@ -446,38 +472,34 @@ class BoutEngine(
         return when (action) {
             is UndoAction.LeftScored -> {
                 _leftFencer = _leftFencer.decrementScore()
-                if (_leftFencer.isWinner) {
-                    _leftFencer = _leftFencer.withoutWinner()
-                }
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false — корректно
+                // обрабатывает случай, когда счёт после декремента всё ещё >= mode
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.RightScored -> {
                 _rightFencer = _rightFencer.decrementScore()
-                if (_rightFencer.isWinner) {
-                    _rightFencer = _rightFencer.withoutWinner()
-                }
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.BothScored -> {
                 _leftFencer = _leftFencer.decrementScore()
                 _rightFencer = _rightFencer.decrementScore()
-                if (_leftFencer.isWinner) _leftFencer = _leftFencer.withoutWinner()
-                if (_rightFencer.isWinner) _rightFencer = _rightFencer.withoutWinner()
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.LeftYellowCard -> {

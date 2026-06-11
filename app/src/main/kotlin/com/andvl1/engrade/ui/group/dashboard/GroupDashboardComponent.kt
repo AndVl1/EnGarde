@@ -39,7 +39,8 @@ data class GroupDashboardState(
     val showEditScoreDialog: EditScoreDialogState? = null,
     val showForfeitDialog: ForfeitDialogState? = null,
     val isLoading: Boolean = true,
-    val exportError: String? = null
+    val exportError: String? = null,
+    val editScoreError: String? = null
 )
 
 data class EditScoreDialogState(
@@ -64,6 +65,7 @@ sealed class GroupDashboardEvent {
     data object NavigateBack : GroupDashboardEvent()
     data object ExportPdf : GroupDashboardEvent()
     data object DismissExportError : GroupDashboardEvent()
+    data object DismissEditScoreError : GroupDashboardEvent()
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
     data object DismissEditScoreDialog : GroupDashboardEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
@@ -157,8 +159,7 @@ class DefaultGroupDashboardComponent(
 
                 val matrix = poolEngine.buildMatrix(
                     fencerCount = fencerCount,
-                    bouts = completedBouts,
-                    excludedSeeds = excludedSeeds
+                    bouts = completedBouts
                 )
 
                 _state.value = _state.value.copy(
@@ -230,6 +231,9 @@ class DefaultGroupDashboardComponent(
             GroupDashboardEvent.DismissExportError -> {
                 _state.value = _state.value.copy(exportError = null)
             }
+            GroupDashboardEvent.DismissEditScoreError -> {
+                _state.value = _state.value.copy(editScoreError = null)
+            }
             is GroupDashboardEvent.ShowEditScoreDialog -> {
                 scope.launch {
                     val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
@@ -251,13 +255,20 @@ class DefaultGroupDashboardComponent(
                 _state.value = _state.value.copy(showEditScoreDialog = null)
             }
             is GroupDashboardEvent.UpdateBoutScore -> {
-                scope.launch {
-                    poolRepository.updateBoutScore(
-                        boutId = event.boutId,
-                        leftScore = event.leftScore,
-                        rightScore = event.rightScore
+                // F3: FIE — ничья запрещена; валидируем до вызова репозитория
+                if (event.leftScore == event.rightScore) {
+                    _state.value = _state.value.copy(
+                        editScoreError = "FIE: ничья в бое запрещена (${event.leftScore}:${event.rightScore})"
                     )
-                    _state.value = _state.value.copy(showEditScoreDialog = null)
+                } else {
+                    scope.launch {
+                        poolRepository.updateBoutScore(
+                            boutId = event.boutId,
+                            leftScore = event.leftScore,
+                            rightScore = event.rightScore
+                        )
+                        _state.value = _state.value.copy(showEditScoreDialog = null)
+                    }
                 }
             }
             GroupDashboardEvent.ShowForfeitDialog -> {

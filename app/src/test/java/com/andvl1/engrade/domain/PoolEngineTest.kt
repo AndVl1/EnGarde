@@ -293,8 +293,7 @@ class PoolEngineTest {
     fun `buildMatrix diagonal cells are null`() {
         val matrix = engine.buildMatrix(
             fencerCount = 3,
-            bouts = emptyList(),
-            excludedSeeds = emptySet()
+            bouts = emptyList()
         )
 
         assertEquals(3, matrix.size)
@@ -307,8 +306,7 @@ class PoolEngineTest {
     fun `buildMatrix pending bouts have PENDING status`() {
         val matrix = engine.buildMatrix(
             fencerCount = 3,
-            bouts = emptyList(),
-            excludedSeeds = emptySet()
+            bouts = emptyList()
         )
 
         for (row in 0 until 3) {
@@ -334,7 +332,7 @@ class PoolEngineTest {
         val bouts = listOf(
             BoutResultData(leftSeed = 1, rightSeed = 2, leftScore = 5, rightScore = 3, status = BoutStatus.COMPLETED)
         )
-        val matrix = engine.buildMatrix(fencerCount = 3, bouts = bouts, excludedSeeds = emptySet())
+        val matrix = engine.buildMatrix(fencerCount = 3, bouts = bouts)
 
         // Строка seed1 (row=0), столбец seed2 (col=1): победа seed1
         val cell1vs2 = matrix[0][1]!!
@@ -353,8 +351,7 @@ class PoolEngineTest {
     fun `buildMatrix size is fencerCount x fencerCount`() {
         val matrix = engine.buildMatrix(
             fencerCount = 5,
-            bouts = emptyList(),
-            excludedSeeds = emptySet()
+            bouts = emptyList()
         )
 
         assertEquals(5, matrix.size)

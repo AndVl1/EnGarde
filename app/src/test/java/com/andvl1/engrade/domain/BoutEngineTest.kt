@@ -597,6 +597,96 @@ class BoutEngineTest {
         assertEquals(SkipResult.CannotSkipPriority, result)
     }
 
+    // === F1: guard — score-запись недопустима после завершения боя ===
+
+    @Test
+    fun `addScoreLeft is no-op when bout is over`() {
+        val engine = BoutEngine(config5())
+        repeat(5) { engine.addScoreLeft() } // left=5 → GameOver
+        assertTrue(engine.isOver)
+        assertEquals(5, engine.leftFencer.score)
+
+        // Попытка добавить ещё одно очко должна быть проигнорирована
+        val result = engine.addScoreLeft()
+        assertEquals(ScoreResult.Scored, result) // no-op возвращает Scored
+        assertEquals(5, engine.leftFencer.score) // счёт не изменился
+        assertTrue(engine.isOver)
+    }
+
+    @Test
+    fun `addScoreRight is no-op when bout is over`() {
+        val engine = BoutEngine(config5())
+        repeat(5) { engine.addScoreRight() } // right=5 → GameOver
+        assertTrue(engine.isOver)
+        assertEquals(5, engine.rightFencer.score)
+
+        val result = engine.addScoreRight()
+        assertEquals(ScoreResult.Scored, result)
+        assertEquals(5, engine.rightFencer.score)
+        assertTrue(engine.isOver)
+    }
+
+    @Test
+    fun `addDoubleTouch is no-op when bout is over`() {
+        val engine = BoutEngine(config5())
+        repeat(5) { engine.addScoreLeft() } // GameOver
+        assertTrue(engine.isOver)
+
+        val result = engine.addDoubleTouch()
+        assertEquals(ScoreResult.Scored, result) // no-op
+        assertEquals(5, engine.leftFencer.score) // не изменился
+        assertTrue(engine.isOver)
+    }
+
+    // === F2: double touch в PRIORITY аннулируется (FIE) ===
+
+    @Test
+    fun `addDoubleTouch in PRIORITY section is annulled scores unchanged bout not over`() {
+        val engine = BoutEngine(config5())
+        // 4:4, mode=5 → endSection() в финальном периоде → переход в PRIORITY
+        repeat(4) { engine.addScoreLeft() }
+        repeat(4) { engine.addScoreRight() }
+        engine.endSection()
+        engine.proceedToNextSection()
+        assertEquals(SectionType.PRIORITY, engine.currentSection)
+        assertEquals(4, engine.leftFencer.score)
+        assertEquals(4, engine.rightFencer.score)
+        assertFalse(engine.isOver)
+
+        // FIE: в минуту приоритета одновременное действие аннулируется
+        val result = engine.addDoubleTouch()
+        assertEquals(
+            "Double touch в PRIORITY должен быть аннулирован (no-op = Scored)",
+            ScoreResult.Scored, result
+        )
+        assertEquals("Счёт левого не должен изменяться", 4, engine.leftFencer.score)
+        assertEquals("Счёт правого не должен изменяться", 4, engine.rightFencer.score)
+        assertFalse("Бой не должен завершаться", engine.isOver)
+        assertEquals("Секция остаётся PRIORITY", SectionType.PRIORITY, engine.currentSection)
+    }
+
+    // === F5: giveRedCard учитывает правило сабли перерыв-на-8 ===
+
+    @Test
+    fun `giveRedCard triggers sabre break when opponent reaches 8`() {
+        val engine = BoutEngine(config15Sabre())
+        // Правый на 7 (одно очко до срабатывания правила перерыва)
+        repeat(7) { engine.addScoreRight() }
+        assertEquals(7, engine.rightFencer.score)
+        assertEquals(SectionType.PERIOD, engine.currentSection)
+
+        // Красная карточка левому → правый получает штрафное очко (7→8) → должен сработать перерыв
+        val result = engine.giveRedCard(FencerSide.LEFT)
+
+        assertEquals(8, engine.rightFencer.score)
+        assertEquals(
+            "Красная карточка, приводящая правого к 8, должна вызывать перерыв в сабле",
+            SectionType.BREAK, engine.currentSection
+        )
+        assertFalse("Бой не должен завершаться при 8 из 15", engine.isOver)
+        assertEquals(CardResult.CardGiven, result)
+    }
+
     // === Score не уходит ниже нуля при undo ===
 
     @Test

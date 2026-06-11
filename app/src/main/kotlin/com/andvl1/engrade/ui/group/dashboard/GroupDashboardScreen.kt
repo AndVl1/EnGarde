@@ -46,6 +46,18 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
         }
     }
 
+    // F3: Show edit-score draw validation error as Snackbar
+    val editScoreError = state.editScoreError
+    LaunchedEffect(editScoreError) {
+        if (editScoreError != null) {
+            snackbarHostState.showSnackbar(
+                message = editScoreError,
+                duration = SnackbarDuration.Short
+            )
+            component.onEvent(GroupDashboardEvent.DismissEditScoreError)
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {

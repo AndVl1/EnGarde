@@ -146,11 +146,15 @@ class PoolEngine {
      * Build N×N matrix of bout results.
      * Returns list of rows, each row is list of cells.
      * Diagonal cells are null (fencer doesn't bout themselves).
+     *
+     * Note: excludedSeeds parameter was removed (F4) — MatrixCell has no field for an
+     * excluded flag, and wiring it would require invasive model + UI changes.
+     * The caller already filters excluded bouts before passing them to this method,
+     * so excluded cells naturally appear as PENDING.
      */
     fun buildMatrix(
         fencerCount: Int,
-        bouts: List<BoutResultData>,
-        excludedSeeds: Set<Int>
+        bouts: List<BoutResultData>
     ): List<List<MatrixCell?>> {
         val matrix = mutableListOf<List<MatrixCell?>>()
 

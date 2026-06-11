@@ -7,7 +7,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -23,8 +25,22 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 @Composable
 fun BoutsListScreen(component: BoutsListComponent) {
     val state by component.state.subscribeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // F3: показываем ошибку ничьей как Snackbar (аналогично exportError в GroupDashboard)
+    val error = state.error
+    LaunchedEffect(error) {
+        if (error != null) {
+            snackbarHostState.showSnackbar(
+                message = error,
+                duration = SnackbarDuration.Short
+            )
+            component.onEvent(BoutsListEvent.DismissError)
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.all_bouts)) },
