@@ -41,7 +41,7 @@ fun DeTableauScreen(component: DeTableauComponent) {
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.action_settings)
+                            contentDescription = stringResource(R.string.action_back)
                         )
                     }
                 }
@@ -59,14 +59,30 @@ fun DeTableauScreen(component: DeTableauComponent) {
                     CircularProgressIndicator(modifier = Modifier.testTag("de_loading"))
                 }
             }
-            state.bracket == null -> {
+            // Error state: bracket could not be loaded (null after loading completed, or error set).
+            state.bracket == null || state.error != null -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.testTag("de_loading_bracket"))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.de_load_error),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.testTag("de_text_loadError")
+                        )
+                        Button(
+                            onClick = { component.onEvent(DeTableauEvent.Retry) },
+                            modifier = Modifier.testTag("de_button_retry")
+                        ) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    }
                 }
             }
             else -> {
@@ -257,10 +273,11 @@ private fun roundLabel(round: Int, totalRounds: Int): String = when (totalRounds
     else -> stringResource(R.string.de_round_n, round)
 }
 
+@Composable
 private fun slotDisplayText(slot: DeSlot): String = when (slot) {
     is DeSlot.Fencer -> "${slot.name} (${slot.seed})"
-    DeSlot.Bye -> "BYE"
-    DeSlot.Tbd -> "TBD"
+    DeSlot.Bye -> stringResource(R.string.de_slot_bye)
+    DeSlot.Tbd -> stringResource(R.string.de_slot_tbd)
 }
 
 /** A match is "ready" when both slots are real fencers and the match has not been played yet. */

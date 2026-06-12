@@ -29,6 +29,8 @@ data class DeTableauState(
 sealed class DeTableauEvent {
     data class PlayMatch(val matchId: Int) : DeTableauEvent()
     data object NavigateBack : DeTableauEvent()
+    /** Retry loading the bracket after an error (re-subscribes to the repository flow). */
+    data object Retry : DeTableauEvent()
 }
 
 /**
@@ -107,6 +109,11 @@ class DefaultDeTableauComponent(
                 )
             }
             DeTableauEvent.NavigateBack -> onBack()
+            DeTableauEvent.Retry -> {
+                // Reset to loading and re-subscribe to the repository flow.
+                _state.value = _state.value.copy(isLoading = true, error = null, bracket = null)
+                observeData()
+            }
         }
     }
 }
