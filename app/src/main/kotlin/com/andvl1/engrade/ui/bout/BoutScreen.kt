@@ -27,6 +27,8 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 @Composable
 fun BoutScreen(component: BoutComponent) {
     val state = component.state.subscribeAsState()
+    val leftDisplayName = state.value.leftFencerName.ifBlank { stringResource(R.string.fencer_left_default) }
+    val rightDisplayName = state.value.rightFencerName.ifBlank { stringResource(R.string.fencer_right_default) }
 
     Scaffold(
         topBar = {
@@ -127,7 +129,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Left fencer
                     FencerScoreCard(
                         fencer = state.value.leftFencer,
-                        fencerName = state.value.leftFencerName,
+                        fencerName = leftDisplayName,
                         side = FencerSide.LEFT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.LeftScored) },
@@ -139,7 +141,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Right fencer
                     FencerScoreCard(
                         fencer = state.value.rightFencer,
-                        fencerName = state.value.rightFencerName,
+                        fencerName = rightDisplayName,
                         side = FencerSide.RIGHT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.RightScored) },

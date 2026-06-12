@@ -8,6 +8,7 @@ import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutConfig
 import com.andvl1.engrade.domain.model.FencerSide
 import com.andvl1.engrade.domain.model.Weapon
+import com.andvl1.engrade.platform.CsvExporter
 import com.andvl1.engrade.platform.NotificationHelper
 import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.SoundManager
@@ -128,6 +129,7 @@ class DefaultRootComponent(
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
     private val pdfExporter: PdfExporter,
+    private val csvExporter: CsvExporter,
     private val soundManager: SoundManager,
     private val notificationHelper: NotificationHelper,
     private val notificationPendingIntent: PendingIntent,
@@ -196,6 +198,7 @@ class DefaultRootComponent(
                 poolRepository = poolRepository,
                 poolEngine = poolEngine,
                 pdfExporter = pdfExporter,
+                csvExporter = csvExporter,
                 deRepository = deRepository,
                 onNavigateToBoutConfirm = { poolId, boutId ->
                     navigation.push(RootComponent.Config.BoutConfirm(poolId, boutId))

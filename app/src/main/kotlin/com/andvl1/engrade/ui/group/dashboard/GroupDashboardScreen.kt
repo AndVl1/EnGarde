@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,6 +82,12 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                         Icon(Icons.Default.PictureAsPdf, stringResource(R.string.export_pdf))
                     }
                     IconButton(
+                        onClick = { component.onEvent(GroupDashboardEvent.ExportCsv) },
+                        modifier = Modifier.testTag("groupDashboard_button_exportCsv")
+                    ) {
+                        Icon(Icons.Default.TableChart, stringResource(R.string.export_csv))
+                    }
+                    IconButton(
                         onClick = { component.onEvent(GroupDashboardEvent.NavigateToBoutsList) },
                         modifier = Modifier.testTag("dashboard_button_boutsList")
                     ) {
@@ -118,19 +125,25 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.testTag("dashboard_text_progress")
                         )
-                        state.currentBoutInfo?.let {
+                        state.currentBout?.let { bout ->
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(it, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = stringResource(R.string.bout_display, bout.boutOrder, bout.leftName, bout.rightName),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                        state.nextBoutInfo?.let {
+                        state.nextBout?.let { bout ->
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(it, style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                text = stringResource(R.string.next_bout_display, bout.leftName, bout.rightName),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
 
                 // Action buttons
-                if (state.currentBoutInfo != null) {
+                if (state.currentBout != null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)

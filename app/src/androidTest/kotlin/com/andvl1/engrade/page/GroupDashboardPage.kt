@@ -7,6 +7,7 @@ import com.atiurin.ultron.page.Page
 object GroupDashboardPage : Page<GroupDashboardPage>() {
     val backButton = hasTestTag("dashboard_button_back")
     val exportPdfButton = hasTestTag("dashboard_button_exportPdf")
+    val exportCsvButton = hasTestTag("groupDashboard_button_exportCsv")
     val boutsListButton = hasTestTag("dashboard_button_boutsList")
     val progressText = hasTestTag("dashboard_text_progress")
     val startBoutButton = hasTestTag("dashboard_button_startBout")

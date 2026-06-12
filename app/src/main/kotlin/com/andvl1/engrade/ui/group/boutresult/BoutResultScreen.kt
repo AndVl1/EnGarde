@@ -62,7 +62,11 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (state.winner == "LEFT") "V${state.leftScore}" else "D${state.leftScore}",
+                        text = if (state.winner == "LEFT") {
+                            stringResource(R.string.victory_short, state.leftScore)
+                        } else {
+                            stringResource(R.string.defeat_short, state.leftScore)
+                        },
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (state.winner == "LEFT") {
@@ -101,7 +105,11 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (state.winner == "RIGHT") "V${state.rightScore}" else "D${state.rightScore}",
+                        text = if (state.winner == "RIGHT") {
+                            stringResource(R.string.victory_short, state.rightScore)
+                        } else {
+                            stringResource(R.string.defeat_short, state.rightScore)
+                        },
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (state.winner == "RIGHT") {

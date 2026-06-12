@@ -190,8 +190,8 @@ class DefaultBoutComponent(
     }
 
     private fun updateState() {
-        val displayLeftName = leftFencerName.ifBlank { "Left" }
-        val displayRightName = rightFencerName.ifBlank { "Right" }
+        val displayLeftName = leftFencerName
+        val displayRightName = rightFencerName
 
         _state.value = _state.value.copy(
             leftFencer = engine.leftFencer,

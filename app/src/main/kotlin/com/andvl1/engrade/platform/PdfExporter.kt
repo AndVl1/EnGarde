@@ -49,7 +49,7 @@ class PdfExporter(private val context: Context) {
         val page1Info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, 1).create()
         val page1 = pdfDocument.startPage(page1Info)
 
-        var yPosition = drawPage1(
+        drawPage1(
             canvas = page1.canvas,
             pool = pool,
             fencers = fencers,
@@ -59,14 +59,9 @@ class PdfExporter(private val context: Context) {
 
         pdfDocument.finishPage(page1)
 
-        // Page 2: Full bout list (if needed)
+        // Pages 2+: Full bout list with automatic page breaks for large pools (e.g. 8 fencers = 28 bouts)
         if (bouts.isNotEmpty()) {
-            val page2Info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, 2).create()
-            val page2 = pdfDocument.startPage(page2Info)
-
-            drawBoutsList(page2.canvas, bouts)
-
-            pdfDocument.finishPage(page2)
+            drawBoutsList(pdfDocument, bouts, startPageNumber = 2)
         }
 
         // Save to cache directory
@@ -115,7 +110,7 @@ class PdfExporter(private val context: Context) {
         fencers: List<PoolFencerWithName>,
         matrix: List<List<MatrixCell?>>,
         rankings: List<FencerRanking>
-    ): Float {
+    ) {
         var y = MARGIN
 
         val titlePaint = Paint().apply {
@@ -163,9 +158,7 @@ class PdfExporter(private val context: Context) {
         canvas.drawText("Итоговое ранжирование / Final Rankings", MARGIN, y, subtitlePaint)
         y += 25f
 
-        y = drawRankings(canvas, rankings, y)
-
-        return y
+        drawRankings(canvas, rankings, y)
     }
 
     private fun drawMatrix(
@@ -319,12 +312,16 @@ class PdfExporter(private val context: Context) {
         return y
     }
 
+    /**
+     * Draws the full bouts list starting at [startPageNumber], creating additional pages
+     * automatically when content reaches the bottom margin. Each continuation page gets
+     * a repeated header line so the reader knows the list continues.
+     */
     private fun drawBoutsList(
-        canvas: Canvas,
-        bouts: List<PoolBoutWithNames>
+        pdfDocument: PdfDocument,
+        bouts: List<PoolBoutWithNames>,
+        startPageNumber: Int
     ) {
-        var y = MARGIN
-
         val titlePaint = Paint().apply {
             textSize = SUBTITLE_SIZE
             isFakeBoldText = true
@@ -335,6 +332,13 @@ class PdfExporter(private val context: Context) {
             textSize = BODY_SIZE
             isAntiAlias = true
         }
+
+        var pageNumber = startPageNumber
+        var page = pdfDocument.startPage(
+            PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create()
+        )
+        var canvas = page.canvas
+        var y = MARGIN
 
         canvas.drawText("Список всех боёв / Full Bout List", MARGIN, y, titlePaint)
         y += 30f
@@ -350,12 +354,26 @@ class PdfExporter(private val context: Context) {
                 " — Pending"
             }
 
+            // Start a new page when there is no room for the next line
+            if (y + 18f > PAGE_HEIGHT - MARGIN) {
+                pdfDocument.finishPage(page)
+                pageNumber++
+                page = pdfDocument.startPage(
+                    PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create()
+                )
+                canvas = page.canvas
+                y = MARGIN
+                canvas.drawText(
+                    "Список всех боёв (продолжение) / Full Bout List (continued)",
+                    MARGIN, y, titlePaint
+                )
+                y += 30f
+            }
+
             canvas.drawText(boutInfo + result, MARGIN, y, bodyPaint)
             y += 18f
-
-            if (y > PAGE_HEIGHT - MARGIN) {
-                break // Prevent overflow
-            }
         }
+
+        pdfDocument.finishPage(page)
     }
 }

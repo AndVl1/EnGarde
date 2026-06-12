@@ -48,3 +48,10 @@ Quick pool score-entry: tap PENDING matrix cell → score dialog → recordBoutR
 
 ### Wave 4 — DE tableau (in progress)
 4a domain (seeding/byes/progression/classification) → 4b persistence (additive migration v1→v2 + migration test) → 4c UI+nav+instrumented.
+
+### Wave 4 ✓ DE tableau (commits 99f2c26, 83a770e, 83fe8e3)
+Full Direct Elimination after pools, end-to-end:
+- 4a domain: seeding (canonical outer-bracket), byes on top seeds, immutable progression, FIE final classification (joint-3rd). +38 unit tests (136 total).
+- 4b persistence: de_tableau/de_match entities, DeRepository, ADDITIVE migration v1→v2 (no destructive fallback — user pools survive), schema 2.json, MigrationTest (room-testing).
+- 4c UI/nav: ui/de/ bracket screen + classification, GroupDashboard "Proceed to DE" (gated on pool complete), Config.DeTableau/DeBout, DE bouts reuse BoutComponent at mode=15 → recordMatchResult advances winner. +instrumented test.
+All builds green (unit/assembleDebug/androidTest/lint), independently re-verified.

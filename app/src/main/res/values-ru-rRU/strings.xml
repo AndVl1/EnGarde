@@ -88,6 +88,9 @@
     <!-- GroupDashboard -->
     <string name="pool_title">Группа</string>
     <string name="bout_number">Бой #%d</string>
+    <string name="bout_display">Бой #%1$d: %2$s — %3$s</string>
+    <string name="next_bout_display">Готовится: %1$s — %2$s</string>
+    <string name="export_csv">Экспорт CSV</string>
     <string name="vs">vs</string>
     <string name="start_next_bout">Начать следующий бой</string>
     <string name="bouts_progress">Проведено %1$d из %2$d</string>
@@ -119,6 +122,10 @@
     <string name="continue_text">Далее</string>
     <string name="victory_short">V%d</string>
     <string name="defeat_short">D%d</string>
+
+    <!-- Bout screen fencer default names (shown when no name is provided) -->
+    <string name="fencer_left_default">Левый</string>
+    <string name="fencer_right_default">Правый</string>
 
     <!-- BoutsList -->
     <string name="all_bouts">Все бои</string>

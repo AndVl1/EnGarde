@@ -7,6 +7,7 @@ import com.andvl1.engrade.domain.model.BoutResultData
 import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.FencerRanking
 import com.andvl1.engrade.domain.model.MatrixCell
+import com.andvl1.engrade.platform.CsvExporter
 import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
@@ -24,6 +25,16 @@ interface GroupDashboardComponent {
     fun onEvent(event: GroupDashboardEvent)
 }
 
+/**
+ * Structured bout info passed to the Composable layer for localized formatting.
+ * Avoids hardcoded English format strings inside the component.
+ */
+data class BoutDisplayInfo(
+    val boutOrder: Int,
+    val leftName: String,
+    val rightName: String
+)
+
 data class GroupDashboardState(
     val poolId: Long = 0,
     val fencerCount: Int = 0,
@@ -35,8 +46,8 @@ data class GroupDashboardState(
     val excludedSeeds: Set<Int> = emptySet(),
     val completedBoutsCount: Int = 0,
     val totalBoutsCount: Int = 0,
-    val currentBoutInfo: String? = null,
-    val nextBoutInfo: String? = null,
+    val currentBout: BoutDisplayInfo? = null,
+    val nextBout: BoutDisplayInfo? = null,
     val showEditScoreDialog: EditScoreDialogState? = null,
     val showForfeitDialog: ForfeitDialogState? = null,
     val showQuickEntryDialog: QuickEntryDialogState? = null,
@@ -75,6 +86,7 @@ sealed class GroupDashboardEvent {
     /** Navigate to the Direct Elimination bracket; creates the tableau if not yet present. */
     data object ProceedToDE : GroupDashboardEvent()
     data object ExportPdf : GroupDashboardEvent()
+    data object ExportCsv : GroupDashboardEvent()
     data object DismissExportError : GroupDashboardEvent()
     data object DismissEditScoreError : GroupDashboardEvent()
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
@@ -95,6 +107,7 @@ class DefaultGroupDashboardComponent(
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
     private val pdfExporter: PdfExporter,
+    private val csvExporter: CsvExporter,
     private val deRepository: DeRepository,
     private val onNavigateToBoutConfirm: (Long, Long) -> Unit,
     private val onNavigateToBoutsList: (Long) -> Unit,
@@ -149,13 +162,13 @@ class DefaultGroupDashboardComponent(
                 val total = bouts.size
 
                 val pendingBouts = bouts.filter { it.bout.status == BoutStatus.PENDING }
-                val currentBout = pendingBouts.firstOrNull()
-                val currentInfo = currentBout?.let {
-                    "Bout #${it.bout.boutOrder}: ${it.leftFencerName} vs ${it.rightFencerName}"
+                val currentPendingEntry = pendingBouts.firstOrNull()
+                val currentBoutDisplayInfo = currentPendingEntry?.let {
+                    BoutDisplayInfo(it.bout.boutOrder, it.leftFencerName, it.rightFencerName)
                 }
-                val nextBout = pendingBouts.drop(1).firstOrNull()
-                val nextInfo = nextBout?.let {
-                    "Next: ${it.leftFencerName} vs ${it.rightFencerName}"
+                val nextPendingEntry = pendingBouts.drop(1).firstOrNull()
+                val nextBoutDisplayInfo = nextPendingEntry?.let {
+                    BoutDisplayInfo(it.bout.boutOrder, it.leftFencerName, it.rightFencerName)
                 }
 
                 // Compute standings in-memory from the same snapshot — no extra DB reads
@@ -196,8 +209,8 @@ class DefaultGroupDashboardComponent(
                     excludedSeeds = excludedSeeds,
                     completedBoutsCount = completed,
                     totalBoutsCount = total,
-                    currentBoutInfo = currentInfo,
-                    nextBoutInfo = nextInfo,
+                    currentBout = currentBoutDisplayInfo,
+                    nextBout = nextBoutDisplayInfo,
                     rankings = rankings,
                     matrix = matrix,
                     isLoading = false
@@ -261,6 +274,26 @@ class DefaultGroupDashboardComponent(
                             withContext(Dispatchers.Main) {
                                 _state.value = _state.value.copy(
                                     exportError = e.message ?: "PDF export failed"
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            GroupDashboardEvent.ExportCsv -> {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val currentState = _state.value
+                            val csvFile = csvExporter.exportRankingsCsv(currentState.rankings)
+                            withContext(Dispatchers.Main) {
+                                csvExporter.shareCsv(csvFile)
+                            }
+                        } catch (e: Exception) {
+                            FirebaseCrashlytics.getInstance().recordException(e)
+                            withContext(Dispatchers.Main) {
+                                _state.value = _state.value.copy(
+                                    exportError = e.message ?: "CSV export failed"
                                 )
                             }
                         }
