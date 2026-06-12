@@ -257,12 +257,15 @@ class BoutEngineTest {
     }
 
     @Test
-    fun `giving yellow card when already has card returns AlreadyHasCard`() {
+    fun `giving yellow card when already has yellow escalates to red (FIE t114)`() {
+        // Wave 2: second group-1 offence auto-escalates; AlreadyHasCard is no longer returned.
         val engine = BoutEngine(config5())
         engine.giveYellowCard(FencerSide.LEFT)
 
         val result = engine.giveYellowCard(FencerSide.LEFT)
-        assertEquals(CardResult.AlreadyHasCard, result)
+        assertEquals(CardResult.CardGiven, result)
+        assertTrue(engine.leftFencer.hasRedCard)
+        assertEquals(1, engine.rightFencer.score)
     }
 
     // === Red card ===
@@ -704,5 +707,190 @@ class BoutEngineTest {
         // Повторный undo не должен падать (стек пуст)
         val result = engine.undo()
         assertEquals(UndoResult.NothingToUndo, result)
+    }
+
+    // === Wave 2: FIE t.114 yellow→red→black escalation ===
+
+    // (a) yellow then yellow on same fencer → opponent +1, fencer has red, bout state consistent
+
+    @Test
+    fun `second yellow card escalates to red and awards opponent one point`() {
+        val engine = BoutEngine(config5())
+        engine.giveYellowCard(FencerSide.LEFT)
+
+        assertTrue(engine.leftFencer.hasYellowCard)
+        assertFalse(engine.leftFencer.hasRedCard)
+        assertEquals(0, engine.rightFencer.score)
+
+        val result = engine.giveYellowCard(FencerSide.LEFT)
+
+        assertEquals(CardResult.CardGiven, result)
+        assertTrue("Left должен иметь красную карточку после эскалации", engine.leftFencer.hasRedCard)
+        assertEquals("Right должен получить 1 очко как штраф", 1, engine.rightFencer.score)
+        assertFalse("Бой не должен завершаться при 1 из 5", engine.isOver)
+    }
+
+    @Test
+    fun `second yellow card to right fencer escalates to red and awards left one point`() {
+        val engine = BoutEngine(config5())
+        engine.giveYellowCard(FencerSide.RIGHT)
+        val result = engine.giveYellowCard(FencerSide.RIGHT)
+
+        assertEquals(CardResult.CardGiven, result)
+        assertTrue(engine.rightFencer.hasRedCard)
+        assertEquals(1, engine.leftFencer.score)
+        assertFalse(engine.isOver)
+    }
+
+    // (b) undo of escalated red restores yellow card and removes the opponent point
+
+    @Test
+    fun `undo yellow-to-red escalation restores yellow card and removes opponent point`() {
+        val engine = BoutEngine(config5())
+        engine.giveYellowCard(FencerSide.LEFT)
+        engine.giveYellowCard(FencerSide.LEFT) // эскалация до красной
+
+        assertEquals(1, engine.rightFencer.score)
+        assertTrue(engine.leftFencer.hasRedCard)
+
+        engine.undo()
+
+        assertFalse("После undo красной эскалации не должно быть", engine.leftFencer.hasRedCard)
+        assertTrue("Жёлтая карточка должна сохраняться после undo эскалации", engine.leftFencer.hasYellowCard)
+        assertEquals("Очко правого должно быть возвращено", 0, engine.rightFencer.score)
+        assertFalse(engine.isOver)
+    }
+
+    @Test
+    fun `undo yellow-to-red escalation that triggered GameOver restores bout`() {
+        val engine = BoutEngine(config5())
+        // Правый на 4 (mode-1): следующее штрафное очко завершит бой
+        repeat(4) { engine.addScoreRight() }
+        engine.giveYellowCard(FencerSide.LEFT) // жёлтая
+
+        val result = engine.giveYellowCard(FencerSide.LEFT) // эскалация → right достигает 5 → GameOver
+
+        assertTrue(result is CardResult.GameOver)
+        assertEquals(FencerSide.RIGHT, (result as CardResult.GameOver).winner)
+        assertTrue(engine.isOver)
+
+        engine.undo()
+
+        assertFalse("После undo бой не должен быть завершён", engine.isOver)
+        assertFalse(engine.leftFencer.hasRedCard)
+        assertTrue(engine.leftFencer.hasYellowCard)
+        assertEquals(4, engine.rightFencer.score)
+        assertFalse(engine.rightFencer.isWinner)
+    }
+
+    // (c) red then group-1 → black/exclusion path + undo restores
+
+    @Test
+    fun `third yellow (on red fencer) escalates to black card ending bout with opponent winner`() {
+        val engine = BoutEngine(config5())
+        engine.giveYellowCard(FencerSide.LEFT)   // 1-й штраф: жёлтая
+        engine.giveYellowCard(FencerSide.LEFT)   // 2-й штраф: эскалация до красной
+        val result = engine.giveYellowCard(FencerSide.LEFT) // 3-й штраф: эскалация до чёрной
+
+        assertTrue(result is CardResult.GameOver)
+        assertEquals(FencerSide.RIGHT, (result as CardResult.GameOver).winner)
+        assertTrue(engine.isOver)
+        assertTrue("Left должен иметь чёрную карточку", engine.leftFencer.hasBlackCard)
+        assertTrue("Right должен быть победителем", engine.rightFencer.isWinner)
+    }
+
+    @Test
+    fun `undo black card from escalation restores bout to pre-exclusion state`() {
+        val engine = BoutEngine(config5())
+        engine.giveYellowCard(FencerSide.LEFT)
+        engine.giveYellowCard(FencerSide.LEFT) // → red
+        engine.giveYellowCard(FencerSide.LEFT) // → black
+        assertTrue(engine.isOver)
+
+        engine.undo()
+
+        assertFalse("После undo бой не должен быть завершён", engine.isOver)
+        assertFalse("Чёрная карточка должна быть снята", engine.leftFencer.hasBlackCard)
+        assertTrue("Красная карточка должна оставаться", engine.leftFencer.hasRedCard)
+        assertFalse("Right не должен быть победителем", engine.rightFencer.isWinner)
+    }
+
+    @Test
+    fun `giveBlackCard directly ends bout with opponent as winner`() {
+        val engine = BoutEngine(config5())
+        val result = engine.giveBlackCard(FencerSide.RIGHT)
+
+        assertTrue(result is CardResult.GameOver)
+        assertEquals(FencerSide.LEFT, (result as CardResult.GameOver).winner)
+        assertTrue(engine.isOver)
+        assertTrue(engine.rightFencer.hasBlackCard)
+        assertTrue(engine.leftFencer.isWinner)
+        assertEquals("Чёрная карточка не добавляет очков", 0, engine.leftFencer.score)
+    }
+
+    @Test
+    fun `undo direct black card restores bout to active state`() {
+        val engine = BoutEngine(config5())
+        engine.giveBlackCard(FencerSide.LEFT)
+        assertTrue(engine.isOver)
+
+        engine.undo()
+
+        assertFalse(engine.isOver)
+        assertFalse(engine.leftFencer.hasBlackCard)
+        assertFalse(engine.rightFencer.isWinner)
+        assertEquals(0, engine.rightFencer.score) // очко не давалось — нечего возвращать
+    }
+
+    @Test
+    fun `giving yellow card to excluded fencer returns AlreadyHasCard`() {
+        // Единственный оставшийся случай AlreadyHasCard: фехтовальщик уже дисквалифицирован
+        val engine = BoutEngine(config5())
+        engine.giveBlackCard(FencerSide.LEFT)
+        // Undo чтобы бой снова был активным, но black card уже снята — проверяем другой путь:
+        // Дадим напрямую black через escalation и попробуем ещё одну yellow
+        engine.undo()
+        // После undo чёрная карточка снята — проверяем реальный AlreadyHasCard:
+        // дадим прямую чёрную ещё раз и убедимся что AlreadyHasCard возвращается
+        engine.giveBlackCard(FencerSide.LEFT)
+        val result = engine.giveYellowCard(FencerSide.LEFT)
+        // Бой уже завершён (giveBlackCard returns early if _isOver).
+        // Проверим через `giveYellowCard` — при hasBlackCard возвращает AlreadyHasCard
+        // но при _isOver = true giveBlackCard делает no-op.
+        // Для корректного теста: сбросим isOver вручную через undo ещё раз:
+        engine.undo() // undo second black card
+        // Теперь isOver = false, left не имеет black card.
+        // Вручную эмулируем fencer с black: yellow → yellow → yellow chain
+        engine.giveYellowCard(FencerSide.LEFT)   // yellow
+        engine.giveYellowCard(FencerSide.LEFT)   // → red
+        engine.giveYellowCard(FencerSide.LEFT)   // → black, isOver = true
+        // Теперь бой завершён и left имеет black card. Следующий вызов:
+        val finalResult = engine.giveYellowCard(FencerSide.LEFT)
+        // giveYellowCard guard: hasBlackCard → AlreadyHasCard
+        assertEquals(CardResult.AlreadyHasCard, finalResult)
+    }
+
+    // (d) escalation respects sabre break-at-8
+
+    @Test
+    fun `yellow-to-red escalation triggers sabre break-at-8 when opponent reaches 8`() {
+        val engine = BoutEngine(config15Sabre())
+        // Правый на 7 (одно очко до срабатывания перерыва в сабле)
+        repeat(7) { engine.addScoreRight() }
+        // Левому даём жёлтую
+        engine.giveYellowCard(FencerSide.LEFT)
+        assertEquals(SectionType.PERIOD, engine.currentSection)
+
+        // Второй штраф левому: эскалация до красной → right получает штрафное очко (7→8) → break
+        val result = engine.giveYellowCard(FencerSide.LEFT)
+
+        assertEquals(CardResult.CardGiven, result)
+        assertEquals(8, engine.rightFencer.score)
+        assertEquals(
+            "Эскалация до красной, приводящая правого к 8, должна вызывать саблевой перерыв",
+            SectionType.BREAK, engine.currentSection
+        )
+        assertFalse("Бой не должен завершаться при 8 из 15", engine.isOver)
+        assertTrue(engine.leftFencer.hasRedCard)
     }
 }

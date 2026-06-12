@@ -22,6 +22,7 @@
     <string name="priority_right">Приоритет справа</string>
     <string name="red_card">Красная карточка</string>
     <string name="red_card_dialog">Дать красную карточку …</string>
+    <string name="black_card">Чёрная карточка</string>
     <string name="rest">Перерыв</string>
     <string name="toast_card">карточка</string>
     <string name="toast_double">двойной</string>

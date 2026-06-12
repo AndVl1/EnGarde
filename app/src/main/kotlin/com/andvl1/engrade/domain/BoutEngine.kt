@@ -184,29 +184,119 @@ class BoutEngine(
 
     /**
      * Give yellow card to a fencer.
-     * Only recorded if they don't already have a card.
+     *
+     * FIE t.114 group-1 penalty escalation chain:
+     *  • No prior card  → yellow card (warning, no touch)
+     *  • Has yellow     → auto-escalate to red: opponent +1 touch (sabre break-at-8 applies)
+     *  • Has red        → auto-escalate to black: immediate exclusion, opponent wins
+     *  • Has black      → no-op (already excluded)
      */
     fun giveYellowCard(side: FencerSide): CardResult {
         when (side) {
             FencerSide.LEFT -> {
-                val alreadyHasCard = _leftFencer.hasYellowCard || _leftFencer.hasRedCard
-                _leftFencer = _leftFencer.withYellowCard()
-                if (!alreadyHasCard) {
-                    _undoStack.addLast(UndoAction.LeftYellowCard)
-                    return CardResult.CardGiven
+                return when {
+                    _leftFencer.hasBlackCard -> CardResult.AlreadyHasCard
+                    _leftFencer.hasRedCard -> escalateToBlack(FencerSide.LEFT)
+                    _leftFencer.hasYellowCard -> escalateYellowToRed(FencerSide.LEFT)
+                    else -> {
+                        _leftFencer = _leftFencer.withYellowCard()
+                        _undoStack.addLast(UndoAction.LeftYellowCard)
+                        CardResult.CardGiven
+                    }
                 }
-                return CardResult.AlreadyHasCard
             }
             FencerSide.RIGHT -> {
-                val alreadyHasCard = _rightFencer.hasYellowCard || _rightFencer.hasRedCard
-                _rightFencer = _rightFencer.withYellowCard()
-                if (!alreadyHasCard) {
-                    _undoStack.addLast(UndoAction.RightYellowCard)
-                    return CardResult.CardGiven
+                return when {
+                    _rightFencer.hasBlackCard -> CardResult.AlreadyHasCard
+                    _rightFencer.hasRedCard -> escalateToBlack(FencerSide.RIGHT)
+                    _rightFencer.hasYellowCard -> escalateYellowToRed(FencerSide.RIGHT)
+                    else -> {
+                        _rightFencer = _rightFencer.withYellowCard()
+                        _undoStack.addLast(UndoAction.RightYellowCard)
+                        CardResult.CardGiven
+                    }
                 }
-                return CardResult.AlreadyHasCard
             }
         }
+    }
+
+    /**
+     * Yellow → Red escalation (FIE t.114, second group-1 offence).
+     * Awards one touch to the opponent; sabre break-at-8 helper is applied.
+     * Pushes a distinct undo action so the escalation reverses cleanly.
+     */
+    private fun escalateYellowToRed(side: FencerSide): CardResult {
+        when (side) {
+            FencerSide.LEFT -> {
+                _leftFencer = _leftFencer.withRedCard()
+                if (_rightFencer.score < config.mode) {
+                    _rightFencer = _rightFencer.incrementScore()
+                }
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.LeftYellowToRedEscalation)
+                if (_rightFencer.score >= config.mode) {
+                    _rightFencer = _rightFencer.withWinner()
+                    _leftFencer = _leftFencer.withoutWinner()
+                    _isOver = true
+                    return CardResult.GameOver(FencerSide.RIGHT)
+                }
+            }
+            FencerSide.RIGHT -> {
+                _rightFencer = _rightFencer.withRedCard()
+                if (_leftFencer.score < config.mode) {
+                    _leftFencer = _leftFencer.incrementScore()
+                }
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.RightYellowToRedEscalation)
+                if (_leftFencer.score >= config.mode) {
+                    _leftFencer = _leftFencer.withWinner()
+                    _rightFencer = _rightFencer.withoutWinner()
+                    _isOver = true
+                    return CardResult.GameOver(FencerSide.LEFT)
+                }
+            }
+        }
+        return CardResult.CardGiven
+    }
+
+    /**
+     * Red → Black escalation (FIE t.114, third group-1 offence, or direct group-3/4 offence).
+     * Ends the bout immediately; opponent is declared winner. No score change.
+     * Internal helper shared by giveYellowCard (escalation) and giveBlackCard (direct).
+     */
+    private fun escalateToBlack(side: FencerSide): CardResult {
+        when (side) {
+            FencerSide.LEFT -> {
+                _leftFencer = _leftFencer.withBlackCard()
+                _rightFencer = _rightFencer.withWinner()
+                _leftFencer = _leftFencer.withoutWinner()
+                _isOver = true
+                _undoStack.addLast(UndoAction.LeftBlackCard)
+                return CardResult.GameOver(FencerSide.RIGHT)
+            }
+            FencerSide.RIGHT -> {
+                _rightFencer = _rightFencer.withBlackCard()
+                _leftFencer = _leftFencer.withWinner()
+                _rightFencer = _rightFencer.withoutWinner()
+                _isOver = true
+                _undoStack.addLast(UndoAction.RightBlackCard)
+                return CardResult.GameOver(FencerSide.LEFT)
+            }
+        }
+    }
+
+    /**
+     * Give black card to a fencer (group 3/4 offence = exclusion, FIE t.86).
+     * Ends the bout immediately with the opponent as winner.
+     * No point is awarded — exclusion is the penalty.
+     * Undoable: undo restores the bout to its pre-exclusion state.
+     *
+     * Pool-level exclusion (PoolFencerEntity annulment) is handled separately.
+     * TODO(wave-follow-up): wire black card to pool exclusion
+     */
+    fun giveBlackCard(side: FencerSide): CardResult {
+        if (_isOver) return CardResult.CardGiven
+        return escalateToBlack(side)
     }
 
     /**
@@ -520,6 +610,34 @@ class BoutEngine(
                 _rightFencer = _rightFencer.withoutRedCard()
                 _leftFencer = _leftFencer.decrementScore()
                 recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.LeftYellowToRedEscalation -> {
+                // Reverse yellow→red escalation: restore to yellow state, remove opponent point.
+                // hasYellowCard remains true (was already set when escalation triggered).
+                _leftFencer = _leftFencer.withoutRedCard()
+                _rightFencer = _rightFencer.decrementScore()
+                recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.RightYellowToRedEscalation -> {
+                _rightFencer = _rightFencer.withoutRedCard()
+                _leftFencer = _leftFencer.decrementScore()
+                recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.LeftBlackCard -> {
+                // Reverse black card exclusion: restore bout to active state.
+                // No score change — black card does not award a point.
+                _leftFencer = _leftFencer.withoutBlackCard()
+                _rightFencer = _rightFencer.withoutWinner()
+                _isOver = false
+                UndoResult.Undone
+            }
+            is UndoAction.RightBlackCard -> {
+                _rightFencer = _rightFencer.withoutBlackCard()
+                _leftFencer = _leftFencer.withoutWinner()
+                _isOver = false
                 UndoResult.Undone
             }
             is UndoAction.SectionSkipped -> {

@@ -19,6 +19,7 @@
     <string name="penalty_card">Penalty card</string>
     <string name="yellow_card">Yellow card</string>
     <string name="red_card">Red card</string>
+    <string name="black_card">Black card</string>
 
     <string name="yellow_card_dialog">Give yellow card to &#8230;</string>
     <string name="red_card_dialog">Give red card to &#8230;</string>

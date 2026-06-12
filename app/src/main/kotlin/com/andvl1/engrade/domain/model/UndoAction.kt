@@ -47,4 +47,18 @@ sealed class UndoAction {
         val previousSection: SectionType,
         val previousPeriod: Int
     ) : UndoAction()  // 7
+
+    // FIE t.114 yellow→red escalation: restores yellow state and removes the opponent point
+    @Serializable
+    data object LeftYellowToRedEscalation : UndoAction()   // 8
+
+    @Serializable
+    data object RightYellowToRedEscalation : UndoAction()  // 9
+
+    // Black card (exclusion): restores bout to active state, no score change
+    @Serializable
+    data object LeftBlackCard : UndoAction()   // 10
+
+    @Serializable
+    data object RightBlackCard : UndoAction()  // 11
 }
