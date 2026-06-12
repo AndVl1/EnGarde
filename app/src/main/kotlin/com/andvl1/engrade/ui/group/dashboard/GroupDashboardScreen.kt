@@ -445,7 +445,12 @@ fun ExcludeFencerDialog(
         AlertDialog(
             onDismissRequest = { pendingSeed = null },
             title = { Text(stringResource(R.string.confirm_exclude)) },
-            text = { Text(stringResource(R.string.confirm_exclude_fencer, fencerName), modifier = Modifier.testTag("excludeConfirmDialog_text")) },
+            text = {
+                Text(
+                    text = stringResource(R.string.confirm_exclude_fencer, fencerName),
+                    modifier = Modifier.testTag("excludeConfirmDialog_text")
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -628,11 +633,16 @@ fun MatrixCellView(
     }
 
     val cellTag = if (cell != null) "matrix_cell_${cell.leftSeed}_${cell.rightSeed}" else ""
+    val borderColor = if (isPending && onClick != null) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
     val baseModifier = Modifier
         .size(size)
         .border(
             width = if (isPending && onClick != null) 2.dp else 1.dp,
-            color = if (isPending && onClick != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline
+            color = borderColor
         )
         .background(backgroundColor)
         .then(if (cellTag.isNotEmpty()) Modifier.testTag(cellTag) else Modifier)
@@ -690,7 +700,11 @@ fun RankingsTable(rankings: List<com.andvl1.engrade.domain.model.FencerRanking>)
                     Text(ranking.name, modifier = Modifier.weight(2f))
                     Text("${ranking.victories}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     // M8 fix: explicit Locale.US for decimal separator consistency
-                    Text("${String.format(Locale.US, "%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                    Text(
+                        text = "${String.format(Locale.US, "%.1f", ranking.vmPercent)}%",
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
                     Text("${ranking.touchesDelivered}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesReceived}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     val indexSign = if (ranking.index >= 0) "+" else ""

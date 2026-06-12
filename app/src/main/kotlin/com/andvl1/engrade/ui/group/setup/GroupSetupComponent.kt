@@ -1,5 +1,6 @@
 package com.andvl1.engrade.ui.group.setup
 
+import android.database.sqlite.SQLiteException
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.db.entity.FencerEntity
 import com.andvl1.engrade.domain.model.FencerInput
@@ -117,44 +118,52 @@ class DefaultGroupSetupComponent(
                 )
                 searchJob?.cancel()
             }
-            GroupSetupEvent.CreatePool -> {
-                val fencers = _state.value.fencers
-
-                // Validate blank names
-                if (fencers.any { it.name.isBlank() }) {
-                    _state.value = _state.value.copy(error = GroupSetupError.BlankNames)
-                    return
-                }
-
-                // Validate duplicate names
-                val normalizedNames = fencers.map { it.name.trim().lowercase() }
-                if (normalizedNames.size != normalizedNames.toSet().size) {
-                    _state.value = _state.value.copy(error = GroupSetupError.DuplicateNames)
-                    return
-                }
-
-                scope.launch {
-                    _state.value = _state.value.copy(isCreating = true)
-                    try {
-                        val poolId = poolRepository.createPool(
-                            mode = _state.value.mode,
-                            weapon = _state.value.weapon,
-                            fencers = _state.value.fencers
-                        )
-                        _state.value = _state.value.copy(isCreating = false)
-                        onPoolCreated(poolId)
-                    } catch (e: Exception) {
-                        FirebaseCrashlytics.getInstance().recordException(e)
-                        _state.value = _state.value.copy(
-                            error = GroupSetupError.CreateFailed,
-                            isCreating = false
-                        )
-                    }
-                }
-            }
+            GroupSetupEvent.CreatePool -> handleCreatePool()
             GroupSetupEvent.NavigateBack -> onBack()
             GroupSetupEvent.DismissError -> {
                 _state.value = _state.value.copy(error = null)
+            }
+        }
+    }
+
+    private fun handleCreatePool() {
+        val fencers = _state.value.fencers
+
+        // Validate blank names
+        if (fencers.any { it.name.isBlank() }) {
+            _state.value = _state.value.copy(error = GroupSetupError.BlankNames)
+            return
+        }
+
+        // Validate duplicate names
+        val normalizedNames = fencers.map { it.name.trim().lowercase() }
+        if (normalizedNames.size != normalizedNames.toSet().size) {
+            _state.value = _state.value.copy(error = GroupSetupError.DuplicateNames)
+            return
+        }
+
+        scope.launch {
+            _state.value = _state.value.copy(isCreating = true)
+            try {
+                val poolId = poolRepository.createPool(
+                    mode = _state.value.mode,
+                    weapon = _state.value.weapon,
+                    fencers = _state.value.fencers
+                )
+                _state.value = _state.value.copy(isCreating = false)
+                onPoolCreated(poolId)
+            } catch (e: IllegalArgumentException) {
+                FirebaseCrashlytics.getInstance().recordException(e)
+                _state.value = _state.value.copy(
+                    error = GroupSetupError.CreateFailed,
+                    isCreating = false
+                )
+            } catch (e: SQLiteException) {
+                FirebaseCrashlytics.getInstance().recordException(e)
+                _state.value = _state.value.copy(
+                    error = GroupSetupError.CreateFailed,
+                    isCreating = false
+                )
             }
         }
     }

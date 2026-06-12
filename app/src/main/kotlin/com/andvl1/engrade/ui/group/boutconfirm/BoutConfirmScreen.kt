@@ -50,97 +50,123 @@ fun BoutConfirmScreen(component: BoutConfirmComponent) {
                 CircularProgressIndicator(modifier = Modifier.testTag("boutConfirm_loading"))
             }
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            BoutConfirmContent(
+                state = state,
+                innerPadding = innerPadding,
+                onEvent = component::onEvent
+            )
+        }
+    }
+}
+
+@Composable
+private fun BoutConfirmContent(
+    state: BoutConfirmState,
+    innerPadding: PaddingValues,
+    onEvent: (BoutConfirmEvent) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.bout_number, state.boutNumber),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.testTag("boutConfirm_text_boutNumber")
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        BoutConfirmFencerCard(
+            leftName = state.leftName,
+            rightName = state.rightName,
+            onSwap = { onEvent(BoutConfirmEvent.SwapSides) }
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Button(
+            onClick = { onEvent(BoutConfirmEvent.StartBout) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .testTag("boutConfirm_button_start")
+        ) {
+            Text(stringResource(R.string.start_bout), style = MaterialTheme.typography.titleMedium)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = { onEvent(BoutConfirmEvent.Cancel) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .testTag("boutConfirm_button_cancel")
+        ) {
+            Text(stringResource(R.string.cancel))
+        }
+    }
+}
+
+@Composable
+private fun BoutConfirmFencerCard(
+    leftName: String,
+    rightName: String,
+    onSwap: () -> Unit
+) {
+    Card {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                stringResource(R.string.left_lane),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = leftName,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.testTag("boutConfirm_text_leftName")
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Swap sides button
+            FilledTonalIconButton(
+                onClick = onSwap,
+                modifier = Modifier.testTag("boutConfirm_button_swap")
             ) {
-                Text(
-                    text = stringResource(R.string.bout_number, state.boutNumber),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.testTag("boutConfirm_text_boutNumber")
+                Icon(
+                    Icons.Default.SwapHoriz,
+                    contentDescription = stringResource(R.string.swap_sides)
                 )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Card {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            stringResource(R.string.left_lane),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = state.leftName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.testTag("boutConfirm_text_leftName")
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Swap sides button
-                        FilledTonalIconButton(
-                            onClick = { component.onEvent(BoutConfirmEvent.SwapSides) },
-                            modifier = Modifier.testTag("boutConfirm_button_swap")
-                        ) {
-                            Icon(
-                                Icons.Default.SwapHoriz,
-                                contentDescription = stringResource(R.string.swap_sides)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            stringResource(R.string.right_lane),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = state.rightName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.testTag("boutConfirm_text_rightName")
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Button(
-                    onClick = { component.onEvent(BoutConfirmEvent.StartBout) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .testTag("boutConfirm_button_start")
-                ) {
-                    Text(stringResource(R.string.start_bout), style = MaterialTheme.typography.titleMedium)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedButton(
-                    onClick = { component.onEvent(BoutConfirmEvent.Cancel) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .testTag("boutConfirm_button_cancel")
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                stringResource(R.string.right_lane),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = rightName,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.testTag("boutConfirm_text_rightName")
+            )
         }
     }
 }

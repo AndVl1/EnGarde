@@ -30,6 +30,8 @@ import com.andvl1.engrade.ui.theme.RedTimer
 import com.andvl1.engrade.ui.theme.Yellow
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
+private const val DISABLED_ICON_ALPHA = 0.3f
+
 // NOTE: BoutScreen intentionally has NO back navigation button.
 // Accidental back gestures mid-match would abort the bout and lose all scoring data.
 // The timer TopAppBar is the only top-level chrome; back is blocked by Decompose handleBackButton.
@@ -65,7 +67,7 @@ fun BoutScreen(component: BoutComponent) {
                         enabled = state.value.canUndo,
                         modifier = Modifier
                             .testTag("bout_button_undo")
-                            .alpha(if (state.value.canUndo) 1f else 0.3f)
+                            .alpha(if (state.value.canUndo) 1f else DISABLED_ICON_ALPHA)
                     ) {
                         Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringResource(R.string.action_undo))
                     }
@@ -126,8 +128,7 @@ fun BoutScreen(component: BoutComponent) {
                     Text(
                         text = formatTime(state.value.timeRemainingMs),
                         style = MaterialTheme.typography.displayLarge,
-                        color = if (state.value.timeRemainingMs == 0L) RedTimer
-                        else MaterialTheme.colorScheme.onBackground,
+                        color = if (state.value.timeRemainingMs == 0L) RedTimer else MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.testTag("bout_text_timer")
                     )

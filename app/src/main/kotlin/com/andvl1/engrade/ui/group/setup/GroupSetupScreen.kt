@@ -105,12 +105,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.mode == mode,
                         onClick = { component.onEvent(GroupSetupEvent.SetMode(mode)) },
-                        label = {
-                            Text(
-                                if (mode == 4) stringResource(R.string.touches_4)
-                                else stringResource(R.string.touches_5)
-                            )
-                        },
+                        label = { Text(if (mode == 4) stringResource(R.string.touches_4) else stringResource(R.string.touches_5)) },
                         modifier = Modifier.testTag("groupSetup_chip_mode_$mode")
                     )
                 }

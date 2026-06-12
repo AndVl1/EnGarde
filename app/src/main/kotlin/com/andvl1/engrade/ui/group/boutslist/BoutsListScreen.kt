@@ -123,7 +123,7 @@ fun BoutListItem(
                 .testTag("boutsList_item_$boutNumber"),
             onClick = onClick
         ) {
-            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore, status)
+            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore)
         }
     } else {
         Card(
@@ -131,7 +131,7 @@ fun BoutListItem(
                 .fillMaxWidth()
                 .testTag("boutsList_item_$boutNumber")
         ) {
-            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore, status)
+            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore)
         }
     }
 }
@@ -142,8 +142,7 @@ private fun BoutListItemContent(
     leftName: String,
     rightName: String,
     leftScore: Int?,
-    rightScore: Int?,
-    status: BoutStatus
+    rightScore: Int?
 ) {
     Row(
             modifier = Modifier
