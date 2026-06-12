@@ -252,18 +252,20 @@ class DefaultRootComponent(
                     anywhereToStart = true
                 ),
                 onBoutFinished = { leftScore, rightScore, winner ->
-                    // Record result
-                    navigation.replaceCurrent(
-                        RootComponent.Config.BoutResult(
-                            poolId = config.poolId,
-                            boutId = config.boutId,
-                            leftName = config.leftName,
-                            rightName = config.rightName,
-                            leftScore = leftScore,
-                            rightScore = rightScore,
-                            winner = winner.name
-                        )
-                    )
+                    // Drop PoolBout *and* BoutConfirm from the stack so that pressing
+                    // Continue/Back from BoutResult returns directly to GroupDashboard.
+                    navigation.navigate { stack ->
+                        stack.dropLastWhile { it !is RootComponent.Config.GroupDashboard } +
+                            RootComponent.Config.BoutResult(
+                                poolId = config.poolId,
+                                boutId = config.boutId,
+                                leftName = config.leftName,
+                                rightName = config.rightName,
+                                leftScore = leftScore,
+                                rightScore = rightScore,
+                                winner = winner.name
+                            )
+                    }
                 },
                 onNavigateToSettings = ::navigateToSettings
             )

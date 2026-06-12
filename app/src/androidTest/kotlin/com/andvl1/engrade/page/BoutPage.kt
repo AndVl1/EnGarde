@@ -37,4 +37,8 @@ object BoutPage : Page<BoutPage>() {
     val yellowCardButton = hasTestTag("bout_button_yellowCard")
     val redCardButton = hasTestTag("bout_button_redCard")
     val cancelCardButton = hasTestTag("bout_button_cancelCard")
+
+    // Confirm dialogs (reset / skip)
+    val resetConfirmButton = hasTestTag("bout_button_resetConfirm")
+    val skipConfirmButton = hasTestTag("bout_button_skipConfirm")
 }
