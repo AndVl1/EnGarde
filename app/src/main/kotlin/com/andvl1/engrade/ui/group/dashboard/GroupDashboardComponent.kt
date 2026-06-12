@@ -38,6 +38,7 @@ data class GroupDashboardState(
     val nextBoutInfo: String? = null,
     val showEditScoreDialog: EditScoreDialogState? = null,
     val showForfeitDialog: ForfeitDialogState? = null,
+    val showQuickEntryDialog: QuickEntryDialogState? = null,
     val isLoading: Boolean = true,
     val exportError: String? = null,
     val editScoreError: String? = null
@@ -49,6 +50,13 @@ data class EditScoreDialogState(
     val rightName: String,
     val leftScore: Int,
     val rightScore: Int
+)
+
+data class QuickEntryDialogState(
+    val boutId: Long,
+    val leftName: String,
+    val rightName: String,
+    val mode: Int
 )
 
 data class ForfeitDialogState(
@@ -73,6 +81,9 @@ sealed class GroupDashboardEvent {
     data object DismissForfeitDialog : GroupDashboardEvent()
     data class RecordForfeit(val boutId: Long, val absentSide: String) : GroupDashboardEvent()
     data class ExcludeFencer(val seedNumber: Int) : GroupDashboardEvent()
+    data class ShowQuickEntryDialog(val leftSeed: Int, val rightSeed: Int) : GroupDashboardEvent()
+    data object DismissQuickEntryDialog : GroupDashboardEvent()
+    data class RecordQuickScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
 }
 
 class DefaultGroupDashboardComponent(
@@ -307,6 +318,46 @@ class DefaultGroupDashboardComponent(
             is GroupDashboardEvent.ExcludeFencer -> {
                 scope.launch {
                     poolRepository.excludeFencer(poolId, event.seedNumber)
+                }
+            }
+            is GroupDashboardEvent.ShowQuickEntryDialog -> {
+                scope.launch {
+                    val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
+                    val bout = boutsList.find { boutWithNames ->
+                        val b = boutWithNames.bout
+                        b.status == BoutStatus.PENDING &&
+                            ((b.leftFencerSeed == event.leftSeed && b.rightFencerSeed == event.rightSeed) ||
+                             (b.leftFencerSeed == event.rightSeed && b.rightFencerSeed == event.leftSeed))
+                    }
+                    bout?.let {
+                        _state.value = _state.value.copy(
+                            showQuickEntryDialog = QuickEntryDialogState(
+                                boutId = it.bout.id,
+                                leftName = it.leftFencerName,
+                                rightName = it.rightFencerName,
+                                mode = _state.value.mode
+                            )
+                        )
+                    }
+                }
+            }
+            GroupDashboardEvent.DismissQuickEntryDialog -> {
+                _state.value = _state.value.copy(showQuickEntryDialog = null)
+            }
+            is GroupDashboardEvent.RecordQuickScore -> {
+                if (event.leftScore == event.rightScore) {
+                    _state.value = _state.value.copy(
+                        editScoreError = "FIE: ничья в бое запрещена (${event.leftScore}:${event.rightScore})"
+                    )
+                } else {
+                    scope.launch {
+                        poolRepository.recordBoutResult(
+                            boutId = event.boutId,
+                            leftScore = event.leftScore,
+                            rightScore = event.rightScore
+                        )
+                        _state.value = _state.value.copy(showQuickEntryDialog = null)
+                    }
                 }
             }
         }

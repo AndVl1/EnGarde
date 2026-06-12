@@ -16,4 +16,12 @@ object GroupDashboardPage : Page<GroupDashboardPage>() {
     val loading = hasTestTag("dashboard_loading")
     val matrix = hasTestTag("dashboard_matrix")
     fun matrixHeaderCol(col: Int) = hasTestTag("matrix_header_col_$col")
+
+    // Quick entry dialog (Wave 3)
+    val quickScoreLeftInput = hasTestTag("dashboard_input_quickScoreLeft")
+    val quickScoreRightInput = hasTestTag("dashboard_input_quickScoreRight")
+    val quickScoreConfirmButton = hasTestTag("dashboard_button_quickScoreConfirm")
+    val quickScoreCancelButton = hasTestTag("dashboard_button_quickScoreCancel")
+    fun matrixCell(row: Int, col: Int) = hasTestTag("matrix_cell_${row}_${col}")
+    fun matrixScore(row: Int, col: Int) = hasTestTag("matrix_score_${row}_${col}")
 }

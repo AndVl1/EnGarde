@@ -153,4 +153,7 @@
     <string name="progress">Progress</string>
     <string name="result_matrix">Result Matrix</string>
     <string name="rankings">Rankings</string>
+
+    <!-- Quick score entry (Wave 3) -->
+    <string name="quick_score_entry">Quick Score Entry</string>
 </resources>

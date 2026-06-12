@@ -2,6 +2,7 @@ package com.andvl1.engrade.ui.group.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
+import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.MatrixCell
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import java.util.Locale
@@ -164,7 +166,12 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 MatrixTable(
                     matrix = state.matrix,
                     fencerNames = state.fencerNames,
-                    fencerCount = state.fencerCount
+                    fencerCount = state.fencerCount,
+                    onPendingCellClick = { cell ->
+                        component.onEvent(
+                            GroupDashboardEvent.ShowQuickEntryDialog(cell.leftSeed, cell.rightSeed)
+                        )
+                    }
                 )
 
                 // Rankings Table
@@ -197,6 +204,19 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 onDismiss = { component.onEvent(GroupDashboardEvent.DismissForfeitDialog) },
                 onForfeit = { absentSide ->
                     component.onEvent(GroupDashboardEvent.RecordForfeit(dialog.boutId, absentSide))
+                }
+            )
+        }
+
+        // Quick Score Entry Dialog (for pending matrix cells)
+        state.showQuickEntryDialog?.let { dialog ->
+            QuickEntryDialog(
+                dialog = dialog,
+                onDismiss = { component.onEvent(GroupDashboardEvent.DismissQuickEntryDialog) },
+                onConfirm = { leftScore, rightScore ->
+                    component.onEvent(
+                        GroupDashboardEvent.RecordQuickScore(dialog.boutId, leftScore, rightScore)
+                    )
                 }
             )
         }
@@ -368,10 +388,70 @@ fun ExcludeFencerDialog(
 }
 
 @Composable
+fun QuickEntryDialog(
+    dialog: QuickEntryDialogState,
+    onDismiss: () -> Unit,
+    onConfirm: (Int, Int) -> Unit
+) {
+    var leftScore by remember { mutableStateOf("") }
+    var rightScore by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.quick_score_entry)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = leftScore,
+                    onValueChange = { leftScore = it },
+                    label = { Text(dialog.leftName) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dashboard_input_quickScoreLeft")
+                )
+                OutlinedTextField(
+                    value = rightScore,
+                    onValueChange = { rightScore = it },
+                    label = { Text(dialog.rightName) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dashboard_input_quickScoreRight")
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val left = leftScore.toIntOrNull() ?: 0
+                    val right = rightScore.toIntOrNull() ?: 0
+                    onConfirm(left, right)
+                },
+                modifier = Modifier.testTag("dashboard_button_quickScoreConfirm")
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("dashboard_button_quickScoreCancel")
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
 fun MatrixTable(
     matrix: List<List<MatrixCell?>>,
     fencerNames: Map<Int, String>,
-    fencerCount: Int
+    fencerCount: Int,
+    onPendingCellClick: ((MatrixCell) -> Unit)? = null
 ) {
     val cellSize = 60.dp
     val nameColumnWidth = 120.dp
@@ -439,7 +519,13 @@ fun MatrixTable(
             matrix.forEach { row ->
                 Row {
                     row.forEach { cell ->
-                        MatrixCellView(cell, cellSize)
+                        MatrixCellView(
+                            cell = cell,
+                            size = cellSize,
+                            onClick = if (cell != null && cell.status == BoutStatus.PENDING) {
+                                { onPendingCellClick?.invoke(cell) }
+                            } else null
+                        )
                     }
                 }
             }
@@ -448,7 +534,12 @@ fun MatrixTable(
 }
 
 @Composable
-fun MatrixCellView(cell: MatrixCell?, size: androidx.compose.ui.unit.Dp) {
+fun MatrixCellView(
+    cell: MatrixCell?,
+    size: androidx.compose.ui.unit.Dp,
+    onClick: (() -> Unit)? = null
+) {
+    val isPending = cell != null && cell.leftScore == null
     val backgroundColor = when {
         cell == null -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) // Diagonal
         cell.isVictory == true -> MaterialTheme.colorScheme.primaryContainer
@@ -456,11 +547,20 @@ fun MatrixCellView(cell: MatrixCell?, size: androidx.compose.ui.unit.Dp) {
         else -> MaterialTheme.colorScheme.surface
     }
 
+    val cellTag = if (cell != null) "matrix_cell_${cell.leftSeed}_${cell.rightSeed}" else ""
+    val baseModifier = Modifier
+        .size(size)
+        .border(
+            width = if (isPending && onClick != null) 2.dp else 1.dp,
+            color = if (isPending && onClick != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Gray
+        )
+        .background(backgroundColor)
+        .then(if (cellTag.isNotEmpty()) Modifier.testTag(cellTag) else Modifier)
+
+    val finalModifier = if (onClick != null) baseModifier.clickable(onClick = onClick) else baseModifier
+
     Box(
-        modifier = Modifier
-            .size(size)
-            .border(1.dp, Color.Gray)
-            .background(backgroundColor),
+        modifier = finalModifier,
         contentAlignment = Alignment.Center
     ) {
         if (cell != null && cell.leftScore != null && cell.rightScore != null) {
@@ -468,7 +568,8 @@ fun MatrixCellView(cell: MatrixCell?, size: androidx.compose.ui.unit.Dp) {
             Text(
                 "$label${cell.leftScore}",
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.testTag("matrix_score_${cell.leftSeed}_${cell.rightSeed}")
             )
         }
     }

@@ -39,3 +39,6 @@
 
 ### Wave 1 ✓ (commit 672ad1e)
 F1-F5 fixed. +10 unit tests. testDebugUnitTest: 88 tests, 0 failures (independently re-verified via test-results XML). assembleDebug SUCCESSFUL. F4 decision: removed dead `excludedSeeds` param (MatrixCell had no field; wiring = separate feature).
+
+### Wave 2 ✓ (commits a95f301 + 3fe2d54)
+FIE t.114 card escalation: 2nd group-1 yellow→red(+pt), 3rd→black(exclusion), direct black-card action, all undoable, respects sabre break-at-8. Black-card UI button + strings in 3 locales. +10 BoutEngine tests → 98 total green, lintDebug clean (re-verified).

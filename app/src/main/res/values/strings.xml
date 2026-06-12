@@ -161,4 +161,7 @@
     <string name="progress">Прогресс</string>
     <string name="result_matrix">Матрица результатов</string>
     <string name="rankings">Ранжирование</string>
+
+    <!-- Quick score entry (Wave 3) -->
+    <string name="quick_score_entry">Ввод счёта</string>
 </resources>

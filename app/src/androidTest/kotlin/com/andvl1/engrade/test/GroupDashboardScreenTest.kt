@@ -91,4 +91,88 @@ class GroupDashboardScreenTest : BaseTest() {
             }
         }
     }
+
+    @Test
+    fun quickEntry_validScoreRecords() {
+        step("Create pool and navigate to dashboard") {
+            createPoolAndNavigateToDashboard()
+        }
+        step("Wait for matrix to load and tap a pending cell") {
+            GroupDashboardPage {
+                // Matrix is loaded once progressText is visible
+                progressText.withTimeout(15000).assertIsDisplayed()
+                // Tap pending cell for fencer 1 vs fencer 2 (row=1, col=2)
+                matrixCell(1, 2).withTimeout(5000).assertIsDisplayed()
+                matrixCell(1, 2).click()
+            }
+        }
+        step("Quick entry dialog is shown") {
+            GroupDashboardPage {
+                quickScoreLeftInput.withTimeout(5000).assertIsDisplayed()
+                quickScoreRightInput.assertIsDisplayed()
+                quickScoreConfirmButton.assertIsDisplayed()
+            }
+        }
+        step("Enter valid non-draw scores and confirm") {
+            GroupDashboardPage {
+                quickScoreLeftInput.clearText()
+                quickScoreLeftInput.inputText("5")
+                quickScoreRightInput.clearText()
+                quickScoreRightInput.inputText("3")
+                quickScoreConfirmButton.click()
+            }
+        }
+        step("Cell [1][2] is now completed with a score") {
+            GroupDashboardPage {
+                // Score text appears once Room flow re-emits and state recomposes
+                matrixScore(1, 2).withTimeout(10000).assertIsDisplayed()
+            }
+        }
+        step("Primary timer-flow start button is still present") {
+            GroupDashboardPage {
+                startBoutButton.assertIsDisplayed()
+            }
+        }
+    }
+
+    @Test
+    fun quickEntry_drawIsRejected() {
+        step("Create pool and navigate to dashboard") {
+            createPoolAndNavigateToDashboard()
+        }
+        step("Wait for matrix and tap a pending cell") {
+            GroupDashboardPage {
+                progressText.withTimeout(15000).assertIsDisplayed()
+                matrixCell(1, 2).withTimeout(5000).assertIsDisplayed()
+                matrixCell(1, 2).click()
+            }
+        }
+        step("Quick entry dialog is shown") {
+            GroupDashboardPage {
+                quickScoreLeftInput.withTimeout(5000).assertIsDisplayed()
+            }
+        }
+        step("Enter equal (draw) scores and attempt confirm") {
+            GroupDashboardPage {
+                quickScoreLeftInput.clearText()
+                quickScoreLeftInput.inputText("5")
+                quickScoreRightInput.clearText()
+                quickScoreRightInput.inputText("5")
+                quickScoreConfirmButton.click()
+            }
+        }
+        step("Dialog remains open - draw was rejected") {
+            GroupDashboardPage {
+                // Confirm button still visible means dialog was not dismissed
+                quickScoreConfirmButton.withTimeout(3000).assertIsDisplayed()
+            }
+        }
+        step("Dismiss dialog and verify cell is still pending (no score text)") {
+            GroupDashboardPage {
+                quickScoreCancelButton.click()
+                // Score text node must not exist for the cell
+                matrixScore(1, 2).assertDoesNotExist()
+            }
+        }
+    }
 }
