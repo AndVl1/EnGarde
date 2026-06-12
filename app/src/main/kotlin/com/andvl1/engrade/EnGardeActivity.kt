@@ -31,12 +31,16 @@ class EnGardeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize Room database
+        // Initialize Room database.
+        // MIGRATION_1_2 adds de_tableau and de_match tables (Wave 4b — additive only).
+        // No fallbackToDestructiveMigration — user pool data must never be wiped.
         val database = Room.databaseBuilder(
             applicationContext,
             EnGardeDatabase::class.java,
             "engarde.db"
-        ).build()
+        )
+            .addMigrations(EnGardeDatabase.MIGRATION_1_2)
+            .build()
 
         // Create dependencies manually (no DI framework)
         val settingsRepository = SettingsRepository(applicationContext)

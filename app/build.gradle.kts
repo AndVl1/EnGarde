@@ -58,6 +58,14 @@ android {
             excludes += "/META-INF/LICENSE-notice.md"
         }
     }
+
+    // Room schema JSON files must be available as test assets so that
+    // MigrationTestHelper can validate the schema after migration.
+    sourceSets {
+        getByName("androidTest").assets.srcDirs(
+            files("$projectDir/schemas")
+        )
+    }
 }
 
 kotlin {
@@ -95,6 +103,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    androidTestImplementation(libs.room.testing)
 
     // Decompose
     implementation(libs.decompose)

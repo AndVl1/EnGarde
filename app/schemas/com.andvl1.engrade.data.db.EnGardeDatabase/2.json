@@ -1,0 +1,482 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "050b3ff5051e988541bc2be175d1006b",
+    "entities": [
+      {
+        "tableName": "fencer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `organization` TEXT, `region` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "organization",
+            "columnName": "organization",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "region",
+            "columnName": "region",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pool",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAt` INTEGER NOT NULL, `mode` INTEGER NOT NULL, `weapon` TEXT NOT NULL, `status` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weapon",
+            "columnName": "weapon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pool_fencer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `poolId` INTEGER NOT NULL, `fencerId` INTEGER NOT NULL, `seedNumber` INTEGER NOT NULL, `excluded` INTEGER NOT NULL, FOREIGN KEY(`poolId`) REFERENCES `pool`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`fencerId`) REFERENCES `fencer`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "poolId",
+            "columnName": "poolId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fencerId",
+            "columnName": "fencerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seedNumber",
+            "columnName": "seedNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "excluded",
+            "columnName": "excluded",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pool_fencer_poolId",
+            "unique": false,
+            "columnNames": [
+              "poolId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pool_fencer_poolId` ON `${TABLE_NAME}` (`poolId`)"
+          },
+          {
+            "name": "index_pool_fencer_fencerId",
+            "unique": false,
+            "columnNames": [
+              "fencerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pool_fencer_fencerId` ON `${TABLE_NAME}` (`fencerId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pool",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "poolId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "fencer",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "fencerId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pool_bout",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `poolId` INTEGER NOT NULL, `boutOrder` INTEGER NOT NULL, `leftFencerSeed` INTEGER NOT NULL, `rightFencerSeed` INTEGER NOT NULL, `leftScore` INTEGER, `rightScore` INTEGER, `winner` TEXT, `status` TEXT NOT NULL, FOREIGN KEY(`poolId`) REFERENCES `pool`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "poolId",
+            "columnName": "poolId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boutOrder",
+            "columnName": "boutOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftFencerSeed",
+            "columnName": "leftFencerSeed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rightFencerSeed",
+            "columnName": "rightFencerSeed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftScore",
+            "columnName": "leftScore",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rightScore",
+            "columnName": "rightScore",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "winner",
+            "columnName": "winner",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pool_bout_poolId",
+            "unique": false,
+            "columnNames": [
+              "poolId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pool_bout_poolId` ON `${TABLE_NAME}` (`poolId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pool",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "poolId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "de_tableau",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `poolId` INTEGER NOT NULL, `tableauSize` INTEGER NOT NULL, `fencerCount` INTEGER NOT NULL, `weapon` TEXT NOT NULL, `mode` INTEGER NOT NULL, `status` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, FOREIGN KEY(`poolId`) REFERENCES `pool`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "poolId",
+            "columnName": "poolId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tableauSize",
+            "columnName": "tableauSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fencerCount",
+            "columnName": "fencerCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weapon",
+            "columnName": "weapon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_de_tableau_poolId",
+            "unique": false,
+            "columnNames": [
+              "poolId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_de_tableau_poolId` ON `${TABLE_NAME}` (`poolId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "pool",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "poolId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "de_match",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableauId` INTEGER NOT NULL, `matchId` INTEGER NOT NULL, `round` INTEGER NOT NULL, `position` INTEGER NOT NULL, `topSlotType` TEXT NOT NULL, `topSeed` INTEGER, `topFencerName` TEXT, `bottomSlotType` TEXT NOT NULL, `bottomSeed` INTEGER, `bottomFencerName` TEXT, `topScore` INTEGER, `bottomScore` INTEGER, `winnerSeed` INTEGER, `winnerFencerName` TEXT, `isBye` INTEGER NOT NULL, `status` TEXT NOT NULL, FOREIGN KEY(`tableauId`) REFERENCES `de_tableau`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tableauId",
+            "columnName": "tableauId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "matchId",
+            "columnName": "matchId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "round",
+            "columnName": "round",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topSlotType",
+            "columnName": "topSlotType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topSeed",
+            "columnName": "topSeed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "topFencerName",
+            "columnName": "topFencerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bottomSlotType",
+            "columnName": "bottomSlotType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bottomSeed",
+            "columnName": "bottomSeed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "bottomFencerName",
+            "columnName": "bottomFencerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "topScore",
+            "columnName": "topScore",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "bottomScore",
+            "columnName": "bottomScore",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "winnerSeed",
+            "columnName": "winnerSeed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "winnerFencerName",
+            "columnName": "winnerFencerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isBye",
+            "columnName": "isBye",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_de_match_tableauId",
+            "unique": false,
+            "columnNames": [
+              "tableauId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_de_match_tableauId` ON `${TABLE_NAME}` (`tableauId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "de_tableau",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tableauId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '050b3ff5051e988541bc2be175d1006b')"
+    ]
+  }
+}

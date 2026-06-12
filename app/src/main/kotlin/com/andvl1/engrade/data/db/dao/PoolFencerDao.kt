@@ -22,4 +22,8 @@ interface PoolFencerDao {
 
     @Query("SELECT * FROM pool_fencer WHERE poolId = :poolId AND excluded = 0 ORDER BY seedNumber ASC")
     fun getActiveFencers(poolId: Long): Flow<List<PoolFencerEntity>>
+
+    /** One-shot suspend read of all fencers (including excluded) for a pool. */
+    @Query("SELECT * FROM pool_fencer WHERE poolId = :poolId ORDER BY seedNumber ASC")
+    suspend fun getByPoolIdOnce(poolId: Long): List<PoolFencerEntity>
 }
