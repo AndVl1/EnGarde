@@ -1,0 +1,148 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:CsvExporter.kt$CsvExporter$value.contains(',') || value.contains('"') || value.contains('\n') || value.contains('\r')</ID>
+    <ID>ComplexCondition:DeTableauTest.kt$DeTableauTest$(top.seed == 4 &amp;&amp; bottom.seed == 5) || (top.seed == 5 &amp;&amp; bottom.seed == 4)</ID>
+    <ID>ForEachOnRange:GroupSetupScreen.kt$5..8</ID>
+    <ID>LargeClass:BoutEngineTest.kt$BoutEngineTest</ID>
+    <ID>LongMethod:BoutConfirmScreen.kt$@Composable fun BoutConfirmScreen(component: BoutConfirmComponent)</ID>
+    <ID>LongMethod:BoutEngine.kt$BoutEngine$fun undo(): UndoResult</ID>
+    <ID>LongMethod:BoutResultScreen.kt$@Composable fun BoutResultScreen(component: BoutResultComponent)</ID>
+    <ID>LongMethod:BoutScreen.kt$@Composable fun FencerScoreCard( fencer: FencerState, fencerName: String, side: FencerSide, modifier: Modifier = Modifier, onScoreClick: () -&gt; Unit, onCardClick: () -&gt; Unit )</ID>
+    <ID>LongMethod:BoutScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun BoutScreen(component: BoutComponent)</ID>
+    <ID>LongMethod:DeTableauScreen.kt$@Composable private fun DeMatchCard( match: DeMatch, onPlay: (() -&gt; Unit)? )</ID>
+    <ID>LongMethod:DeTableauScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun DeTableauScreen(component: DeTableauComponent)</ID>
+    <ID>LongMethod:GroupDashboardComponent.kt$DefaultGroupDashboardComponent$override fun onEvent(event: GroupDashboardEvent)</ID>
+    <ID>LongMethod:GroupDashboardScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun GroupDashboardScreen(component: GroupDashboardComponent)</ID>
+    <ID>LongMethod:GroupSetupScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun GroupSetupScreen(component: GroupSetupComponent)</ID>
+    <ID>LongMethod:RootComponent.kt$DefaultRootComponent$private fun createChild( config: RootComponent.Config, context: ComponentContext ): RootComponent.Child</ID>
+    <ID>LongMethod:SettingsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SettingsScreen(component: SettingsComponent)</ID>
+    <ID>LongParameterList:BoutResultComponent.kt$DefaultBoutResultComponent$( componentContext: ComponentContext, private val poolId: Long, private val boutId: Long, private val leftName: String, private val rightName: String, private val leftScore: Int, private val rightScore: Int, private val winner: String, private val poolRepository: PoolRepository, private val onContinue: () -&gt; Unit )</ID>
+    <ID>LongParameterList:GroupDashboardComponent.kt$DefaultGroupDashboardComponent$( componentContext: ComponentContext, private val poolId: Long, private val poolRepository: PoolRepository, private val poolEngine: PoolEngine, private val pdfExporter: PdfExporter, private val csvExporter: CsvExporter, private val deRepository: DeRepository, private val onNavigateToBoutConfirm: (Long, Long) -&gt; Unit, private val onNavigateToBoutsList: (Long) -&gt; Unit, /** * Navigate to the DE tableau for this pool. * * **Qualification default:** all pool fencers qualify, seeded by final pool ranking (FIE * standard). Excluded fencers remain in the DE draw per FIE rules — their pool bouts still * count toward ranking. A qualification cutoff (e.g. top-N qualify) is a future feature. * * @param poolId DB id of the pool * @param weapon FIE weapon code ("SABRE" / "FOIL_EPEE") so DE bouts inherit pool weapon */ private val onNavigateToDE: (poolId: Long, weapon: String) -&gt; Unit, private val onBack: () -&gt; Unit )</ID>
+    <ID>LongParameterList:RootComponent.kt$DefaultRootComponent$( componentContext: ComponentContext, private val settingsRepository: SettingsRepository, private val poolRepository: PoolRepository, private val poolEngine: PoolEngine, private val pdfExporter: PdfExporter, private val csvExporter: CsvExporter, private val soundManager: SoundManager, private val notificationHelper: NotificationHelper, private val notificationPendingIntent: PendingIntent, private val deRepository: DeRepository )</ID>
+    <ID>LoopWithTooManyJumpStatements:DeTableauTest.kt$DeTableauTest$for</ID>
+    <ID>MagicNumber:BoutComponent.kt$DefaultBoutComponent$100</ID>
+    <ID>MagicNumber:BoutEngine.kt$BoutEngine$0.5</ID>
+    <ID>MagicNumber:BoutEngine.kt$BoutEngine$8</ID>
+    <ID>MagicNumber:BoutScreen.kt$0xFF212121</ID>
+    <ID>MagicNumber:BoutScreen.kt$10</ID>
+    <ID>MagicNumber:BoutScreen.kt$1000</ID>
+    <ID>MagicNumber:BoutScreen.kt$60</ID>
+    <ID>MagicNumber:BoutScreen.kt$60000</ID>
+    <ID>MagicNumber:DeTableau.kt$DeTableau$3</ID>
+    <ID>MagicNumber:FieBoutOrder.kt$FieBoutOrder$5</ID>
+    <ID>MagicNumber:FieBoutOrder.kt$FieBoutOrder$8</ID>
+    <ID>MagicNumber:GroupDashboardScreen.kt$0.5f</ID>
+    <ID>MagicNumber:GroupDashboardScreen.kt$0.7f</ID>
+    <ID>MagicNumber:GroupSetupComponent.kt$GroupSetupState$5</ID>
+    <ID>MagicNumber:GroupSetupScreen.kt$0.9f</ID>
+    <ID>MagicNumber:GroupSetupScreen.kt$4</ID>
+    <ID>MagicNumber:GroupSetupScreen.kt$5</ID>
+    <ID>MagicNumber:GroupSetupScreen.kt$8</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$120f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$14f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$15f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$18f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$20f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$25f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$3</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$30f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$4</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$40f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$5</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$50f</ID>
+    <ID>MagicNumber:PdfExporter.kt$PdfExporter$5f</ID>
+    <ID>MagicNumber:PoolEngine.kt$PoolEngine$100</ID>
+    <ID>MagicNumber:PoolRepository.kt$PoolRepository$5</ID>
+    <ID>MagicNumber:PoolRepository.kt$PoolRepository$8</ID>
+    <ID>MagicNumber:SettingsRepository.kt$SettingsRepository$5</ID>
+    <ID>MagicNumber:SettingsScreen.kt$15</ID>
+    <ID>MagicNumber:SettingsScreen.kt$5</ID>
+    <ID>MagicNumber:SoundManager.kt$SoundManager$100</ID>
+    <ID>MagicNumber:SoundManager.kt$SoundManager$200</ID>
+    <ID>MagicNumber:SoundManager.kt$SoundManager$3000</ID>
+    <ID>MaxLineLength:GroupDashboardScreen.kt$Text("${String.format(Locale.US, "%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)</ID>
+    <ID>MaximumLineLength:GroupDashboardScreen.kt$ </ID>
+    <ID>MultiLineIfElse:DeRepository.kt$DeRepository$DeTableau.finalClassification(bracket)</ID>
+    <ID>MultiLineIfElse:DeRepository.kt$DeRepository$DeTableauStatus.COMPLETED</ID>
+    <ID>MultiLineIfElse:DeRepository.kt$DeRepository$DeTableauStatus.IN_PROGRESS</ID>
+    <ID>MultiLineIfElse:DeRepository.kt$DeRepository$emptyList()</ID>
+    <ID>MultiLineIfElse:DeRepository.kt$DeRepository$null</ID>
+    <ID>MultiLineIfElse:DeTableau.kt$DeTableau$DeSlot.Bye</ID>
+    <ID>MultiLineIfElse:DeTableau.kt$DeTableau$m</ID>
+    <ID>MultiLineIfElse:DeTableauScreen.kt$MaterialTheme.colorScheme.onSurface</ID>
+    <ID>MultiLineIfElse:DeTableauScreen.kt$MaterialTheme.colorScheme.onSurfaceVariant</ID>
+    <ID>MultiLineIfElse:DeTableauScreen.kt$MaterialTheme.colorScheme.primary</ID>
+    <ID>MultiLineIfElse:DeTableauScreen.kt$null</ID>
+    <ID>MultiLineIfElse:GroupDashboardScreen.kt$null</ID>
+    <ID>NestedBlockDepth:PoolEngine.kt$PoolEngine$fun buildMatrix( fencerCount: Int, bouts: List&lt;BoutResultData&gt; ): List&lt;List&lt;MatrixCell?&gt;&gt;</ID>
+    <ID>NoMultipleSpaces:BoutConfig.kt$BoutConfig$ </ID>
+    <ID>NoMultipleSpaces:BoutEngineTest.kt$BoutEngineTest$ </ID>
+    <ID>NoMultipleSpaces:CardType.kt$CardType.BLACK$ </ID>
+    <ID>NoMultipleSpaces:CardType.kt$CardType.RED$ </ID>
+    <ID>NoMultipleSpaces:CardType.kt$CardType.YELLOW$ </ID>
+    <ID>NoMultipleSpaces:DeTableau.kt$DeTableau$ </ID>
+    <ID>NoMultipleSpaces:DeTableauTest.kt$DeTableauTest$ </ID>
+    <ID>NoMultipleSpaces:PdfExporter.kt$PdfExporter.Companion$ </ID>
+    <ID>NoMultipleSpaces:PoolBoutEntity.kt$PoolBoutEntity$ </ID>
+    <ID>NoMultipleSpaces:PoolEngineTest.kt$PoolEngineTest$ </ID>
+    <ID>NoMultipleSpaces:PoolEntity.kt$PoolEntity$ </ID>
+    <ID>NoMultipleSpaces:SectionType.kt$SectionType.BREAK$ </ID>
+    <ID>NoMultipleSpaces:SectionType.kt$SectionType.PERIOD$ </ID>
+    <ID>NoMultipleSpaces:SectionType.kt$SectionType.PRIORITY$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.BothScored$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.LeftBlackCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.LeftRedCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.LeftScored$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.LeftYellowCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.LeftYellowToRedEscalation$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.RightBlackCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.RightRedCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.RightScored$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.RightYellowCard$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.RightYellowToRedEscalation$ </ID>
+    <ID>NoMultipleSpaces:UndoAction.kt$UndoAction.SectionSkipped$ </ID>
+    <ID>NoMultipleSpaces:Weapon.kt$Weapon.FOIL_EPEE$ </ID>
+    <ID>NoMultipleSpaces:Weapon.kt$Weapon.SABRE$ </ID>
+    <ID>SpacingBetweenDeclarationsWithComments:GroupDashboardComponent.kt$GroupDashboardEvent.ProceedToDE$/** Navigate to the Direct Elimination bracket; creates the tableau if not yet present. */</ID>
+    <ID>StringTemplate:GroupDashboardScreen.kt$${row}</ID>
+    <ID>StringTemplate:GroupDashboardScreen.kt$${seed}</ID>
+    <ID>SwallowedException:FieBoutOrderTest.kt$FieBoutOrderTest$e: IllegalArgumentException</ID>
+    <ID>SwallowedException:NotificationHelper.kt$NotificationHelper$e: SecurityException</ID>
+    <ID>TooGenericExceptionCaught:GroupDashboardComponent.kt$DefaultGroupDashboardComponent$e: Exception</ID>
+    <ID>TooManyFunctions:BoutEngine.kt$BoutEngine</ID>
+    <ID>UnconditionalJumpStatementInLoop:DeTableauTest.kt$DeTableauTest$for (match in bracket.matches) { if (match.winner != null || match.isBye) continue val top = match.topSlot as? DeSlot.Fencer ?: continue val bottom = match.bottomSlot as? DeSlot.Fencer ?: continue val winner = if (top.seed &lt; bottom.seed) top else bottom bracket = DeTableau.recordWinner(bracket, match.id, winner) progress = true break // перезапустить цикл — список изменился }</ID>
+    <ID>UnusedPrivateProperty:BoutEngineTest.kt$BoutEngineTest$val result2 = engine.addScoreRight() // right=8, left=8 → NO break (left не &lt; 8)</ID>
+    <ID>UnusedPrivateProperty:BoutResultComponent.kt$DefaultBoutResultComponent$private val poolId: Long</ID>
+    <ID>WildcardImport:BoutComponent.kt$import com.andvl1.engrade.domain.*</ID>
+    <ID>WildcardImport:BoutComponent.kt$import com.andvl1.engrade.domain.model.*</ID>
+    <ID>WildcardImport:BoutComponent.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:BoutConfirmScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BoutConfirmScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:BoutEngine.kt$import com.andvl1.engrade.domain.model.*</ID>
+    <ID>WildcardImport:BoutResultScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BoutResultScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:BoutScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BoutScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:BoutScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:BoutScreen.kt$import com.andvl1.engrade.domain.model.*</ID>
+    <ID>WildcardImport:BoutState.kt$import com.andvl1.engrade.domain.model.*</ID>
+    <ID>WildcardImport:BoutsListScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BoutsListScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DeTableauScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DeTableauScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:GroupDashboardScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:GroupDashboardScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:GroupDashboardScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:GroupSetupScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:GroupSetupScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:HomeScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HomeScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RootComponent.kt$import com.arkivanov.decompose.router.stack.*</ID>
+    <ID>WildcardImport:SettingsRepository.kt$import androidx.datastore.preferences.core.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.material3.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

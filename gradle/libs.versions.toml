@@ -13,6 +13,8 @@ firebase-bom = "34.14.0"
 ksp = "2.2.21-2.0.5"
 room = "2.8.4"
 ultron = "2.6.2"
+detekt = "1.23.8"
+kover = "0.9.8"
 
 [libraries]
 # Kotlin
@@ -63,6 +65,9 @@ ultron-compose = { module = "com.atiurin:ultron-compose-android", version.ref = 
 ultron-allure = { module = "com.atiurin:ultron-allure", version.ref = "ultron" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 
+# Static analysis
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -71,3 +76,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.7" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

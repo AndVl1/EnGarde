@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -131,4 +133,24 @@ dependencies {
     // Compose Testing
     androidTestImplementation(platform(libs.compose.bom))
     debugImplementation(libs.compose.ui.test.manifest)
+
+    // Detekt plugins
+    detektPlugins(libs.detekt.formatting)
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom("$rootDir/detekt.yml")
+    buildUponDefaultConfig = true
+    baseline = file("$rootDir/detekt-baseline.xml")
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                androidGeneratedClasses()
+            }
+        }
+    }
 }
