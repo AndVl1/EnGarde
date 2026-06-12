@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.andvl1.engrade.ui.bout.BoutScreen
+import com.andvl1.engrade.ui.de.DeTableauScreen
 import com.andvl1.engrade.ui.group.boutconfirm.BoutConfirmScreen
 import com.andvl1.engrade.ui.group.boutresult.BoutResultScreen
 import com.andvl1.engrade.ui.group.boutslist.BoutsListScreen
@@ -34,6 +35,7 @@ fun RootContent(component: RootComponent) {
             is RootComponent.Child.BoutConfirm -> BoutConfirmScreen(instance.component)
             is RootComponent.Child.BoutResult -> BoutResultScreen(instance.component)
             is RootComponent.Child.BoutsList -> BoutsListScreen(instance.component)
+            is RootComponent.Child.DeTableau -> DeTableauScreen(instance.component)
         }
     }
 }

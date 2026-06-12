@@ -164,4 +164,15 @@
 
     <!-- Quick score entry (Wave 3) -->
     <string name="quick_score_entry">Ввод счёта</string>
+
+    <!-- Direct Elimination (Wave 4c) -->
+    <string name="proceed_to_de">Перейти к прямому выбыванию</string>
+    <string name="de_screen_title">Прямое выбывание</string>
+    <string name="de_final">Финал</string>
+    <string name="de_semifinal">Полуфинал</string>
+    <string name="de_quarterfinal">Четвертьфинал</string>
+    <string name="de_round_n">Раунд %d</string>
+    <string name="de_play_match">Бой</string>
+    <string name="de_classification_title">Итоговое ранжирование</string>
+    <string name="de_seed_label">посев %d</string>
 </resources>

@@ -312,9 +312,25 @@ class DeRepository(
             position = entity.position,
             topSlot = topSlot,
             bottomSlot = bottomSlot,
-            winner = winner
+            winner = winner,
+            topScore = entity.topScore,
+            bottomScore = entity.bottomScore
         )
     }
+
+    // -------------------------------------------------------------------------
+    // (e) Expose tableau DB id for UI navigation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns a [Flow] emitting the DB id of the [DeTableauEntity] associated with [poolId],
+     * or null if no tableau has been created yet.
+     *
+     * Used by [DefaultDeTableauComponent] to obtain the tableauId needed for
+     * [recordMatchResult] without direct DAO access from the UI layer.
+     */
+    fun observeTableauId(poolId: Long): Flow<Long?> =
+        db.deTableauDao().getTableauByPoolId(poolId).map { it?.id }
 
     private fun reconstructBracket(
         tableau: DeTableauEntity,

@@ -1,5 +1,6 @@
 package com.andvl1.engrade.ui.group.dashboard
 
+import com.andvl1.engrade.data.DeRepository
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutResultData
@@ -71,6 +72,8 @@ sealed class GroupDashboardEvent {
     data object StartNextBout : GroupDashboardEvent()
     data object NavigateToBoutsList : GroupDashboardEvent()
     data object NavigateBack : GroupDashboardEvent()
+    /** Navigate to the Direct Elimination bracket; creates the tableau if not yet present. */
+    data object ProceedToDE : GroupDashboardEvent()
     data object ExportPdf : GroupDashboardEvent()
     data object DismissExportError : GroupDashboardEvent()
     data object DismissEditScoreError : GroupDashboardEvent()
@@ -92,8 +95,20 @@ class DefaultGroupDashboardComponent(
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
     private val pdfExporter: PdfExporter,
+    private val deRepository: DeRepository,
     private val onNavigateToBoutConfirm: (Long, Long) -> Unit,
     private val onNavigateToBoutsList: (Long) -> Unit,
+    /**
+     * Navigate to the DE tableau for this pool.
+     *
+     * **Qualification default:** all pool fencers qualify, seeded by final pool ranking (FIE
+     * standard). Excluded fencers remain in the DE draw per FIE rules — their pool bouts still
+     * count toward ranking. A qualification cutoff (e.g. top-N qualify) is a future feature.
+     *
+     * @param poolId DB id of the pool
+     * @param weapon FIE weapon code ("SABRE" / "FOIL_EPEE") so DE bouts inherit pool weapon
+     */
+    private val onNavigateToDE: (poolId: Long, weapon: String) -> Unit,
     private val onBack: () -> Unit
 ) : GroupDashboardComponent, ComponentContext by componentContext {
 
@@ -205,6 +220,19 @@ class DefaultGroupDashboardComponent(
                 onNavigateToBoutsList(poolId)
             }
             GroupDashboardEvent.NavigateBack -> onBack()
+            GroupDashboardEvent.ProceedToDE -> {
+                scope.launch {
+                    try {
+                        val existingBracket = deRepository.observeBracket(poolId).first()
+                        if (existingBracket == null) {
+                            deRepository.createTableauForPool(poolId)
+                        }
+                        onNavigateToDE(poolId, _state.value.weapon)
+                    } catch (e: Exception) {
+                        FirebaseCrashlytics.getInstance().recordException(e)
+                    }
+                }
+            }
             GroupDashboardEvent.ExportPdf -> {
                 scope.launch {
                     withContext(Dispatchers.IO) {

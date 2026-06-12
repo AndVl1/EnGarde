@@ -17,6 +17,9 @@ object GroupDashboardPage : Page<GroupDashboardPage>() {
     val matrix = hasTestTag("dashboard_matrix")
     fun matrixHeaderCol(col: Int) = hasTestTag("matrix_header_col_$col")
 
+    // Proceed to Direct Elimination (Wave 4c)
+    val proceedToDeButton = hasTestTag("groupDashboard_button_proceedToDe")
+
     // Quick entry dialog (Wave 3)
     val quickScoreLeftInput = hasTestTag("dashboard_input_quickScoreLeft")
     val quickScoreRightInput = hasTestTag("dashboard_input_quickScoreRight")

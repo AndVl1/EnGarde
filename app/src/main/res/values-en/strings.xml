@@ -156,4 +156,15 @@
 
     <!-- Quick score entry (Wave 3) -->
     <string name="quick_score_entry">Quick Score Entry</string>
+
+    <!-- Direct Elimination (Wave 4c) -->
+    <string name="proceed_to_de">Proceed to Direct Elimination</string>
+    <string name="de_screen_title">Direct Elimination</string>
+    <string name="de_final">Final</string>
+    <string name="de_semifinal">Semifinal</string>
+    <string name="de_quarterfinal">Quarterfinal</string>
+    <string name="de_round_n">Round %d</string>
+    <string name="de_play_match">Play</string>
+    <string name="de_classification_title">Final Classification</string>
+    <string name="de_seed_label">seed %d</string>
 </resources>

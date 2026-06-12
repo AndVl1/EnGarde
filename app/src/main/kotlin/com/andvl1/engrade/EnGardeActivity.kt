@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.room.Room
+import com.andvl1.engrade.data.DeRepository
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.SettingsRepository
 import com.andvl1.engrade.data.db.EnGardeDatabase
@@ -46,6 +47,7 @@ class EnGardeActivity : ComponentActivity() {
         val settingsRepository = SettingsRepository(applicationContext)
         val poolRepository = PoolRepository(database)
         val poolEngine = PoolEngine()
+        val deRepository = DeRepository(database, poolEngine)
         val pdfExporter = com.andvl1.engrade.platform.PdfExporter(applicationContext)
         soundManager = SoundManager(applicationContext)
         val pendingIntent = PendingIntent.getActivity(
@@ -65,7 +67,8 @@ class EnGardeActivity : ComponentActivity() {
             pdfExporter = pdfExporter,
             soundManager = soundManager,
             notificationHelper = notificationHelper,
-            notificationPendingIntent = pendingIntent
+            notificationPendingIntent = pendingIntent,
+            deRepository = deRepository
         )
 
         setContent {

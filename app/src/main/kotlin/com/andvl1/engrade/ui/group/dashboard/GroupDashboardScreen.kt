@@ -183,6 +183,21 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                 )
 
                 RankingsTable(rankings = state.rankings)
+
+                // Proceed to Direct Elimination (enabled only when all pool bouts are done)
+                val isDeReady = state.totalBoutsCount > 0 &&
+                    state.completedBoutsCount == state.totalBoutsCount
+
+                Button(
+                    onClick = { component.onEvent(GroupDashboardEvent.ProceedToDE) },
+                    enabled = isDeReady,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .testTag("groupDashboard_button_proceedToDe")
+                ) {
+                    Text(stringResource(R.string.proceed_to_de))
+                }
             }
         }
 
