@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -58,6 +60,14 @@ android {
             excludes += "/META-INF/LICENSE-notice.md"
         }
     }
+
+    // Room schema JSON files must be available as test assets so that
+    // MigrationTestHelper can validate the schema after migration.
+    sourceSets {
+        getByName("androidTest").assets.srcDirs(
+            files("$projectDir/schemas")
+        )
+    }
 }
 
 kotlin {
@@ -95,6 +105,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    androidTestImplementation(libs.room.testing)
 
     // Decompose
     implementation(libs.decompose)
@@ -122,4 +133,24 @@ dependencies {
     // Compose Testing
     androidTestImplementation(platform(libs.compose.bom))
     debugImplementation(libs.compose.ui.test.manifest)
+
+    // Detekt plugins
+    detektPlugins(libs.detekt.formatting)
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom("$rootDir/detekt.yml")
+    buildUponDefaultConfig = true
+    baseline = file("$rootDir/detekt-baseline.xml")
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                androidGeneratedClasses()
+            }
+        }
+    }
 }

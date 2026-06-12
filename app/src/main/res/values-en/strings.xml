@@ -19,6 +19,7 @@
     <string name="penalty_card">Penalty card</string>
     <string name="yellow_card">Yellow card</string>
     <string name="red_card">Red card</string>
+    <string name="black_card">Black card</string>
 
     <string name="yellow_card_dialog">Give yellow card to &#8230;</string>
     <string name="red_card_dialog">Give red card to &#8230;</string>
@@ -101,6 +102,9 @@
     <!-- GroupDashboard -->
     <string name="pool_title">Pool</string>
     <string name="bout_number">Bout #%d</string>
+    <string name="bout_display">Bout #%1$d: %2$s vs %3$s</string>
+    <string name="next_bout_display">Next: %1$s vs %2$s</string>
+    <string name="export_csv">Export CSV</string>
     <string name="vs">vs</string>
     <string name="start_next_bout">Start Next Bout</string>
     <string name="bouts_progress">Completed %1$d of %2$d</string>
@@ -133,6 +137,10 @@
     <string name="victory_short">V%d</string>
     <string name="defeat_short">D%d</string>
 
+    <!-- Bout screen fencer default names (shown when no name is provided) -->
+    <string name="fencer_left_default">Left</string>
+    <string name="fencer_right_default">Right</string>
+
     <!-- BoutsList -->
     <string name="all_bouts">All Bouts</string>
     <string name="pending">Pending</string>
@@ -152,4 +160,23 @@
     <string name="progress">Progress</string>
     <string name="result_matrix">Result Matrix</string>
     <string name="rankings">Rankings</string>
+
+    <!-- Quick score entry (Wave 3) -->
+    <string name="quick_score_entry">Quick Score Entry</string>
+
+    <!-- GroupDashboard error messages (resolved in View layer) -->
+    <string name="error_draw_prohibited">FIE: draw is prohibited (%1$d:%2$d)</string>
+    <string name="error_pdf_export_failed">PDF export failed</string>
+    <string name="error_csv_export_failed">CSV export failed</string>
+
+    <!-- Direct Elimination (Wave 4c) -->
+    <string name="proceed_to_de">Proceed to Direct Elimination</string>
+    <string name="de_screen_title">Direct Elimination</string>
+    <string name="de_final">Final</string>
+    <string name="de_semifinal">Semifinal</string>
+    <string name="de_quarterfinal">Quarterfinal</string>
+    <string name="de_round_n">Round %d</string>
+    <string name="de_play_match">Play</string>
+    <string name="de_classification_title">Final Classification</string>
+    <string name="de_seed_label">seed %d</string>
 </resources>

@@ -1,14 +1,22 @@
 package com.andvl1.engrade.ui.root
 
 import android.app.PendingIntent
+import com.andvl1.engrade.data.DeRepository
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.SettingsRepository
 import com.andvl1.engrade.domain.PoolEngine
+import com.andvl1.engrade.domain.model.BoutConfig
+import com.andvl1.engrade.domain.model.FencerSide
+import com.andvl1.engrade.domain.model.Weapon
+import com.andvl1.engrade.platform.CsvExporter
 import com.andvl1.engrade.platform.NotificationHelper
 import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.SoundManager
+import com.andvl1.engrade.platform.componentScope
 import com.andvl1.engrade.ui.bout.BoutComponent
 import com.andvl1.engrade.ui.bout.DefaultBoutComponent
+import com.andvl1.engrade.ui.de.DeTableauComponent
+import com.andvl1.engrade.ui.de.DefaultDeTableauComponent
 import com.andvl1.engrade.ui.group.setup.GroupSetupComponent
 import com.andvl1.engrade.ui.group.dashboard.GroupDashboardComponent
 import com.andvl1.engrade.ui.group.boutconfirm.BoutConfirmComponent
@@ -20,6 +28,7 @@ import com.andvl1.engrade.ui.settings.SettingsComponent
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 interface RootComponent {
@@ -37,6 +46,7 @@ interface RootComponent {
         data class BoutConfirm(val component: BoutConfirmComponent) : Child()
         data class BoutResult(val component: BoutResultComponent) : Child()
         data class BoutsList(val component: BoutsListComponent) : Child()
+        data class DeTableau(val component: DeTableauComponent) : Child()
     }
 
     @Serializable
@@ -82,6 +92,33 @@ interface RootComponent {
 
         @Serializable
         data class BoutsList(val poolId: Long) : Config()
+
+        /**
+         * Direct Elimination bracket screen.
+         *
+         * [weapon] is carried from the pool so [DefaultDeTableauComponent] can configure
+         * DE bouts (mode=15, same weapon) without an extra DB read.
+         */
+        @Serializable
+        data class DeTableau(val poolId: Long, val weapon: String) : Config()
+
+        /**
+         * A single DE match played through the existing [BoutComponent] at mode=15.
+         *
+         * [topSeed] / [bottomSeed] identify the bracket participants so the root can
+         * determine the winner seed after [BoutComponent.onBoutFinished] fires.
+         * [topName] maps to the left fencer on screen; [bottomName] to the right.
+         */
+        @Serializable
+        data class DeBout(
+            val tableauId: Long,
+            val matchId: Int,
+            val topName: String,
+            val bottomName: String,
+            val topSeed: Int,
+            val bottomSeed: Int,
+            val weapon: String
+        ) : Config()
     }
 }
 
@@ -92,12 +129,15 @@ class DefaultRootComponent(
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
     private val pdfExporter: PdfExporter,
+    private val csvExporter: CsvExporter,
     private val soundManager: SoundManager,
     private val notificationHelper: NotificationHelper,
-    private val notificationPendingIntent: PendingIntent
+    private val notificationPendingIntent: PendingIntent,
+    private val deRepository: DeRepository
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<RootComponent.Config>()
+    private val scope = componentScope()
 
     override val childStack: Value<ChildStack<RootComponent.Config, RootComponent.Child>> =
         childStack(
@@ -158,11 +198,16 @@ class DefaultRootComponent(
                 poolRepository = poolRepository,
                 poolEngine = poolEngine,
                 pdfExporter = pdfExporter,
+                csvExporter = csvExporter,
+                deRepository = deRepository,
                 onNavigateToBoutConfirm = { poolId, boutId ->
                     navigation.push(RootComponent.Config.BoutConfirm(poolId, boutId))
                 },
                 onNavigateToBoutsList = { poolId ->
                     navigation.push(RootComponent.Config.BoutsList(poolId))
+                },
+                onNavigateToDE = { poolId, weapon ->
+                    navigation.push(RootComponent.Config.DeTableau(poolId, weapon))
                 },
                 onBack = ::navigateBack
             )
@@ -246,6 +291,72 @@ class DefaultRootComponent(
                 poolId = config.poolId,
                 poolRepository = poolRepository,
                 onBack = ::navigateBack
+            )
+        )
+
+        is RootComponent.Config.DeTableau -> RootComponent.Child.DeTableau(
+            DefaultDeTableauComponent(
+                componentContext = context,
+                poolId = config.poolId,
+                weapon = config.weapon,
+                deRepository = deRepository,
+                onNavigateToDeBout = { tableauId, matchId, topName, bottomName, topSeed, bottomSeed, weapon ->
+                    navigation.push(
+                        RootComponent.Config.DeBout(
+                            tableauId = tableauId,
+                            matchId = matchId,
+                            topName = topName,
+                            bottomName = bottomName,
+                            topSeed = topSeed,
+                            bottomSeed = bottomSeed,
+                            weapon = weapon
+                        )
+                    )
+                },
+                onBack = ::navigateBack
+            )
+        )
+
+        is RootComponent.Config.DeBout -> RootComponent.Child.Bout(
+            DefaultBoutComponent(
+                componentContext = context,
+                settingsRepository = settingsRepository,
+                soundManager = soundManager,
+                notificationHelper = notificationHelper,
+                notificationPendingIntent = notificationPendingIntent,
+                leftFencerName = config.topName,
+                rightFencerName = config.bottomName,
+                overrideConfig = BoutConfig(
+                    mode = 15,
+                    weapon = Weapon.valueOf(config.weapon),
+                    periodLengthMs = 3 * 60 * 1000L,
+                    breakLengthMs = 1 * 60 * 1000L,
+                    priorityLengthMs = 1 * 60 * 1000L,
+                    showDoubleTouchButton = config.weapon == "SABRE",
+                    anywhereToStart = true
+                ),
+                onBoutFinished = { leftScore, rightScore, winner ->
+                    // Determine which DE seed won (topName = left fencer on screen)
+                    val winnerSeed = if (winner == FencerSide.LEFT) config.topSeed else config.bottomSeed
+                    scope.launch {
+                        try {
+                            deRepository.recordMatchResult(
+                                tableauId = config.tableauId,
+                                matchId = config.matchId,
+                                winnerSeed = winnerSeed,
+                                topScore = leftScore,
+                                bottomScore = rightScore
+                            )
+                        } catch (e: Exception) {
+                            // Navigate back even if DB write fails; bracket will not update.
+                            // Log to Crashlytics so the failure is visible in production.
+                            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
+                                .recordException(e)
+                        }
+                        navigation.popWhile { it !is RootComponent.Config.DeTableau }
+                    }
+                },
+                onNavigateToSettings = ::navigateToSettings
             )
         )
     }

@@ -44,4 +44,8 @@ interface PoolBoutDao {
         WHERE poolId = :poolId AND (leftFencerSeed = :seedNumber OR rightFencerSeed = :seedNumber)
     """)
     suspend fun annulBoutsForSeed(poolId: Long, seedNumber: Int)
+
+    /** One-shot suspend read of all bouts for a pool ordered by boutOrder. */
+    @Query("SELECT * FROM pool_bout WHERE poolId = :poolId ORDER BY boutOrder ASC")
+    suspend fun getByPoolIdOnce(poolId: Long): List<PoolBoutEntity>
 }

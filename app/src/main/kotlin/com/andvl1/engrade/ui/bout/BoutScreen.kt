@@ -27,6 +27,8 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 @Composable
 fun BoutScreen(component: BoutComponent) {
     val state = component.state.subscribeAsState()
+    val leftDisplayName = state.value.leftFencerName.ifBlank { stringResource(R.string.fencer_left_default) }
+    val rightDisplayName = state.value.rightFencerName.ifBlank { stringResource(R.string.fencer_right_default) }
 
     Scaffold(
         topBar = {
@@ -127,7 +129,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Left fencer
                     FencerScoreCard(
                         fencer = state.value.leftFencer,
-                        fencerName = state.value.leftFencerName,
+                        fencerName = leftDisplayName,
                         side = FencerSide.LEFT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.LeftScored) },
@@ -139,7 +141,7 @@ fun BoutScreen(component: BoutComponent) {
                     // Right fencer
                     FencerScoreCard(
                         fencer = state.value.rightFencer,
-                        fencerName = state.value.rightFencerName,
+                        fencerName = rightDisplayName,
                         side = FencerSide.RIGHT,
                         modifier = Modifier.weight(1f),
                         onScoreClick = { component.onEvent(BoutEvent.RightScored) },
@@ -246,22 +248,26 @@ fun FencerScoreCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Card indicator
-            if (fencer.hasRedCard || fencer.hasYellowCard) {
+            // Card indicator — priority: black > red > yellow
+            if (fencer.hasBlackCard || fencer.hasRedCard || fencer.hasYellowCard) {
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
-                            color = if (fencer.hasRedCard) Color.Red else Yellow,
+                            color = when {
+                                fencer.hasBlackCard -> Color(0xFF212121)
+                                fencer.hasRedCard -> Color.Red
+                                else -> Yellow
+                            },
                             shape = MaterialTheme.shapes.small
                         )
                         .clickable(onClick = onCardClick)
                         .testTag("bout_button_${sideTag}Card")
                         .then(
-                            if (fencer.hasYellowCard) {
-                                Modifier.testTag("bout_indicator_${sideTag}YellowCard")
-                            } else {
-                                Modifier.testTag("bout_indicator_${sideTag}RedCard")
+                            when {
+                                fencer.hasBlackCard -> Modifier.testTag("bout_indicator_${sideTag}BlackCard")
+                                fencer.hasRedCard -> Modifier.testTag("bout_indicator_${sideTag}RedCard")
+                                else -> Modifier.testTag("bout_indicator_${sideTag}YellowCard")
                             }
                         )
                 )
@@ -309,6 +315,7 @@ fun CardDialog(
             )
         },
         text = {
+            val sideLabel = if (fencerSide == FencerSide.LEFT) "Left" else "Right"
             Column {
                 Button(
                     onClick = { onCardSelected(CardType.YELLOW) },
@@ -330,6 +337,18 @@ fun CardDialog(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
                     Text(stringResource(R.string.red_card))
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { onCardSelected(CardType.BLACK) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("bout_button_blackCard$sideLabel"),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF212121))
+                ) {
+                    Text(stringResource(R.string.black_card))
                 }
             }
         },

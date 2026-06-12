@@ -164,6 +164,7 @@ class DefaultBoutComponent(
         when (type) {
             CardType.YELLOW -> engine.giveYellowCard(side)
             CardType.RED -> engine.giveRedCard(side)
+            CardType.BLACK -> engine.giveBlackCard(side)
         }
         dismissCardDialog()
         updateState()
@@ -189,8 +190,8 @@ class DefaultBoutComponent(
     }
 
     private fun updateState() {
-        val displayLeftName = leftFencerName.ifBlank { "Left" }
-        val displayRightName = rightFencerName.ifBlank { "Right" }
+        val displayLeftName = leftFencerName
+        val displayRightName = rightFencerName
 
         _state.value = _state.value.copy(
             leftFencer = engine.leftFencer,
@@ -211,7 +212,9 @@ class DefaultBoutComponent(
             finishedCallbackFired = true
             val leftScore = engine.leftFencer.score
             val rightScore = engine.rightFencer.score
-            val winner = if (leftScore > rightScore) FencerSide.LEFT else FencerSide.RIGHT
+            // Use engine's authoritative isWinner flag — black-card exclusion declares the
+            // OPPONENT the winner regardless of score, so score comparison would be wrong.
+            val winner = if (engine.leftFencer.isWinner) FencerSide.LEFT else FencerSide.RIGHT
             onBoutFinished(leftScore, rightScore, winner)
         }
     }

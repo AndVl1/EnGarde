@@ -1,11 +1,13 @@
 package com.andvl1.engrade.ui.group.dashboard
 
+import com.andvl1.engrade.data.DeRepository
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.domain.PoolEngine
 import com.andvl1.engrade.domain.model.BoutResultData
 import com.andvl1.engrade.domain.model.BoutStatus
 import com.andvl1.engrade.domain.model.FencerRanking
 import com.andvl1.engrade.domain.model.MatrixCell
+import com.andvl1.engrade.platform.CsvExporter
 import com.andvl1.engrade.platform.PdfExporter
 import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
@@ -23,6 +25,29 @@ interface GroupDashboardComponent {
     fun onEvent(event: GroupDashboardEvent)
 }
 
+/**
+ * Structured error type for dashboard errors.
+ * Resolved to localized strings in the Composable layer — keeps the non-Composable
+ * component free of hardcoded strings in any language.
+ */
+sealed class DashboardError {
+    /** FIE rule: draws are not permitted. The scores that caused the violation are included
+     *  so the View can format "%1$d:%2$d" via string resources. */
+    data class DrawProhibited(val leftScore: Int, val rightScore: Int) : DashboardError()
+    data object PdfExportFailed : DashboardError()
+    data object CsvExportFailed : DashboardError()
+}
+
+/**
+ * Structured bout info passed to the Composable layer for localized formatting.
+ * Avoids hardcoded English format strings inside the component.
+ */
+data class BoutDisplayInfo(
+    val boutOrder: Int,
+    val leftName: String,
+    val rightName: String
+)
+
 data class GroupDashboardState(
     val poolId: Long = 0,
     val fencerCount: Int = 0,
@@ -34,12 +59,14 @@ data class GroupDashboardState(
     val excludedSeeds: Set<Int> = emptySet(),
     val completedBoutsCount: Int = 0,
     val totalBoutsCount: Int = 0,
-    val currentBoutInfo: String? = null,
-    val nextBoutInfo: String? = null,
+    val currentBout: BoutDisplayInfo? = null,
+    val nextBout: BoutDisplayInfo? = null,
     val showEditScoreDialog: EditScoreDialogState? = null,
     val showForfeitDialog: ForfeitDialogState? = null,
+    val showQuickEntryDialog: QuickEntryDialogState? = null,
     val isLoading: Boolean = true,
-    val exportError: String? = null
+    val exportError: DashboardError? = null,
+    val editScoreError: DashboardError? = null
 )
 
 data class EditScoreDialogState(
@@ -48,6 +75,13 @@ data class EditScoreDialogState(
     val rightName: String,
     val leftScore: Int,
     val rightScore: Int
+)
+
+data class QuickEntryDialogState(
+    val boutId: Long,
+    val leftName: String,
+    val rightName: String,
+    val mode: Int
 )
 
 data class ForfeitDialogState(
@@ -62,8 +96,12 @@ sealed class GroupDashboardEvent {
     data object StartNextBout : GroupDashboardEvent()
     data object NavigateToBoutsList : GroupDashboardEvent()
     data object NavigateBack : GroupDashboardEvent()
+    /** Navigate to the Direct Elimination bracket; creates the tableau if not yet present. */
+    data object ProceedToDE : GroupDashboardEvent()
     data object ExportPdf : GroupDashboardEvent()
+    data object ExportCsv : GroupDashboardEvent()
     data object DismissExportError : GroupDashboardEvent()
+    data object DismissEditScoreError : GroupDashboardEvent()
     data class ShowEditScoreDialog(val boutId: Long) : GroupDashboardEvent()
     data object DismissEditScoreDialog : GroupDashboardEvent()
     data class UpdateBoutScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
@@ -71,6 +109,9 @@ sealed class GroupDashboardEvent {
     data object DismissForfeitDialog : GroupDashboardEvent()
     data class RecordForfeit(val boutId: Long, val absentSide: String) : GroupDashboardEvent()
     data class ExcludeFencer(val seedNumber: Int) : GroupDashboardEvent()
+    data class ShowQuickEntryDialog(val leftSeed: Int, val rightSeed: Int) : GroupDashboardEvent()
+    data object DismissQuickEntryDialog : GroupDashboardEvent()
+    data class RecordQuickScore(val boutId: Long, val leftScore: Int, val rightScore: Int) : GroupDashboardEvent()
 }
 
 class DefaultGroupDashboardComponent(
@@ -79,14 +120,30 @@ class DefaultGroupDashboardComponent(
     private val poolRepository: PoolRepository,
     private val poolEngine: PoolEngine,
     private val pdfExporter: PdfExporter,
+    private val csvExporter: CsvExporter,
+    private val deRepository: DeRepository,
     private val onNavigateToBoutConfirm: (Long, Long) -> Unit,
     private val onNavigateToBoutsList: (Long) -> Unit,
+    /**
+     * Navigate to the DE tableau for this pool.
+     *
+     * **Qualification default:** all pool fencers qualify, seeded by final pool ranking (FIE
+     * standard). Excluded fencers remain in the DE draw per FIE rules — their pool bouts still
+     * count toward ranking. A qualification cutoff (e.g. top-N qualify) is a future feature.
+     *
+     * @param poolId DB id of the pool
+     * @param weapon FIE weapon code ("SABRE" / "FOIL_EPEE") so DE bouts inherit pool weapon
+     */
+    private val onNavigateToDE: (poolId: Long, weapon: String) -> Unit,
     private val onBack: () -> Unit
 ) : GroupDashboardComponent, ComponentContext by componentContext {
 
     private val scope = componentScope()
     private val _state = MutableValue(GroupDashboardState(poolId = poolId))
     override val state: Value<GroupDashboardState> = _state
+
+    /** Guard against double-tap: only one ProceedToDE coroutine may be in flight. */
+    private var isProceedingToDE = false
 
     init {
         loadPoolData()
@@ -121,13 +178,13 @@ class DefaultGroupDashboardComponent(
                 val total = bouts.size
 
                 val pendingBouts = bouts.filter { it.bout.status == BoutStatus.PENDING }
-                val currentBout = pendingBouts.firstOrNull()
-                val currentInfo = currentBout?.let {
-                    "Bout #${it.bout.boutOrder}: ${it.leftFencerName} vs ${it.rightFencerName}"
+                val currentPendingEntry = pendingBouts.firstOrNull()
+                val currentBoutDisplayInfo = currentPendingEntry?.let {
+                    BoutDisplayInfo(it.bout.boutOrder, it.leftFencerName, it.rightFencerName)
                 }
-                val nextBout = pendingBouts.drop(1).firstOrNull()
-                val nextInfo = nextBout?.let {
-                    "Next: ${it.leftFencerName} vs ${it.rightFencerName}"
+                val nextPendingEntry = pendingBouts.drop(1).firstOrNull()
+                val nextBoutDisplayInfo = nextPendingEntry?.let {
+                    BoutDisplayInfo(it.bout.boutOrder, it.leftFencerName, it.rightFencerName)
                 }
 
                 // Compute standings in-memory from the same snapshot — no extra DB reads
@@ -157,8 +214,7 @@ class DefaultGroupDashboardComponent(
 
                 val matrix = poolEngine.buildMatrix(
                     fencerCount = fencerCount,
-                    bouts = completedBouts,
-                    excludedSeeds = excludedSeeds
+                    bouts = completedBouts
                 )
 
                 _state.value = _state.value.copy(
@@ -169,8 +225,8 @@ class DefaultGroupDashboardComponent(
                     excludedSeeds = excludedSeeds,
                     completedBoutsCount = completed,
                     totalBoutsCount = total,
-                    currentBoutInfo = currentInfo,
-                    nextBoutInfo = nextInfo,
+                    currentBout = currentBoutDisplayInfo,
+                    nextBout = nextBoutDisplayInfo,
                     rankings = rankings,
                     matrix = matrix,
                     isLoading = false
@@ -193,6 +249,23 @@ class DefaultGroupDashboardComponent(
                 onNavigateToBoutsList(poolId)
             }
             GroupDashboardEvent.NavigateBack -> onBack()
+            GroupDashboardEvent.ProceedToDE -> {
+                if (isProceedingToDE) return
+                isProceedingToDE = true
+                scope.launch {
+                    try {
+                        val existingBracket = deRepository.observeBracket(poolId).first()
+                        if (existingBracket == null) {
+                            deRepository.createTableauForPool(poolId)
+                        }
+                        onNavigateToDE(poolId, _state.value.weapon)
+                    } catch (e: Exception) {
+                        FirebaseCrashlytics.getInstance().recordException(e)
+                    } finally {
+                        isProceedingToDE = false
+                    }
+                }
+            }
             GroupDashboardEvent.ExportPdf -> {
                 scope.launch {
                     withContext(Dispatchers.IO) {
@@ -220,7 +293,27 @@ class DefaultGroupDashboardComponent(
                             FirebaseCrashlytics.getInstance().recordException(e)
                             withContext(Dispatchers.Main) {
                                 _state.value = _state.value.copy(
-                                    exportError = e.message ?: "PDF export failed"
+                                    exportError = DashboardError.PdfExportFailed
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            GroupDashboardEvent.ExportCsv -> {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val currentState = _state.value
+                            val csvFile = csvExporter.exportRankingsCsv(currentState.rankings)
+                            withContext(Dispatchers.Main) {
+                                csvExporter.shareCsv(csvFile)
+                            }
+                        } catch (e: Exception) {
+                            FirebaseCrashlytics.getInstance().recordException(e)
+                            withContext(Dispatchers.Main) {
+                                _state.value = _state.value.copy(
+                                    exportError = DashboardError.CsvExportFailed
                                 )
                             }
                         }
@@ -229,6 +322,9 @@ class DefaultGroupDashboardComponent(
             }
             GroupDashboardEvent.DismissExportError -> {
                 _state.value = _state.value.copy(exportError = null)
+            }
+            GroupDashboardEvent.DismissEditScoreError -> {
+                _state.value = _state.value.copy(editScoreError = null)
             }
             is GroupDashboardEvent.ShowEditScoreDialog -> {
                 scope.launch {
@@ -251,13 +347,20 @@ class DefaultGroupDashboardComponent(
                 _state.value = _state.value.copy(showEditScoreDialog = null)
             }
             is GroupDashboardEvent.UpdateBoutScore -> {
-                scope.launch {
-                    poolRepository.updateBoutScore(
-                        boutId = event.boutId,
-                        leftScore = event.leftScore,
-                        rightScore = event.rightScore
+                // F3: FIE — ничья запрещена; валидируем до вызова репозитория
+                if (event.leftScore == event.rightScore) {
+                    _state.value = _state.value.copy(
+                        editScoreError = DashboardError.DrawProhibited(event.leftScore, event.rightScore)
                     )
-                    _state.value = _state.value.copy(showEditScoreDialog = null)
+                } else {
+                    scope.launch {
+                        poolRepository.updateBoutScore(
+                            boutId = event.boutId,
+                            leftScore = event.leftScore,
+                            rightScore = event.rightScore
+                        )
+                        _state.value = _state.value.copy(showEditScoreDialog = null)
+                    }
                 }
             }
             GroupDashboardEvent.ShowForfeitDialog -> {
@@ -296,6 +399,46 @@ class DefaultGroupDashboardComponent(
             is GroupDashboardEvent.ExcludeFencer -> {
                 scope.launch {
                     poolRepository.excludeFencer(poolId, event.seedNumber)
+                }
+            }
+            is GroupDashboardEvent.ShowQuickEntryDialog -> {
+                scope.launch {
+                    val boutsList = poolRepository.getPoolBoutsWithNames(poolId).first()
+                    val bout = boutsList.find { boutWithNames ->
+                        val b = boutWithNames.bout
+                        b.status == BoutStatus.PENDING &&
+                            ((b.leftFencerSeed == event.leftSeed && b.rightFencerSeed == event.rightSeed) ||
+                             (b.leftFencerSeed == event.rightSeed && b.rightFencerSeed == event.leftSeed))
+                    }
+                    bout?.let {
+                        _state.value = _state.value.copy(
+                            showQuickEntryDialog = QuickEntryDialogState(
+                                boutId = it.bout.id,
+                                leftName = it.leftFencerName,
+                                rightName = it.rightFencerName,
+                                mode = _state.value.mode
+                            )
+                        )
+                    }
+                }
+            }
+            GroupDashboardEvent.DismissQuickEntryDialog -> {
+                _state.value = _state.value.copy(showQuickEntryDialog = null)
+            }
+            is GroupDashboardEvent.RecordQuickScore -> {
+                if (event.leftScore == event.rightScore) {
+                    _state.value = _state.value.copy(
+                        editScoreError = DashboardError.DrawProhibited(event.leftScore, event.rightScore)
+                    )
+                } else {
+                    scope.launch {
+                        poolRepository.recordBoutResult(
+                            boutId = event.boutId,
+                            leftScore = event.leftScore,
+                            rightScore = event.rightScore
+                        )
+                        _state.value = _state.value.copy(showQuickEntryDialog = null)
+                    }
                 }
             }
         }

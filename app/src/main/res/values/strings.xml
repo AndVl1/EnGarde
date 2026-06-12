@@ -24,6 +24,7 @@
     <string name="penalty_card">Penalty card</string>
     <string name="yellow_card">Yellow card</string>
     <string name="red_card">Red card</string>
+    <string name="black_card">Чёрная карточка</string>
 
     <string name="yellow_card_dialog">Give yellow card to &#8230;</string>
     <string name="red_card_dialog">Give red card to &#8230;</string>
@@ -109,6 +110,9 @@
     <!-- GroupDashboard -->
     <string name="pool_title">Группа</string>
     <string name="bout_number">Бой #%d</string>
+    <string name="bout_display">Бой #%1$d: %2$s — %3$s</string>
+    <string name="next_bout_display">Готовится: %1$s — %2$s</string>
+    <string name="export_csv">Экспорт CSV</string>
     <string name="vs">vs</string>
     <string name="start_next_bout">Начать следующий бой</string>
     <string name="bouts_progress">Проведено %1$d из %2$d</string>
@@ -141,6 +145,10 @@
     <string name="victory_short">V%d</string>
     <string name="defeat_short">D%d</string>
 
+    <!-- Bout screen fencer default names (shown when no name is provided) -->
+    <string name="fencer_left_default">Левый</string>
+    <string name="fencer_right_default">Правый</string>
+
     <!-- BoutsList -->
     <string name="all_bouts">Все бои</string>
     <string name="pending">Ожидание</string>
@@ -160,4 +168,23 @@
     <string name="progress">Прогресс</string>
     <string name="result_matrix">Матрица результатов</string>
     <string name="rankings">Ранжирование</string>
+
+    <!-- Quick score entry (Wave 3) -->
+    <string name="quick_score_entry">Ввод счёта</string>
+
+    <!-- GroupDashboard error messages (resolved in View layer) -->
+    <string name="error_draw_prohibited">FIE: ничья в бое запрещена (%1$d:%2$d)</string>
+    <string name="error_pdf_export_failed">Ошибка экспорта PDF</string>
+    <string name="error_csv_export_failed">Ошибка экспорта CSV</string>
+
+    <!-- Direct Elimination (Wave 4c) -->
+    <string name="proceed_to_de">Перейти к прямому выбыванию</string>
+    <string name="de_screen_title">Прямое выбывание</string>
+    <string name="de_final">Финал</string>
+    <string name="de_semifinal">Полуфинал</string>
+    <string name="de_quarterfinal">Четвертьфинал</string>
+    <string name="de_round_n">Раунд %d</string>
+    <string name="de_play_match">Бой</string>
+    <string name="de_classification_title">Итоговое ранжирование</string>
+    <string name="de_seed_label">посев %d</string>
 </resources>

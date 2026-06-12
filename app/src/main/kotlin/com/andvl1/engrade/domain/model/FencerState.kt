@@ -7,6 +7,7 @@ data class FencerState(
     val score: Int = 0,
     val hasYellowCard: Boolean = false,
     val hasRedCard: Boolean = false,
+    val hasBlackCard: Boolean = false,
     val hasPriority: Boolean = false,
     val isWinner: Boolean = false
 ) {
@@ -15,6 +16,8 @@ data class FencerState(
     fun withoutYellowCard() = copy(hasYellowCard = false)
     fun withRedCard() = copy(hasRedCard = true)
     fun withoutRedCard() = copy(hasRedCard = false)
+    fun withBlackCard() = copy(hasBlackCard = true)
+    fun withoutBlackCard() = copy(hasBlackCard = false)
     fun withPriority() = copy(hasPriority = true)
     fun withoutPriority() = copy(hasPriority = false)
     fun withWinner() = copy(isWinner = true)

@@ -58,6 +58,9 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreLeft(): ScoreResult {
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
         // Save state before making changes
         val previousSection = _currentSection
         val previousNextSection = _nextSection
@@ -72,15 +75,8 @@ class BoutEngine(
             )
         )
 
-        // Sabre break-at-8 rule
-        if (config.weapon == Weapon.SABRE &&
-            _leftFencer.score == 8 &&
-            _rightFencer.score < 8
-        ) {
-            _timeRemaining = config.breakLengthMs
-            _currentSection = SectionType.BREAK
-            _nextSection = SectionType.PERIOD
-        }
+        // F5: Sabre break-at-8 rule (общий helper)
+        applySabreBreakAt8IfNeeded()
 
         // Check for winner
         if (_leftFencer.score >= config.mode || _currentSection == SectionType.PRIORITY) {
@@ -98,6 +94,9 @@ class BoutEngine(
      * Handles sabre break-at-8 rule and winner determination.
      */
     fun addScoreRight(): ScoreResult {
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
         // Save state before making changes
         val previousSection = _currentSection
         val previousNextSection = _nextSection
@@ -112,15 +111,8 @@ class BoutEngine(
             )
         )
 
-        // Sabre break-at-8 rule
-        if (config.weapon == Weapon.SABRE &&
-            _rightFencer.score == 8 &&
-            _leftFencer.score < 8
-        ) {
-            _timeRemaining = config.breakLengthMs
-            _currentSection = SectionType.BREAK
-            _nextSection = SectionType.PERIOD
-        }
+        // F5: Sabre break-at-8 rule (общий helper)
+        applySabreBreakAt8IfNeeded()
 
         // Check for winner
         if (_rightFencer.score >= config.mode || _currentSection == SectionType.PRIORITY) {
@@ -135,13 +127,21 @@ class BoutEngine(
 
     /**
      * Add double touch (both fencers score).
-     * NOT allowed when both are at (mode - 1), except in PRIORITY section.
+     * NOT allowed when both are at (mode - 1).
+     * In PRIORITY section, simultaneous action is annulled per FIE rules.
      */
     fun addDoubleTouch(): ScoreResult {
-        // Prevent double touch when both at mode-1 (except in PRIORITY)
+        // F1: бой завершён — добавление очков запрещено
+        if (_isOver) return ScoreResult.Scored
+
+        // F2: FIE — одновременное действие в минуту приоритета аннулируется (никто не засчитывает)
+        if (_currentSection == SectionType.PRIORITY) {
+            return ScoreResult.Scored
+        }
+
+        // Prevent double touch when both at mode-1
         if (_leftFencer.score == _rightFencer.score &&
-            _leftFencer.score == config.mode - 1 &&
-            _currentSection != SectionType.PRIORITY
+            _leftFencer.score == config.mode - 1
         ) {
             return ScoreResult.DoubleNotAllowed
         }
@@ -184,29 +184,125 @@ class BoutEngine(
 
     /**
      * Give yellow card to a fencer.
-     * Only recorded if they don't already have a card.
+     *
+     * FIE t.114 group-1 penalty escalation chain:
+     *  • No prior card  → yellow card (warning, no touch)
+     *  • Has yellow     → auto-escalate to red: opponent +1 touch (sabre break-at-8 applies)
+     *  • Has red        → auto-escalate to black: immediate exclusion, opponent wins
+     *  • Has black      → no-op (already excluded)
      */
     fun giveYellowCard(side: FencerSide): CardResult {
         when (side) {
             FencerSide.LEFT -> {
-                val alreadyHasCard = _leftFencer.hasYellowCard || _leftFencer.hasRedCard
-                _leftFencer = _leftFencer.withYellowCard()
-                if (!alreadyHasCard) {
-                    _undoStack.addLast(UndoAction.LeftYellowCard)
-                    return CardResult.CardGiven
+                return when {
+                    _leftFencer.hasBlackCard -> CardResult.AlreadyHasCard
+                    _leftFencer.hasRedCard -> escalateToBlack(FencerSide.LEFT)
+                    _leftFencer.hasYellowCard -> escalateYellowToRed(FencerSide.LEFT)
+                    else -> {
+                        _leftFencer = _leftFencer.withYellowCard()
+                        _undoStack.addLast(UndoAction.LeftYellowCard)
+                        CardResult.CardGiven
+                    }
                 }
-                return CardResult.AlreadyHasCard
             }
             FencerSide.RIGHT -> {
-                val alreadyHasCard = _rightFencer.hasYellowCard || _rightFencer.hasRedCard
-                _rightFencer = _rightFencer.withYellowCard()
-                if (!alreadyHasCard) {
-                    _undoStack.addLast(UndoAction.RightYellowCard)
-                    return CardResult.CardGiven
+                return when {
+                    _rightFencer.hasBlackCard -> CardResult.AlreadyHasCard
+                    _rightFencer.hasRedCard -> escalateToBlack(FencerSide.RIGHT)
+                    _rightFencer.hasYellowCard -> escalateYellowToRed(FencerSide.RIGHT)
+                    else -> {
+                        _rightFencer = _rightFencer.withYellowCard()
+                        _undoStack.addLast(UndoAction.RightYellowCard)
+                        CardResult.CardGiven
+                    }
                 }
-                return CardResult.AlreadyHasCard
             }
         }
+    }
+
+    /**
+     * Yellow → Red escalation (FIE t.114, second group-1 offence).
+     * Awards one touch to the opponent; sabre break-at-8 helper is applied.
+     * Pushes a distinct undo action so the escalation reverses cleanly.
+     */
+    private fun escalateYellowToRed(side: FencerSide): CardResult {
+        when (side) {
+            FencerSide.LEFT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
+                _leftFencer = _leftFencer.withRedCard()
+                if (_rightFencer.score < config.mode) {
+                    _rightFencer = _rightFencer.incrementScore()
+                }
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.LeftYellowToRedEscalation(previousSection, previousNextSection, previousTime))
+                if (_rightFencer.score >= config.mode) {
+                    _rightFencer = _rightFencer.withWinner()
+                    _leftFencer = _leftFencer.withoutWinner()
+                    _isOver = true
+                    return CardResult.GameOver(FencerSide.RIGHT)
+                }
+            }
+            FencerSide.RIGHT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
+                _rightFencer = _rightFencer.withRedCard()
+                if (_leftFencer.score < config.mode) {
+                    _leftFencer = _leftFencer.incrementScore()
+                }
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.RightYellowToRedEscalation(previousSection, previousNextSection, previousTime))
+                if (_leftFencer.score >= config.mode) {
+                    _leftFencer = _leftFencer.withWinner()
+                    _rightFencer = _rightFencer.withoutWinner()
+                    _isOver = true
+                    return CardResult.GameOver(FencerSide.LEFT)
+                }
+            }
+        }
+        return CardResult.CardGiven
+    }
+
+    /**
+     * Red → Black escalation (FIE t.114, third group-1 offence, or direct group-3/4 offence).
+     * Ends the bout immediately; opponent is declared winner. No score change.
+     * Internal helper shared by giveYellowCard (escalation) and giveBlackCard (direct).
+     */
+    private fun escalateToBlack(side: FencerSide): CardResult {
+        when (side) {
+            FencerSide.LEFT -> {
+                _leftFencer = _leftFencer.withBlackCard()
+                _rightFencer = _rightFencer.withWinner()
+                _leftFencer = _leftFencer.withoutWinner()
+                _isOver = true
+                _undoStack.addLast(UndoAction.LeftBlackCard)
+                return CardResult.GameOver(FencerSide.RIGHT)
+            }
+            FencerSide.RIGHT -> {
+                _rightFencer = _rightFencer.withBlackCard()
+                _leftFencer = _leftFencer.withWinner()
+                _rightFencer = _rightFencer.withoutWinner()
+                _isOver = true
+                _undoStack.addLast(UndoAction.RightBlackCard)
+                return CardResult.GameOver(FencerSide.LEFT)
+            }
+        }
+    }
+
+    /**
+     * Give black card to a fencer (group 3/4 offence = exclusion, FIE t.86).
+     * Ends the bout immediately with the opponent as winner.
+     * No point is awarded — exclusion is the penalty.
+     * Undoable: undo restores the bout to its pre-exclusion state.
+     *
+     * Pool-level exclusion (PoolFencerEntity annulment) is handled separately.
+     * TODO(wave-follow-up): wire black card to pool exclusion
+     */
+    fun giveBlackCard(side: FencerSide): CardResult {
+        if (_isOver) return CardResult.CardGiven
+        return escalateToBlack(side)
     }
 
     /**
@@ -216,12 +312,17 @@ class BoutEngine(
     fun giveRedCard(side: FencerSide): CardResult {
         when (side) {
             FencerSide.LEFT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _leftFencer = _leftFencer.withRedCard()
                 // Opponent gets a point (if not at max)
                 if (_rightFencer.score < config.mode) {
                     _rightFencer = _rightFencer.incrementScore()
                 }
-                _undoStack.addLast(UndoAction.LeftRedCard)
+                // F5: штрафное очко может сработать правило сабли перерыв-на-8
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.LeftRedCard(previousSection, previousNextSection, previousTime))
 
                 // Check if right fencer wins
                 if (_rightFencer.score >= config.mode) {
@@ -232,12 +333,17 @@ class BoutEngine(
                 }
             }
             FencerSide.RIGHT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _rightFencer = _rightFencer.withRedCard()
                 // Opponent gets a point (if not at max)
                 if (_leftFencer.score < config.mode) {
                     _leftFencer = _leftFencer.incrementScore()
                 }
-                _undoStack.addLast(UndoAction.RightRedCard)
+                // F5: штрафное очко может сработать правило сабли перерыв-на-8
+                applySabreBreakAt8IfNeeded()
+                _undoStack.addLast(UndoAction.RightRedCard(previousSection, previousNextSection, previousTime))
 
                 // Check if left fencer wins
                 if (_leftFencer.score >= config.mode) {
@@ -405,6 +511,28 @@ class BoutEngine(
     // === INTERNAL HELPERS ===
 
     /**
+     * F5: Sabre break-at-8 rule.
+     * Если оружие — сабля и один фехтовальщик достигает ровно 8 очков, пока другой ниже 8,
+     * срабатывает обязательный перерыв (согласно правилам ФИЭ).
+     * Вызывается из addScoreLeft, addScoreRight и giveRedCard.
+     */
+    private fun applySabreBreakAt8IfNeeded() {
+        if (config.weapon != Weapon.SABRE) return
+        when {
+            _leftFencer.score == 8 && _rightFencer.score < 8 -> {
+                _timeRemaining = config.breakLengthMs
+                _currentSection = SectionType.BREAK
+                _nextSection = SectionType.PERIOD
+            }
+            _rightFencer.score == 8 && _leftFencer.score < 8 -> {
+                _timeRemaining = config.breakLengthMs
+                _currentSection = SectionType.BREAK
+                _nextSection = SectionType.PERIOD
+            }
+        }
+    }
+
+    /**
      * Recomputes _isOver and winner flags from the current score/section state.
      * Called after any undo that affects scores, so the bout status stays consistent.
      *
@@ -446,38 +574,34 @@ class BoutEngine(
         return when (action) {
             is UndoAction.LeftScored -> {
                 _leftFencer = _leftFencer.decrementScore()
-                if (_leftFencer.isWinner) {
-                    _leftFencer = _leftFencer.withoutWinner()
-                }
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false — корректно
+                // обрабатывает случай, когда счёт после декремента всё ещё >= mode
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.RightScored -> {
                 _rightFencer = _rightFencer.decrementScore()
-                if (_rightFencer.isWinner) {
-                    _rightFencer = _rightFencer.withoutWinner()
-                }
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.BothScored -> {
                 _leftFencer = _leftFencer.decrementScore()
                 _rightFencer = _rightFencer.decrementScore()
-                if (_leftFencer.isWinner) _leftFencer = _leftFencer.withoutWinner()
-                if (_rightFencer.isWinner) _rightFencer = _rightFencer.withoutWinner()
                 // Restore section state
                 _currentSection = action.previousSection
                 _nextSection = action.previousNextSection
                 _timeRemaining = action.previousTime
-                _isOver = false
+                // F1: recomputeOverState вместо жёсткого _isOver = false
+                recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.LeftYellowCard -> {
@@ -487,6 +611,9 @@ class BoutEngine(
             is UndoAction.LeftRedCard -> {
                 _leftFencer = _leftFencer.withoutRedCard()
                 _rightFencer = _rightFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
                 UndoResult.Undone
             }
@@ -497,7 +624,45 @@ class BoutEngine(
             is UndoAction.RightRedCard -> {
                 _rightFencer = _rightFencer.withoutRedCard()
                 _leftFencer = _leftFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.LeftYellowToRedEscalation -> {
+                // Reverse yellow→red escalation: restore to yellow state, remove opponent point,
+                // and restore section state in case applySabreBreakAt8IfNeeded mutated it.
+                // hasYellowCard remains true (was already set when escalation triggered).
+                _leftFencer = _leftFencer.withoutRedCard()
+                _rightFencer = _rightFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
+                recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.RightYellowToRedEscalation -> {
+                _rightFencer = _rightFencer.withoutRedCard()
+                _leftFencer = _leftFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
+                recomputeOverState()
+                UndoResult.Undone
+            }
+            is UndoAction.LeftBlackCard -> {
+                // Reverse black card exclusion: restore bout to active state.
+                // No score change — black card does not award a point.
+                _leftFencer = _leftFencer.withoutBlackCard()
+                _rightFencer = _rightFencer.withoutWinner()
+                _isOver = false
+                UndoResult.Undone
+            }
+            is UndoAction.RightBlackCard -> {
+                _rightFencer = _rightFencer.withoutBlackCard()
+                _leftFencer = _leftFencer.withoutWinner()
+                _isOver = false
                 UndoResult.Undone
             }
             is UndoAction.SectionSkipped -> {

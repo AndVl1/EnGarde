@@ -145,13 +145,9 @@ class PoolRepository(private val db: EnGardeDatabase) {
      *
      * FIE rule: draws are not allowed in pool bouts (M3).
      * Finalizing a bout with leftScore == rightScore is rejected here at the data layer.
-     * Intermediate score editing during the bout (updateBoutScore) is not restricted
-     * since the UI may show equal scores before the final touch is scored.
      */
     suspend fun recordBoutResult(boutId: Long, leftScore: Int, rightScore: Int) {
-        require(leftScore != rightScore) {
-            "FIE: draws are not allowed in pool bouts (scores $leftScore:$rightScore are equal)"
-        }
+        validateNoDraw(leftScore, rightScore)
 
         val winner = when {
             leftScore > rightScore -> FencerSide.LEFT
@@ -196,10 +192,12 @@ class PoolRepository(private val db: EnGardeDatabase) {
 
     /**
      * Update bout score (for editing completed bouts).
-     * Equal scores are allowed here since this is mid-bout editing,
-     * not final result recording. See recordBoutResult for FIE draw restriction.
+     *
+     * F3: FIE rule — draws are not allowed. Equal scores are rejected here and
+     * at the UI layer (callers validate before calling to avoid crashing).
      */
     suspend fun updateBoutScore(boutId: Long, leftScore: Int, rightScore: Int) {
+        validateNoDraw(leftScore, rightScore)
         val winner = when {
             leftScore > rightScore -> FencerSide.LEFT
             rightScore > leftScore -> FencerSide.RIGHT
@@ -240,6 +238,18 @@ class PoolRepository(private val db: EnGardeDatabase) {
     companion object {
         /** Valid bout mode values (touches). Matches GroupSetupScreen UI options. */
         val VALID_MODES = listOf(4, 5)
+
+        /**
+         * F3: Validates that bout scores don't form an illegal FIE draw.
+         * Exposed as internal so unit tests can verify the invariant without a real DB.
+         * @throws IllegalArgumentException if leftScore == rightScore
+         */
+        @Throws(IllegalArgumentException::class)
+        internal fun validateNoDraw(leftScore: Int, rightScore: Int) {
+            require(leftScore != rightScore) {
+                "FIE: ничья в бое запрещена (счёт $leftScore:$rightScore равный)"
+            }
+        }
     }
 }
 

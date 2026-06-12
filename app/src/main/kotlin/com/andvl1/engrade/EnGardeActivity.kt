@@ -12,10 +12,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.room.Room
+import com.andvl1.engrade.data.DeRepository
 import com.andvl1.engrade.data.PoolRepository
 import com.andvl1.engrade.data.SettingsRepository
 import com.andvl1.engrade.data.db.EnGardeDatabase
 import com.andvl1.engrade.domain.PoolEngine
+import com.andvl1.engrade.platform.CsvExporter
 import com.andvl1.engrade.platform.NotificationHelper
 import com.andvl1.engrade.platform.SoundManager
 import com.andvl1.engrade.ui.root.DefaultRootComponent
@@ -31,18 +33,24 @@ class EnGardeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize Room database
+        // Initialize Room database.
+        // MIGRATION_1_2 adds de_tableau and de_match tables (Wave 4b — additive only).
+        // No fallbackToDestructiveMigration — user pool data must never be wiped.
         val database = Room.databaseBuilder(
             applicationContext,
             EnGardeDatabase::class.java,
             "engarde.db"
-        ).build()
+        )
+            .addMigrations(EnGardeDatabase.MIGRATION_1_2)
+            .build()
 
         // Create dependencies manually (no DI framework)
         val settingsRepository = SettingsRepository(applicationContext)
         val poolRepository = PoolRepository(database)
         val poolEngine = PoolEngine()
+        val deRepository = DeRepository(database, poolEngine)
         val pdfExporter = com.andvl1.engrade.platform.PdfExporter(applicationContext)
+        val csvExporter = CsvExporter(applicationContext)
         soundManager = SoundManager(applicationContext)
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -59,9 +67,11 @@ class EnGardeActivity : ComponentActivity() {
             poolRepository = poolRepository,
             poolEngine = poolEngine,
             pdfExporter = pdfExporter,
+            csvExporter = csvExporter,
             soundManager = soundManager,
             notificationHelper = notificationHelper,
-            notificationPendingIntent = pendingIntent
+            notificationPendingIntent = pendingIntent,
+            deRepository = deRepository
         )
 
         setContent {
