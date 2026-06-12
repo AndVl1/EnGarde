@@ -8,12 +8,19 @@ import com.andvl1.engrade.platform.componentScope
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 interface GroupSetupComponent {
     val state: Value<GroupSetupState>
     fun onEvent(event: GroupSetupEvent)
+}
+
+sealed class GroupSetupError {
+    data object BlankNames : GroupSetupError()
+    data object DuplicateNames : GroupSetupError()
+    data object CreateFailed : GroupSetupError()
 }
 
 data class GroupSetupState(
@@ -23,7 +30,8 @@ data class GroupSetupState(
     val fencers: List<FencerInput> = List(5) { FencerInput("") },
     val suggestions: List<FencerEntity> = emptyList(),
     val activeSuggestionIndex: Int = -1,
-    val isCreating: Boolean = false
+    val isCreating: Boolean = false,
+    val error: GroupSetupError? = null
 )
 
 sealed class GroupSetupEvent {
@@ -36,6 +44,7 @@ sealed class GroupSetupEvent {
     data object DismissSuggestions : GroupSetupEvent()
     data object CreatePool : GroupSetupEvent()
     data object NavigateBack : GroupSetupEvent()
+    data object DismissError : GroupSetupEvent()
 }
 
 class DefaultGroupSetupComponent(
@@ -109,6 +118,21 @@ class DefaultGroupSetupComponent(
                 searchJob?.cancel()
             }
             GroupSetupEvent.CreatePool -> {
+                val fencers = _state.value.fencers
+
+                // Validate blank names
+                if (fencers.any { it.name.isBlank() }) {
+                    _state.value = _state.value.copy(error = GroupSetupError.BlankNames)
+                    return
+                }
+
+                // Validate duplicate names
+                val normalizedNames = fencers.map { it.name.trim().lowercase() }
+                if (normalizedNames.size != normalizedNames.toSet().size) {
+                    _state.value = _state.value.copy(error = GroupSetupError.DuplicateNames)
+                    return
+                }
+
                 scope.launch {
                     _state.value = _state.value.copy(isCreating = true)
                     try {
@@ -118,12 +142,19 @@ class DefaultGroupSetupComponent(
                             fencers = _state.value.fencers
                         )
                         onPoolCreated(poolId)
-                    } finally {
-                        _state.value = _state.value.copy(isCreating = false)
+                    } catch (e: Exception) {
+                        FirebaseCrashlytics.getInstance().recordException(e)
+                        _state.value = _state.value.copy(
+                            error = GroupSetupError.CreateFailed,
+                            isCreating = false
+                        )
                     }
                 }
             }
             GroupSetupEvent.NavigateBack -> onBack()
+            GroupSetupEvent.DismissError -> {
+                _state.value = _state.value.copy(error = null)
+            }
         }
     }
 }
