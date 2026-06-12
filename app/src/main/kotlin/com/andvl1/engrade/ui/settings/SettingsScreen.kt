@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.Weapon
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
@@ -22,13 +24,13 @@ fun SettingsScreen(component: SettingsComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Настройки") },
+                title = { Text(stringResource(R.string.activity_settings)) },
                 navigationIcon = {
                     IconButton(
                         onClick = { component.onEvent(SettingsEvent.BackPressed) },
                         modifier = Modifier.testTag("settings_button_back")
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 }
             )
@@ -43,7 +45,7 @@ fun SettingsScreen(component: SettingsComponent) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Weapon selection
-            Text("Оружие", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.weapon_label), style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -51,7 +53,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 FilterChip(
                     selected = state.value.weapon == Weapon.SABRE,
                     onClick = { component.onEvent(SettingsEvent.WeaponChanged(Weapon.SABRE)) },
-                    label = { Text("Сабля") },
+                    label = { Text(stringResource(R.string.sabre)) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag("settings_chip_sabre")
@@ -59,7 +61,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 FilterChip(
                     selected = state.value.weapon == Weapon.FOIL_EPEE,
                     onClick = { component.onEvent(SettingsEvent.WeaponChanged(Weapon.FOIL_EPEE)) },
-                    label = { Text("Рапира/Шпага") },
+                    label = { Text(stringResource(R.string.epee_foil)) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag("settings_chip_foilEpee")
@@ -69,7 +71,7 @@ fun SettingsScreen(component: SettingsComponent) {
             HorizontalDivider()
 
             // Mode selection
-            Text("Режим (до скольки уколов)", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.settings_mode_label), style = MaterialTheme.typography.titleMedium)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -77,7 +79,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 FilterChip(
                     selected = state.value.mode == 5,
                     onClick = { component.onEvent(SettingsEvent.ModeChanged(5)) },
-                    label = { Text("До 5") },
+                    label = { Text(stringResource(R.string.settings_mode_to_5)) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag("settings_chip_mode5")
@@ -85,7 +87,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 FilterChip(
                     selected = state.value.mode == 15,
                     onClick = { component.onEvent(SettingsEvent.ModeChanged(15)) },
-                    label = { Text("До 15") },
+                    label = { Text(stringResource(R.string.settings_mode_to_15)) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag("settings_chip_mode15")
@@ -100,7 +102,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Показывать кнопку обоюдного укола")
+                Text(stringResource(R.string.pref_show_double))
                 Switch(
                     checked = state.value.showDouble,
                     onCheckedChange = { component.onEvent(SettingsEvent.ShowDoubleChanged(it)) },
@@ -114,7 +116,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Запуск таймера касанием по экрану")
+                Text(stringResource(R.string.pref_anywhere_to_start))
                 Switch(
                     checked = state.value.anywhereToStart,
                     onCheckedChange = { component.onEvent(SettingsEvent.AnywhereToStartChanged(it)) },
@@ -128,7 +130,7 @@ fun SettingsScreen(component: SettingsComponent) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Чёрный фон (AMOLED)")
+                Text(stringResource(R.string.pref_black))
                 Switch(
                     checked = state.value.blackBackground,
                     onCheckedChange = { component.onEvent(SettingsEvent.BlackBackgroundChanged(it)) },

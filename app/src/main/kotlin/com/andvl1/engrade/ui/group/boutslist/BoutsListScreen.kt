@@ -49,7 +49,7 @@ fun BoutsListScreen(component: BoutsListComponent) {
                         onClick = { component.onEvent(BoutsListEvent.NavigateBack) },
                         modifier = Modifier.testTag("boutsList_button_back")
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 }
             )
@@ -114,13 +114,37 @@ fun BoutListItem(
     status: BoutStatus,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("boutsList_item_$boutNumber"),
-        onClick = if (status == BoutStatus.COMPLETED || status == BoutStatus.FORFEIT) onClick else ({})
-    ) {
-        Row(
+    val isInteractive = status == BoutStatus.COMPLETED || status == BoutStatus.FORFEIT
+    // Use the non-clickable Card overload for pending bouts to avoid an empty-lambda ripple.
+    if (isInteractive) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("boutsList_item_$boutNumber"),
+            onClick = onClick
+        ) {
+            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore)
+        }
+    } else {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("boutsList_item_$boutNumber")
+        ) {
+            BoutListItemContent(boutNumber, leftName, rightName, leftScore, rightScore)
+        }
+    }
+}
+
+@Composable
+private fun BoutListItemContent(
+    boutNumber: Int,
+    leftName: String,
+    rightName: String,
+    leftScore: Int?,
+    rightScore: Int?
+) {
+    Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -176,5 +200,4 @@ fun BoutListItem(
                 )
             }
         }
-    }
 }

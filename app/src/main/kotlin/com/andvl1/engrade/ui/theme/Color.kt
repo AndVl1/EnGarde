@@ -19,3 +19,6 @@ val Green = Color(0xFF4CAF50)
 
 val White = Color(0xFFFFFFFF)
 val WhiteTransparent = Color(0x80FFFFFF)
+
+// Domain color: card indicator surface that is visible on both DarkGray and Black AMOLED backgrounds.
+val BlackCardSurface = Color(0xFF424242)

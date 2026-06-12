@@ -18,7 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -87,7 +86,7 @@ fun GroupDashboardScreen(component: GroupDashboardComponent) {
                         onClick = { component.onEvent(GroupDashboardEvent.NavigateBack) },
                         modifier = Modifier.testTag("dashboard_button_back")
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_settings))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -273,8 +272,11 @@ private fun OverflowMenu(component: GroupDashboardComponent, state: GroupDashboa
     var showExcludeDialog by remember { mutableStateOf(false) }
 
     Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Default.MoreVert, contentDescription = null)
+        IconButton(
+            onClick = { expanded = true },
+            modifier = Modifier.testTag("dashboard_button_overflow")
+        ) {
+            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
         DropdownMenu(
             expanded = expanded,
@@ -285,7 +287,8 @@ private fun OverflowMenu(component: GroupDashboardComponent, state: GroupDashboa
                 onClick = {
                     expanded = false
                     showExcludeDialog = true
-                }
+                },
+                modifier = Modifier.testTag("dashboard_menuItem_exclude")
             )
         }
     }
@@ -311,6 +314,7 @@ fun EditScoreDialog(
 ) {
     var leftScore by remember { mutableStateOf(dialog.leftScore.toString()) }
     var rightScore by remember { mutableStateOf(dialog.rightScore.toString()) }
+    val isValid = leftScore.toIntOrNull() != null && rightScore.toIntOrNull() != null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -335,6 +339,7 @@ fun EditScoreDialog(
         },
         confirmButton = {
             TextButton(
+                enabled = isValid,
                 onClick = {
                     val left = leftScore.toIntOrNull() ?: 0
                     val right = rightScore.toIntOrNull() ?: 0
@@ -400,7 +405,9 @@ fun ExcludeFencerDialog(
     onExclude: (Int) -> Unit
 ) {
     val activeSeeds = fencerNames.keys.filter { it !in excludedSeeds }.sorted()
+    var pendingSeed by remember { mutableStateOf<Int?>(null) }
 
+    // First-step: select fencer to exclude
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.confirm_exclude)) },
@@ -414,8 +421,10 @@ fun ExcludeFencerDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 activeSeeds.forEach { seed ->
                     TextButton(
-                        onClick = { onExclude(seed) },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = { pendingSeed = seed },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("excludeDialog_button_fencer_$seed")
                     ) {
                         Text("${seed}. ${fencerNames[seed] ?: ""}")
                     }
@@ -429,6 +438,36 @@ fun ExcludeFencerDialog(
             }
         }
     )
+
+    // Second-step: confirm exclusion for the selected fencer
+    pendingSeed?.let { seed ->
+        val fencerName = fencerNames[seed] ?: ""
+        AlertDialog(
+            onDismissRequest = { pendingSeed = null },
+            title = { Text(stringResource(R.string.confirm_exclude)) },
+            text = {
+                Text(
+                    text = stringResource(R.string.confirm_exclude_fencer, fencerName),
+                    modifier = Modifier.testTag("excludeConfirmDialog_text")
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingSeed = null
+                        onExclude(seed)
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingSeed = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -439,6 +478,7 @@ fun QuickEntryDialog(
 ) {
     var leftScore by remember { mutableStateOf("") }
     var rightScore by remember { mutableStateOf("") }
+    val isValid = leftScore.toIntOrNull() != null && rightScore.toIntOrNull() != null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -469,6 +509,7 @@ fun QuickEntryDialog(
         },
         confirmButton = {
             TextButton(
+                enabled = isValid,
                 onClick = {
                     val left = leftScore.toIntOrNull() ?: 0
                     val right = rightScore.toIntOrNull() ?: 0
@@ -516,7 +557,7 @@ fun MatrixTable(
             Box(
                 modifier = Modifier
                     .size(nameColumnWidth, cellSize)
-                    .border(1.dp, Color.Gray)
+                    .border(1.dp, MaterialTheme.colorScheme.outline)
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
@@ -528,7 +569,7 @@ fun MatrixTable(
                 Box(
                     modifier = Modifier
                         .size(nameColumnWidth, cellSize)
-                        .border(1.dp, Color.Gray)
+                        .border(1.dp, MaterialTheme.colorScheme.outline)
                         .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -549,7 +590,7 @@ fun MatrixTable(
                     Box(
                         modifier = Modifier
                             .size(cellSize)
-                            .border(1.dp, Color.Gray)
+                            .border(1.dp, MaterialTheme.colorScheme.outline)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .testTag("matrix_header_col_$col"),
                         contentAlignment = Alignment.Center
@@ -592,11 +633,16 @@ fun MatrixCellView(
     }
 
     val cellTag = if (cell != null) "matrix_cell_${cell.leftSeed}_${cell.rightSeed}" else ""
+    val borderColor = if (isPending && onClick != null) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
     val baseModifier = Modifier
         .size(size)
         .border(
             width = if (isPending && onClick != null) 2.dp else 1.dp,
-            color = if (isPending && onClick != null) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Gray
+            color = borderColor
         )
         .background(backgroundColor)
         .then(if (cellTag.isNotEmpty()) Modifier.testTag(cellTag) else Modifier)
@@ -632,7 +678,7 @@ fun RankingsTable(rankings: List<com.andvl1.engrade.domain.model.FencerRanking>)
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("#", fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.5f))
-                Text("Name", fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
+                Text(stringResource(R.string.ranking_header_name), fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
                 Text("V", fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                 Text("V/M%", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 Text("TD", fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
@@ -654,7 +700,11 @@ fun RankingsTable(rankings: List<com.andvl1.engrade.domain.model.FencerRanking>)
                     Text(ranking.name, modifier = Modifier.weight(2f))
                     Text("${ranking.victories}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     // M8 fix: explicit Locale.US for decimal separator consistency
-                    Text("${String.format(Locale.US, "%.1f", ranking.vmPercent)}%", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                    Text(
+                        text = "${String.format(Locale.US, "%.1f", ranking.vmPercent)}%",
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
                     Text("${ranking.touchesDelivered}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     Text("${ranking.touchesReceived}", modifier = Modifier.weight(0.5f), textAlign = TextAlign.Center)
                     val indexSign = if (ranking.index >= 0) "+" else ""

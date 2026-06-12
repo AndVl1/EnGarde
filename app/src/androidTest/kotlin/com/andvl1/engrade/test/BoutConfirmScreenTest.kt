@@ -112,4 +112,22 @@ class BoutConfirmScreenTest : BaseTest() {
             }
         }
     }
+
+    @Test
+    fun boutConfirm_backArrow_navigatesToDashboard() {
+        step("Navigate to bout confirm screen") {
+            navigateToBoutConfirm()
+        }
+        step("Click top-bar back arrow") {
+            BoutConfirmPage {
+                backButton.assertIsDisplayed()
+                backButton.click()
+            }
+        }
+        step("Verify group dashboard is shown") {
+            GroupDashboardPage {
+                startBoutButton.assertIsDisplayed()
+            }
+        }
+    }
 }

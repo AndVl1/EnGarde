@@ -179,4 +179,23 @@
     <string name="de_play_match">Play</string>
     <string name="de_classification_title">Final Classification</string>
     <string name="de_seed_label">seed %d</string>
+
+    <!-- UI/UX polish (Wave 7) -->
+    <string name="action_back">Back</string>
+    <string name="settings_mode_label">Mode (touches to win)</string>
+    <string name="settings_mode_to_5">To 5</string>
+    <string name="settings_mode_to_15">To 15</string>
+    <string name="confirm_reset_title">Reset bout?</string>
+    <string name="confirm_reset_message">Current score and time will be reset.</string>
+    <string name="confirm_skip_title">Skip section?</string>
+    <string name="confirm_skip_message">The current section will be skipped.</string>
+    <string name="cd_give_card">Assign card</string>
+    <string name="error_create_pool_failed">Failed to create pool</string>
+    <string name="more_options">More options</string>
+    <string name="ranking_header_name">Name</string>
+    <string name="de_load_error">Failed to load bracket</string>
+    <string name="retry">Retry</string>
+    <string name="confirm_exclude_fencer">Exclude %1$s? All bouts will be annulled.</string>
+    <string name="de_slot_bye">BYE</string>
+    <string name="de_slot_tbd">TBD</string>
 </resources>

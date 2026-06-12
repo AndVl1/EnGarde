@@ -12,4 +12,5 @@ object GroupSetupPage : Page<GroupSetupPage>() {
     fun orgInput(index: Int) = hasTestTag("groupSetup_input_org_$index")
     fun regionInput(index: Int) = hasTestTag("groupSetup_input_region_$index")
     val createButton = hasTestTag("groupSetup_button_create")
+    val backButton = hasTestTag("groupSetup_button_back")
 }

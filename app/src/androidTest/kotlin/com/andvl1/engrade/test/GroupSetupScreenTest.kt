@@ -1,5 +1,6 @@
 package com.andvl1.engrade.test
 
+import androidx.compose.ui.test.hasTestTag
 import com.andvl1.engrade.base.BaseTest
 import com.andvl1.engrade.page.GroupDashboardPage
 import com.andvl1.engrade.page.GroupSetupPage
@@ -57,6 +58,66 @@ class GroupSetupScreenTest : BaseTest() {
             GroupSetupPage {
                 nameInput(5).assertExists()
             }
+        }
+    }
+
+    @Test
+    fun groupSetup_backButton_navigatesHome() {
+        step("Navigate to group setup screen") {
+            navigateToGroupSetup()
+        }
+        step("Click back button") {
+            GroupSetupPage {
+                backButton.assertIsDisplayed()
+                backButton.click()
+            }
+        }
+        step("Verify home screen group stage button is displayed") {
+            HomePage {
+                groupStageButton.assertIsDisplayed()
+            }
+        }
+    }
+
+    @Test
+    fun groupSetup_blankName_showsSnackbar() {
+        step("Navigate to group setup screen") {
+            navigateToGroupSetup()
+        }
+        step("Leave all names blank and tap create") {
+            GroupSetupPage {
+                createButton.scrollTo()
+                createButton.click()
+            }
+        }
+        step("Verify validation snackbar for blank names appears") {
+            hasTestTag("groupSetup_snackbar").withTimeout(6000).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun groupSetup_duplicateName_showsSnackbar() {
+        step("Navigate to group setup screen") {
+            navigateToGroupSetup()
+        }
+        step("Fill all 5 names with the same value") {
+            GroupSetupPage {
+                for (i in 0 until 5) {
+                    nameInput(i).scrollTo()
+                    nameInput(i).click()
+                    nameInput(i).clearText()
+                    nameInput(i).inputText("Same")
+                }
+            }
+        }
+        step("Tap create button") {
+            GroupSetupPage {
+                createButton.scrollTo()
+                createButton.click()
+            }
+        }
+        step("Verify duplicate-name snackbar appears") {
+            hasTestTag("groupSetup_snackbar").withTimeout(6000).assertIsDisplayed()
         }
     }
 

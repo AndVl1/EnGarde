@@ -2,28 +2,81 @@ package com.andvl1.engrade.ui.group.setup
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.FencerInput
 import com.andvl1.engrade.domain.model.Weapon
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
+@Composable
+private fun weaponLabel(weapon: Weapon): String = when (weapon) {
+    Weapon.SABRE -> stringResource(R.string.sabre)
+    Weapon.FOIL_EPEE -> stringResource(R.string.epee_foil)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSetupScreen(component: GroupSetupComponent) {
     val state by component.state.subscribeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val focusManager = LocalFocusManager.current
+
+    // Localized error strings resolved in composable scope
+    val blankNamesMsg = stringResource(R.string.name_required)
+    val dupNamesMsg = stringResource(R.string.duplicate_names)
+    val createFailedMsg = stringResource(R.string.error_create_pool_failed)
+
+    val error = state.error
+    LaunchedEffect(error) {
+        if (error != null) {
+            val msg = when (error) {
+                GroupSetupError.BlankNames -> blankNamesMsg
+                GroupSetupError.DuplicateNames -> dupNamesMsg
+                GroupSetupError.CreateFailed -> createFailedMsg
+            }
+            snackbarHostState.showSnackbar(message = msg, duration = SnackbarDuration.Long)
+            component.onEvent(GroupSetupEvent.DismissError)
+        }
+    }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(snackbarData = data, modifier = Modifier.testTag("groupSetup_snackbar"))
+            }
+        },
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(stringResource(R.string.group_setup)) })
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(R.string.group_setup)) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { component.onEvent(GroupSetupEvent.NavigateBack) },
+                        modifier = Modifier.testTag("groupSetup_button_back")
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.action_back)
+                        )
+                    }
+                }
+            )
         }
     ) { padding ->
         Column(
@@ -52,7 +105,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.mode == mode,
                         onClick = { component.onEvent(GroupSetupEvent.SetMode(mode)) },
-                        label = { Text("$mode") },
+                        label = { Text(if (mode == 4) stringResource(R.string.touches_4) else stringResource(R.string.touches_5)) },
                         modifier = Modifier.testTag("groupSetup_chip_mode_$mode")
                     )
                 }
@@ -64,7 +117,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                     FilterChip(
                         selected = state.weapon == weapon,
                         onClick = { component.onEvent(GroupSetupEvent.SetWeapon(weapon)) },
-                        label = { Text(weapon.name) },
+                        label = { Text(weaponLabel(weapon)) },
                         modifier = Modifier.testTag("groupSetup_chip_weapon_${weapon.name}")
                     )
                 }
@@ -75,6 +128,7 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
             Text(stringResource(R.string.participants), style = MaterialTheme.typography.titleMedium)
 
             state.fencers.forEachIndexed { index, fencer ->
+                val isLastFencer = index == state.fencers.size - 1
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -95,6 +149,11 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                                     )
                                 },
                                 label = { Text(stringResource(R.string.fencer_name, index + 1)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(
+                                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                                ),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("groupSetup_input_name_$index")
@@ -134,7 +193,11 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                                 )
                             },
                             label = { Text(stringResource(R.string.organization)) },
-                            placeholder = { Text(stringResource(R.string.organization)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("groupSetup_input_org_$index")
@@ -148,7 +211,14 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                                 )
                             },
                             label = { Text(stringResource(R.string.region)) },
-                            placeholder = { Text(stringResource(R.string.region)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = if (isLastFencer) ImeAction.Done else ImeAction.Next
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                                onDone = { focusManager.clearFocus() }
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("groupSetup_input_region_$index")
@@ -157,11 +227,11 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = { component.onEvent(GroupSetupEvent.CreatePool) },
-                enabled = !state.isCreating && state.fencers.all { it.name.isNotBlank() },
+                enabled = !state.isCreating,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)

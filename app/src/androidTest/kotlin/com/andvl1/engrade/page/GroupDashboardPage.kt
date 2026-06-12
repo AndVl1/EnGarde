@@ -21,6 +21,12 @@ object GroupDashboardPage : Page<GroupDashboardPage>() {
     // Proceed to Direct Elimination (Wave 4c)
     val proceedToDeButton = hasTestTag("groupDashboard_button_proceedToDe")
 
+    // Exclude fencer (overflow menu + two-step dialog)
+    val overflowButton = hasTestTag("dashboard_button_overflow")
+    val excludeMenuItem = hasTestTag("dashboard_menuItem_exclude")
+    fun excludeFencerButton(seed: Int) = hasTestTag("excludeDialog_button_fencer_$seed")
+    val excludeConfirmText = hasTestTag("excludeConfirmDialog_text")
+
     // Quick entry dialog (Wave 3)
     val quickScoreLeftInput = hasTestTag("dashboard_input_quickScoreLeft")
     val quickScoreRightInput = hasTestTag("dashboard_input_quickScoreRight")

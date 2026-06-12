@@ -9,19 +9,32 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.andvl1.engrade.R
 import com.andvl1.engrade.domain.model.*
+import com.andvl1.engrade.ui.theme.BlackCardSurface
 import com.andvl1.engrade.ui.theme.RedTimer
 import com.andvl1.engrade.ui.theme.Yellow
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+
+private const val DISABLED_ICON_ALPHA = 0.3f
+
+// NOTE: BoutScreen intentionally has NO back navigation button.
+// Accidental back gestures mid-match would abort the bout and lose all scoring data.
+// The timer TopAppBar is the only top-level chrome; back is blocked by Decompose handleBackButton.
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +42,10 @@ fun BoutScreen(component: BoutComponent) {
     val state = component.state.subscribeAsState()
     val leftDisplayName = state.value.leftFencerName.ifBlank { stringResource(R.string.fencer_left_default) }
     val rightDisplayName = state.value.rightFencerName.ifBlank { stringResource(R.string.fencer_right_default) }
+
+    // Local UI state for confirmation dialogs — pure view state, no business logic.
+    var showResetConfirm by remember { mutableStateOf(false) }
+    var showSkipConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -44,30 +61,31 @@ fun BoutScreen(component: BoutComponent) {
                     )
                 },
                 actions = {
-                    // Undo button
-                    if (state.value.canUndo) {
-                        IconButton(
-                            onClick = { component.onEvent(BoutEvent.Undo) },
-                            modifier = Modifier.testTag("bout_button_undo")
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Undo, "Undo")
-                        }
+                    // Undo button — always rendered; disabled and dimmed when no action to undo.
+                    IconButton(
+                        onClick = { component.onEvent(BoutEvent.Undo) },
+                        enabled = state.value.canUndo,
+                        modifier = Modifier
+                            .testTag("bout_button_undo")
+                            .alpha(if (state.value.canUndo) 1f else DISABLED_ICON_ALPHA)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringResource(R.string.action_undo))
                     }
 
-                    // Skip section
+                    // Skip section — gated by confirm dialog.
                     IconButton(
-                        onClick = { component.onEvent(BoutEvent.SkipSection) },
+                        onClick = { showSkipConfirm = true },
                         modifier = Modifier.testTag("bout_button_skipSection")
                     ) {
-                        Icon(Icons.Default.SkipNext, "Skip Section")
+                        Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.action_skip_section))
                     }
 
-                    // Reset
+                    // Reset — gated by confirm dialog.
                     IconButton(
-                        onClick = { component.onEvent(BoutEvent.Reset) },
+                        onClick = { showResetConfirm = true },
                         modifier = Modifier.testTag("bout_button_reset")
                     ) {
-                        Icon(Icons.Default.Refresh, "Reset")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.action_reset))
                     }
 
                     // Settings
@@ -75,7 +93,7 @@ fun BoutScreen(component: BoutComponent) {
                         onClick = { component.onEvent(BoutEvent.OpenSettings) },
                         modifier = Modifier.testTag("bout_button_settings")
                     ) {
-                        Icon(Icons.Default.Settings, "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.action_settings))
                     }
                 }
             )
@@ -110,7 +128,7 @@ fun BoutScreen(component: BoutComponent) {
                     Text(
                         text = formatTime(state.value.timeRemainingMs),
                         style = MaterialTheme.typography.displayLarge,
-                        color = if (state.value.timeRemainingMs == 0L) RedTimer else Color.White,
+                        color = if (state.value.timeRemainingMs == 0L) RedTimer else MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.testTag("bout_text_timer")
                     )
@@ -178,8 +196,74 @@ fun BoutScreen(component: BoutComponent) {
                     onDismiss = { component.onEvent(BoutEvent.DismissCardDialog) }
                 )
             }
+
+            // Reset confirmation dialog
+            if (showResetConfirm) {
+                BoutConfirmDialog(
+                    title = stringResource(R.string.confirm_reset_title),
+                    message = stringResource(R.string.confirm_reset_message),
+                    dialogTag = "bout_dialog_resetConfirm",
+                    confirmTag = "bout_button_resetConfirm",
+                    cancelTag = "bout_button_resetCancel",
+                    onConfirm = {
+                        showResetConfirm = false
+                        component.onEvent(BoutEvent.Reset)
+                    },
+                    onDismiss = { showResetConfirm = false }
+                )
+            }
+
+            // Skip section confirmation dialog
+            if (showSkipConfirm) {
+                BoutConfirmDialog(
+                    title = stringResource(R.string.confirm_skip_title),
+                    message = stringResource(R.string.confirm_skip_message),
+                    dialogTag = "bout_dialog_skipConfirm",
+                    confirmTag = "bout_button_skipConfirm",
+                    cancelTag = "bout_button_skipCancel",
+                    onConfirm = {
+                        showSkipConfirm = false
+                        component.onEvent(BoutEvent.SkipSection)
+                    },
+                    onDismiss = { showSkipConfirm = false }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun BoutConfirmDialog(
+    title: String,
+    message: String,
+    dialogTag: String,
+    confirmTag: String,
+    cancelTag: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag(dialogTag),
+        title = { Text(title) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                modifier = Modifier.testTag(confirmTag)
+            ) {
+                Text(stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag(cancelTag)
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
@@ -192,6 +276,7 @@ fun FencerScoreCard(
     onCardClick: () -> Unit
 ) {
     val sideTag = side.name.lowercase()
+    val cdGiveCard = stringResource(R.string.cd_give_card)
 
     Column(
         modifier = modifier,
@@ -201,7 +286,7 @@ fun FencerScoreCard(
         Text(
             fencerName,
             style = MaterialTheme.typography.titleMedium,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
             maxLines = 1,
             modifier = Modifier.testTag("bout_text_${sideTag}Name")
@@ -235,7 +320,7 @@ fun FencerScoreCard(
                 Text(
                     text = fencer.score.toString(),
                     style = MaterialTheme.typography.displayMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.testTag("bout_text_${sideTag}Score")
                 )
             }
@@ -252,10 +337,10 @@ fun FencerScoreCard(
             if (fencer.hasBlackCard || fencer.hasRedCard || fencer.hasYellowCard) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                         .background(
                             color = when {
-                                fencer.hasBlackCard -> Color(0xFF212121)
+                                fencer.hasBlackCard -> BlackCardSurface
                                 fencer.hasRedCard -> Color.Red
                                 else -> Yellow
                             },
@@ -263,6 +348,7 @@ fun FencerScoreCard(
                         )
                         .clickable(onClick = onCardClick)
                         .testTag("bout_button_${sideTag}Card")
+                        .semantics { contentDescription = cdGiveCard }
                         .then(
                             when {
                                 fencer.hasBlackCard -> Modifier.testTag("bout_indicator_${sideTag}BlackCard")
@@ -272,12 +358,18 @@ fun FencerScoreCard(
                         )
                 )
             } else {
-                // Invisible placeholder or card button
+                // Give card button when no card assigned yet
                 IconButton(
                     onClick = onCardClick,
-                    modifier = Modifier.testTag("bout_button_${sideTag}Card")
+                    modifier = Modifier
+                        .testTag("bout_button_${sideTag}Card")
+                        .semantics { contentDescription = cdGiveCard }
                 ) {
-                    Icon(Icons.Default.Flag, "Give Card", tint = Color.Gray)
+                    Icon(
+                        Icons.Default.Flag,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -322,9 +414,12 @@ fun CardDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("bout_button_yellowCard"),
-                    colors = ButtonDefaults.buttonColors(containerColor = Yellow)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Yellow,
+                        contentColor = Color.Black
+                    )
                 ) {
-                    Text(stringResource(R.string.yellow_card), color = Color.Black)
+                    Text(stringResource(R.string.yellow_card))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -346,7 +441,7 @@ fun CardDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("bout_button_blackCard$sideLabel"),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF212121))
+                    colors = ButtonDefaults.buttonColors(containerColor = BlackCardSurface)
                 ) {
                     Text(stringResource(R.string.black_card))
                 }

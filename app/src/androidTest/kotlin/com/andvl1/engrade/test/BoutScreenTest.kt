@@ -109,9 +109,10 @@ class BoutScreenTest : BaseTest() {
                 rightScore.withUseUnmergedTree(true).assertTextContains("1")
             }
         }
-        step("Reset bout") {
+        step("Reset bout and confirm") {
             BoutPage {
                 resetButton.click()
+                resetConfirmButton.click()
             }
         }
         step("Verify both scores reset to 0") {
@@ -147,9 +148,10 @@ class BoutScreenTest : BaseTest() {
         step("Navigate to bout screen") {
             navigateToBout()
         }
-        step("Skip current section") {
+        step("Skip current section and confirm") {
             BoutPage {
                 skipSectionButton.click()
+                skipConfirmButton.click()
             }
         }
         step("Verify section changed") {
