@@ -36,3 +36,6 @@
 
 ## Execution log
 (updated per wave)
+
+### Wave 1 ✓ (commit 672ad1e)
+F1-F5 fixed. +10 unit tests. testDebugUnitTest: 88 tests, 0 failures (independently re-verified via test-results XML). assembleDebug SUCCESSFUL. F4 decision: removed dead `excludedSeeds` param (MatrixCell had no field; wiring = separate feature).
