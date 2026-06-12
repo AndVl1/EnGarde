@@ -73,11 +73,14 @@ class PdfExporter(private val context: Context) {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val pdfFile = File(pdfDir, "pool_protocol_$timestamp.pdf")
 
-        FileOutputStream(pdfFile).use { outputStream ->
-            pdfDocument.writeTo(outputStream)
+        try {
+            FileOutputStream(pdfFile).use { outputStream ->
+                pdfDocument.writeTo(outputStream)
+            }
+        } finally {
+            // Always release native PDF resources even if writeTo or startPage/draw throws.
+            pdfDocument.close()
         }
-
-        pdfDocument.close()
 
         return pdfFile
     }

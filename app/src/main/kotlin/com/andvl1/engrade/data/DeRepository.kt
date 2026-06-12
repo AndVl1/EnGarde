@@ -52,6 +52,11 @@ class DeRepository(
      */
     suspend fun createTableauForPool(poolId: Long): Long {
         return db.withTransaction {
+            // Idempotency: if a tableau already exists for this pool (concurrent double-tap or
+            // re-entry), return the existing id without inserting a duplicate.
+            val existing = db.deTableauDao().getTableauByPoolIdOnce(poolId)
+            if (existing != null) return@withTransaction existing.id
+
             val pool = db.poolDao().getById(poolId)
                 ?: error("Pool $poolId not found")
 

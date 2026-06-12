@@ -172,6 +172,11 @@
     <!-- Quick score entry (Wave 3) -->
     <string name="quick_score_entry">Ввод счёта</string>
 
+    <!-- GroupDashboard error messages (resolved in View layer) -->
+    <string name="error_draw_prohibited">FIE: ничья в бое запрещена (%1$d:%2$d)</string>
+    <string name="error_pdf_export_failed">Ошибка экспорта PDF</string>
+    <string name="error_csv_export_failed">Ошибка экспорта CSV</string>
+
     <!-- Direct Elimination (Wave 4c) -->
     <string name="proceed_to_de">Перейти к прямому выбыванию</string>
     <string name="de_screen_title">Прямое выбывание</string>

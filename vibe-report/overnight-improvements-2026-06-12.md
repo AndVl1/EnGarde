@@ -55,3 +55,12 @@ Full Direct Elimination after pools, end-to-end:
 - 4b persistence: de_tableau/de_match entities, DeRepository, ADDITIVE migration v1→v2 (no destructive fallback — user pools survive), schema 2.json, MigrationTest (room-testing).
 - 4c UI/nav: ui/de/ bracket screen + classification, GroupDashboard "Proceed to DE" (gated on pool complete), Config.DeTableau/DeBout, DE bouts reuse BoutComponent at mode=15 → recordMatchResult advances winner. +instrumented test.
 All builds green (unit/assembleDebug/androidTest/lint), independently re-verified.
+
+### Wave 5 ✓ (commit 0111713) / Wave 6 ✓ (commit e7d05df)
+W5: PDF multipage, i18n cleanup, CSV export, BoutResult test. W6: detekt+baseline(142), Kover, build CI gate, dependabot, README+CONTRIBUTING. Builds green.
+
+### Verify stage — on-device (pixel6_api34, API34)
+connectedDebugAndroidTest: 40/43 passed. PASSED on device: MigrationTest (v1→v2 safe ✓), quick-entry, BoutResult, all existing. FAILED: 3× DeTableauScreenTest — `groupDashboard_button_proceedToDe` not displayed (gated on all pool bouts complete; test setup gap). → review_fixes wave.
+
+### Code review (code-reviewer) findings → review_fixes
+HIGH #1 BoutComponent winner derived from score not engine flag (black-card can advance wrong fencer). MED #2 red/escalation undo doesn't restore sabre-break section; #3 hardcoded draw/export error strings; #4 ProceedToDE not idempotent (dup tableau on double-tap); #5 recordMatchResult failure swallowed. LOW #6 PdfDocument.close not in finally; #7 recordWinner both-slots guard.

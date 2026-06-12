@@ -26,6 +26,19 @@ interface GroupDashboardComponent {
 }
 
 /**
+ * Structured error type for dashboard errors.
+ * Resolved to localized strings in the Composable layer — keeps the non-Composable
+ * component free of hardcoded strings in any language.
+ */
+sealed class DashboardError {
+    /** FIE rule: draws are not permitted. The scores that caused the violation are included
+     *  so the View can format "%1$d:%2$d" via string resources. */
+    data class DrawProhibited(val leftScore: Int, val rightScore: Int) : DashboardError()
+    data object PdfExportFailed : DashboardError()
+    data object CsvExportFailed : DashboardError()
+}
+
+/**
  * Structured bout info passed to the Composable layer for localized formatting.
  * Avoids hardcoded English format strings inside the component.
  */
@@ -52,8 +65,8 @@ data class GroupDashboardState(
     val showForfeitDialog: ForfeitDialogState? = null,
     val showQuickEntryDialog: QuickEntryDialogState? = null,
     val isLoading: Boolean = true,
-    val exportError: String? = null,
-    val editScoreError: String? = null
+    val exportError: DashboardError? = null,
+    val editScoreError: DashboardError? = null
 )
 
 data class EditScoreDialogState(
@@ -128,6 +141,9 @@ class DefaultGroupDashboardComponent(
     private val scope = componentScope()
     private val _state = MutableValue(GroupDashboardState(poolId = poolId))
     override val state: Value<GroupDashboardState> = _state
+
+    /** Guard against double-tap: only one ProceedToDE coroutine may be in flight. */
+    private var isProceedingToDE = false
 
     init {
         loadPoolData()
@@ -234,6 +250,8 @@ class DefaultGroupDashboardComponent(
             }
             GroupDashboardEvent.NavigateBack -> onBack()
             GroupDashboardEvent.ProceedToDE -> {
+                if (isProceedingToDE) return
+                isProceedingToDE = true
                 scope.launch {
                     try {
                         val existingBracket = deRepository.observeBracket(poolId).first()
@@ -243,6 +261,8 @@ class DefaultGroupDashboardComponent(
                         onNavigateToDE(poolId, _state.value.weapon)
                     } catch (e: Exception) {
                         FirebaseCrashlytics.getInstance().recordException(e)
+                    } finally {
+                        isProceedingToDE = false
                     }
                 }
             }
@@ -273,7 +293,7 @@ class DefaultGroupDashboardComponent(
                             FirebaseCrashlytics.getInstance().recordException(e)
                             withContext(Dispatchers.Main) {
                                 _state.value = _state.value.copy(
-                                    exportError = e.message ?: "PDF export failed"
+                                    exportError = DashboardError.PdfExportFailed
                                 )
                             }
                         }
@@ -293,7 +313,7 @@ class DefaultGroupDashboardComponent(
                             FirebaseCrashlytics.getInstance().recordException(e)
                             withContext(Dispatchers.Main) {
                                 _state.value = _state.value.copy(
-                                    exportError = e.message ?: "CSV export failed"
+                                    exportError = DashboardError.CsvExportFailed
                                 )
                             }
                         }
@@ -330,7 +350,7 @@ class DefaultGroupDashboardComponent(
                 // F3: FIE — ничья запрещена; валидируем до вызова репозитория
                 if (event.leftScore == event.rightScore) {
                     _state.value = _state.value.copy(
-                        editScoreError = "FIE: ничья в бое запрещена (${event.leftScore}:${event.rightScore})"
+                        editScoreError = DashboardError.DrawProhibited(event.leftScore, event.rightScore)
                     )
                 } else {
                     scope.launch {
@@ -408,7 +428,7 @@ class DefaultGroupDashboardComponent(
             is GroupDashboardEvent.RecordQuickScore -> {
                 if (event.leftScore == event.rightScore) {
                     _state.value = _state.value.copy(
-                        editScoreError = "FIE: ничья в бое запрещена (${event.leftScore}:${event.rightScore})"
+                        editScoreError = DashboardError.DrawProhibited(event.leftScore, event.rightScore)
                     )
                 } else {
                     scope.launch {

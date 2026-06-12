@@ -111,6 +111,7 @@
     <ID>SwallowedException:FieBoutOrderTest.kt$FieBoutOrderTest$e: IllegalArgumentException</ID>
     <ID>SwallowedException:NotificationHelper.kt$NotificationHelper$e: SecurityException</ID>
     <ID>TooGenericExceptionCaught:GroupDashboardComponent.kt$DefaultGroupDashboardComponent$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RootComponent.kt$DefaultRootComponent$e: Exception</ID>
     <ID>TooManyFunctions:BoutEngine.kt$BoutEngine</ID>
     <ID>UnconditionalJumpStatementInLoop:DeTableauTest.kt$DeTableauTest$for (match in bracket.matches) { if (match.winner != null || match.isBye) continue val top = match.topSlot as? DeSlot.Fencer ?: continue val bottom = match.bottomSlot as? DeSlot.Fencer ?: continue val winner = if (top.seed &lt; bottom.seed) top else bottom bracket = DeTableau.recordWinner(bracket, match.id, winner) progress = true break // перезапустить цикл — список изменился }</ID>
     <ID>UnusedPrivateProperty:BoutEngineTest.kt$BoutEngineTest$val result2 = engine.addScoreRight() // right=8, left=8 → NO break (left не &lt; 8)</ID>

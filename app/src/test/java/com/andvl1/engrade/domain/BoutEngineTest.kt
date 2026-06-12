@@ -842,6 +842,88 @@ class BoutEngineTest {
         assertEquals(0, engine.rightFencer.score) // очко не давалось — нечего возвращать
     }
 
+    // === A1: winner from engine flag, not score comparison ===
+
+    @Test
+    fun `black card to left while left leads on score — right wins (engine flag not score)`() {
+        // A1 regression: if winner is derived from score comparison, left would incorrectly win.
+        val engine = BoutEngine(config5())
+        // Left leads 3:1 — score comparison would pick LEFT as winner.
+        repeat(3) { engine.addScoreLeft() }
+        repeat(1) { engine.addScoreRight() }
+        assertFalse(engine.isOver)
+
+        // Black card to LEFT → RIGHT wins regardless of score.
+        val result = engine.giveBlackCard(FencerSide.LEFT)
+
+        assertTrue("Bout must be over after black card", engine.isOver)
+        assertTrue("result must be GameOver", result is CardResult.GameOver)
+        assertEquals("RIGHT must win by exclusion", FencerSide.RIGHT, (result as CardResult.GameOver).winner)
+        assertTrue("engine.rightFencer.isWinner must be true", engine.rightFencer.isWinner)
+        assertFalse("engine.leftFencer.isWinner must be false", engine.leftFencer.isWinner)
+        // Score has NOT changed — black card grants no touch.
+        assertEquals("Left score unchanged at 3", 3, engine.leftFencer.score)
+        assertEquals("Right score unchanged at 1", 1, engine.rightFencer.score)
+    }
+
+    // === A2: red-card undo restores sabre break section state ===
+
+    @Test
+    fun `undo red card that triggered sabre break-at-8 restores section and time`() {
+        // A2 regression: before fix, undo of red card did not restore section/time mutated
+        // by applySabreBreakAt8IfNeeded.
+        val engine = BoutEngine(config15Sabre())
+        // Opponent (RIGHT) is at 7 — one touch away from sabre break-at-8.
+        repeat(7) { engine.addScoreRight() }
+        assertEquals(SectionType.PERIOD, engine.currentSection)
+        val sectionBefore = engine.currentSection
+        val nextSectionBefore = engine.nextSection
+        val timeBefore = engine.timeRemaining
+
+        // Red card to LEFT → RIGHT gets penalty touch (7→8) → sabre break triggers.
+        val result = engine.giveRedCard(FencerSide.LEFT)
+        assertEquals(CardResult.CardGiven, result)
+        assertEquals("Break-at-8 must have triggered", SectionType.BREAK, engine.currentSection)
+        assertEquals("Right score must be 8", 8, engine.rightFencer.score)
+
+        // Undo the red card — section state must revert to pre-break.
+        val undoResult = engine.undo()
+        assertEquals(UndoResult.Undone, undoResult)
+        assertEquals("Section must revert to pre-break state", sectionBefore, engine.currentSection)
+        assertEquals("NextSection must revert", nextSectionBefore, engine.nextSection)
+        assertEquals("Time must revert", timeBefore, engine.timeRemaining)
+        assertEquals("Right score must revert to 7", 7, engine.rightFencer.score)
+        assertFalse("Bout must not be over", engine.isOver)
+        assertFalse("Left must not have red card", engine.leftFencer.hasRedCard)
+    }
+
+    @Suppress("SameParameterValue")
+    @Test
+    fun `undo yellow-to-red escalation that triggered sabre break-at-8 restores section and time`() {
+        // A2: same as above but via yellow→red escalation path.
+        val engine = BoutEngine(config15Sabre())
+        repeat(7) { engine.addScoreRight() }
+        engine.giveYellowCard(FencerSide.LEFT)
+        val sectionBefore = engine.currentSection
+        val nextSectionBefore = engine.nextSection
+        val timeBefore = engine.timeRemaining
+
+        // Second yellow on LEFT → escalation to red → RIGHT gets touch 7→8 → break.
+        val result = engine.giveYellowCard(FencerSide.LEFT)
+        assertEquals(CardResult.CardGiven, result)
+        assertEquals(SectionType.BREAK, engine.currentSection)
+        assertEquals(8, engine.rightFencer.score)
+
+        // Undo: escalation must be reversed, section state restored.
+        engine.undo()
+        assertEquals("Section must revert", sectionBefore, engine.currentSection)
+        assertEquals("NextSection must revert", nextSectionBefore, engine.nextSection)
+        assertEquals("Time must revert", timeBefore, engine.timeRemaining)
+        assertEquals(7, engine.rightFencer.score)
+        assertFalse(engine.leftFencer.hasRedCard)
+        assertTrue("Yellow card must survive undo of escalation", engine.leftFencer.hasYellowCard)
+    }
+
     @Test
     fun `giving yellow card to excluded fencer returns AlreadyHasCard`() {
         // Единственный оставшийся случай AlreadyHasCard: фехтовальщик уже дисквалифицирован

@@ -33,13 +33,21 @@ sealed class UndoAction {
     data object LeftYellowCard : UndoAction()  // 3
 
     @Serializable
-    data object LeftRedCard : UndoAction()  // 4
+    data class LeftRedCard(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 4
 
     @Serializable
     data object RightYellowCard : UndoAction()  // 5
 
     @Serializable
-    data object RightRedCard : UndoAction()  // 6
+    data class RightRedCard(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 6
 
     @Serializable
     data class SectionSkipped(
@@ -48,12 +56,21 @@ sealed class UndoAction {
         val previousPeriod: Int
     ) : UndoAction()  // 7
 
-    // FIE t.114 yellow→red escalation: restores yellow state and removes the opponent point
+    // FIE t.114 yellow→red escalation: restores yellow state, removes the opponent point, and
+    // restores section state in case applySabreBreakAt8IfNeeded mutated it.
     @Serializable
-    data object LeftYellowToRedEscalation : UndoAction()   // 8
+    data class LeftYellowToRedEscalation(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()   // 8
 
     @Serializable
-    data object RightYellowToRedEscalation : UndoAction()  // 9
+    data class RightYellowToRedEscalation(
+        val previousSection: SectionType,
+        val previousNextSection: SectionType,
+        val previousTime: Long
+    ) : UndoAction()  // 9
 
     // Black card (exclusion): restores bout to active state, no score change
     @Serializable

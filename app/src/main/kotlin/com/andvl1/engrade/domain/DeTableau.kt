@@ -252,6 +252,10 @@ object DeTableau {
         require(match.winner == null) {
             "Match id=$matchId is already resolved (winner seed=${match.winner!!.seed})"
         }
+        require(match.topSlot is DeSlot.Fencer && match.bottomSlot is DeSlot.Fencer) {
+            "Cannot record winner for match id=$matchId while a slot is still Tbd " +
+                "(top=${match.topSlot}, bottom=${match.bottomSlot})"
+        }
 
         val topFencer = match.topSlot as? DeSlot.Fencer
         val bottomFencer = match.bottomSlot as? DeSlot.Fencer

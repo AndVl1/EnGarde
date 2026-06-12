@@ -164,6 +164,11 @@
     <!-- Quick score entry (Wave 3) -->
     <string name="quick_score_entry">Quick Score Entry</string>
 
+    <!-- GroupDashboard error messages (resolved in View layer) -->
+    <string name="error_draw_prohibited">FIE: draw is prohibited (%1$d:%2$d)</string>
+    <string name="error_pdf_export_failed">PDF export failed</string>
+    <string name="error_csv_export_failed">CSV export failed</string>
+
     <!-- Direct Elimination (Wave 4c) -->
     <string name="proceed_to_de">Proceed to Direct Elimination</string>
     <string name="de_screen_title">Direct Elimination</string>

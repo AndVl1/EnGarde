@@ -212,9 +212,9 @@ class DefaultBoutComponent(
             finishedCallbackFired = true
             val leftScore = engine.leftFencer.score
             val rightScore = engine.rightFencer.score
-            // TODO(wave-follow-up): wire black card to pool exclusion;
-            //  for exclusions the winner is determined by isWinner flag, not score comparison.
-            val winner = if (leftScore > rightScore) FencerSide.LEFT else FencerSide.RIGHT
+            // Use engine's authoritative isWinner flag — black-card exclusion declares the
+            // OPPONENT the winner regardless of score, so score comparison would be wrong.
+            val winner = if (engine.leftFencer.isWinner) FencerSide.LEFT else FencerSide.RIGHT
             onBoutFinished(leftScore, rightScore, winner)
         }
     }

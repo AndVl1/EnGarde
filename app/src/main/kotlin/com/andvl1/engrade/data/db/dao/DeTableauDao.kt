@@ -21,6 +21,10 @@ interface DeTableauDao {
     @Query("SELECT * FROM de_tableau WHERE poolId = :poolId LIMIT 1")
     fun getTableauByPoolId(poolId: Long): Flow<DeTableauEntity?>
 
+    /** One-shot read used inside transactions to check idempotency before inserting. */
+    @Query("SELECT * FROM de_tableau WHERE poolId = :poolId LIMIT 1")
+    suspend fun getTableauByPoolIdOnce(poolId: Long): DeTableauEntity?
+
     @Query("SELECT * FROM de_tableau WHERE id = :tableauId")
     suspend fun getTableauById(tableauId: Long): DeTableauEntity?
 

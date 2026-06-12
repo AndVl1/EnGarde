@@ -347,8 +347,11 @@ class DefaultRootComponent(
                                 topScore = leftScore,
                                 bottomScore = rightScore
                             )
-                        } catch (_: Exception) {
-                            // Navigate back even if DB write fails; bracket will not update
+                        } catch (e: Exception) {
+                            // Navigate back even if DB write fails; bracket will not update.
+                            // Log to Crashlytics so the failure is visible in production.
+                            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance()
+                                .recordException(e)
                         }
                         navigation.popWhile { it !is RootComponent.Config.DeTableau }
                     }

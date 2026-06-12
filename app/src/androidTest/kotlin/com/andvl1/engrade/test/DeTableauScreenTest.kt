@@ -95,11 +95,13 @@ class DeTableauScreenTest : BaseTest() {
         step("Verify 'Proceed to DE' button is visible after all bouts complete") {
             GroupDashboardPage {
                 progressText.withTimeout(10000).assertIsDisplayed()
-                proceedToDeButton.withTimeout(10000).assertIsDisplayed()
+                // Button is below the rankings table in a vertically scrollable Column.
+                proceedToDeButton.withTimeout(10000).scrollTo().assertIsDisplayed()
             }
         }
         step("Tap 'Proceed to DE'") {
             GroupDashboardPage {
+                proceedToDeButton.scrollTo()
                 proceedToDeButton.click()
             }
         }
@@ -137,7 +139,7 @@ class DeTableauScreenTest : BaseTest() {
         }
         step("Navigate to DE bracket") {
             GroupDashboardPage {
-                proceedToDeButton.withTimeout(10000).assertIsDisplayed()
+                proceedToDeButton.withTimeout(10000).scrollTo().assertIsDisplayed()
                 proceedToDeButton.click()
             }
         }
@@ -159,16 +161,16 @@ class DeTableauScreenTest : BaseTest() {
                 rightScore.withUseUnmergedTree(true).assertTextContains("0")
             }
         }
-        step("Score 15 touches for left fencer to win the DE bout") {
+        step("Score enough touches to win the DE bout and wait for navigation back") {
+            // Click left score enough times to end the bout (mode=15 for DE bouts).
+            // Clicks beyond the winning touch are safe no-ops (BoutEngine guards isOver).
+            // We do NOT assert leftWinner here: navigation fires in the same dispatch
+            // cycle after the bout ends and the screen is gone before an assertion lands.
+            // The bracket-state assertions below are the authoritative DE-level checks.
             BoutPage {
                 repeat(15) {
                     leftScoreButton.click()
                 }
-            }
-        }
-        step("Verify left fencer wins (bout ends at 15 touches)") {
-            BoutPage {
-                leftWinner.withUseUnmergedTree(true).withTimeout(5000).assertIsDisplayed()
             }
         }
         step("Verify navigation returns to DE bracket after result is recorded") {
@@ -198,7 +200,7 @@ class DeTableauScreenTest : BaseTest() {
         step("Create pool, complete all bouts, navigate to DE") {
             createPoolAndCompleteAllBouts()
             GroupDashboardPage {
-                proceedToDeButton.withTimeout(10000).assertIsDisplayed()
+                proceedToDeButton.withTimeout(10000).scrollTo().assertIsDisplayed()
                 proceedToDeButton.click()
             }
         }
@@ -214,13 +216,16 @@ class DeTableauScreenTest : BaseTest() {
         }
         step("Dashboard still shows 'Proceed to DE' enabled") {
             GroupDashboardPage {
-                progressText.withTimeout(5000).assertIsDisplayed()
-                proceedToDeButton.assertIsDisplayed()
+                // scrollTo() needed: scroll state is preserved from the earlier scroll-to-button,
+                // so progressText (at the top) may be off-screen when the dashboard resumes.
+                progressText.withTimeout(15000).scrollTo().assertIsDisplayed()
+                proceedToDeButton.scrollTo().assertIsDisplayed()
                 proceedToDeButton.assertIsEnabled()
             }
         }
         step("Tap 'Proceed to DE' again — should resume existing bracket") {
             GroupDashboardPage {
+                proceedToDeButton.scrollTo()
                 proceedToDeButton.click()
             }
         }

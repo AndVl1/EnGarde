@@ -228,12 +228,15 @@ class BoutEngine(
     private fun escalateYellowToRed(side: FencerSide): CardResult {
         when (side) {
             FencerSide.LEFT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _leftFencer = _leftFencer.withRedCard()
                 if (_rightFencer.score < config.mode) {
                     _rightFencer = _rightFencer.incrementScore()
                 }
                 applySabreBreakAt8IfNeeded()
-                _undoStack.addLast(UndoAction.LeftYellowToRedEscalation)
+                _undoStack.addLast(UndoAction.LeftYellowToRedEscalation(previousSection, previousNextSection, previousTime))
                 if (_rightFencer.score >= config.mode) {
                     _rightFencer = _rightFencer.withWinner()
                     _leftFencer = _leftFencer.withoutWinner()
@@ -242,12 +245,15 @@ class BoutEngine(
                 }
             }
             FencerSide.RIGHT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _rightFencer = _rightFencer.withRedCard()
                 if (_leftFencer.score < config.mode) {
                     _leftFencer = _leftFencer.incrementScore()
                 }
                 applySabreBreakAt8IfNeeded()
-                _undoStack.addLast(UndoAction.RightYellowToRedEscalation)
+                _undoStack.addLast(UndoAction.RightYellowToRedEscalation(previousSection, previousNextSection, previousTime))
                 if (_leftFencer.score >= config.mode) {
                     _leftFencer = _leftFencer.withWinner()
                     _rightFencer = _rightFencer.withoutWinner()
@@ -306,6 +312,9 @@ class BoutEngine(
     fun giveRedCard(side: FencerSide): CardResult {
         when (side) {
             FencerSide.LEFT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _leftFencer = _leftFencer.withRedCard()
                 // Opponent gets a point (if not at max)
                 if (_rightFencer.score < config.mode) {
@@ -313,7 +322,7 @@ class BoutEngine(
                 }
                 // F5: штрафное очко может сработать правило сабли перерыв-на-8
                 applySabreBreakAt8IfNeeded()
-                _undoStack.addLast(UndoAction.LeftRedCard)
+                _undoStack.addLast(UndoAction.LeftRedCard(previousSection, previousNextSection, previousTime))
 
                 // Check if right fencer wins
                 if (_rightFencer.score >= config.mode) {
@@ -324,6 +333,9 @@ class BoutEngine(
                 }
             }
             FencerSide.RIGHT -> {
+                val previousSection = _currentSection
+                val previousNextSection = _nextSection
+                val previousTime = _timeRemaining
                 _rightFencer = _rightFencer.withRedCard()
                 // Opponent gets a point (if not at max)
                 if (_leftFencer.score < config.mode) {
@@ -331,7 +343,7 @@ class BoutEngine(
                 }
                 // F5: штрафное очко может сработать правило сабли перерыв-на-8
                 applySabreBreakAt8IfNeeded()
-                _undoStack.addLast(UndoAction.RightRedCard)
+                _undoStack.addLast(UndoAction.RightRedCard(previousSection, previousNextSection, previousTime))
 
                 // Check if left fencer wins
                 if (_leftFencer.score >= config.mode) {
@@ -599,6 +611,9 @@ class BoutEngine(
             is UndoAction.LeftRedCard -> {
                 _leftFencer = _leftFencer.withoutRedCard()
                 _rightFencer = _rightFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
                 UndoResult.Undone
             }
@@ -609,20 +624,30 @@ class BoutEngine(
             is UndoAction.RightRedCard -> {
                 _rightFencer = _rightFencer.withoutRedCard()
                 _leftFencer = _leftFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.LeftYellowToRedEscalation -> {
-                // Reverse yellow→red escalation: restore to yellow state, remove opponent point.
+                // Reverse yellow→red escalation: restore to yellow state, remove opponent point,
+                // and restore section state in case applySabreBreakAt8IfNeeded mutated it.
                 // hasYellowCard remains true (was already set when escalation triggered).
                 _leftFencer = _leftFencer.withoutRedCard()
                 _rightFencer = _rightFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
                 UndoResult.Undone
             }
             is UndoAction.RightYellowToRedEscalation -> {
                 _rightFencer = _rightFencer.withoutRedCard()
                 _leftFencer = _leftFencer.decrementScore()
+                _currentSection = action.previousSection
+                _nextSection = action.previousNextSection
+                _timeRemaining = action.previousTime
                 recomputeOverState()
                 UndoResult.Undone
             }

@@ -31,30 +31,46 @@ import com.andvl1.engrade.domain.model.MatrixCell
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import java.util.Locale
 
+/**
+ * Converts a [DashboardError] to a localized user-facing message.
+ * Must be called in Composable scope so that [stringResource] is available.
+ */
+@Composable
+private fun DashboardError.toLocalizedMessage(): String = when (this) {
+    is DashboardError.DrawProhibited ->
+        stringResource(R.string.error_draw_prohibited, leftScore, rightScore)
+    DashboardError.PdfExportFailed ->
+        stringResource(R.string.error_pdf_export_failed)
+    DashboardError.CsvExportFailed ->
+        stringResource(R.string.error_csv_export_failed)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupDashboardScreen(component: GroupDashboardComponent) {
     val state by component.state.subscribeAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // M2: Show export error as Snackbar
+    // M2: Show export error as Snackbar — resolve DashboardError to string in composable scope.
     val exportError = state.exportError
+    val exportErrorMsg = exportError?.toLocalizedMessage()
     LaunchedEffect(exportError) {
-        if (exportError != null) {
+        if (exportErrorMsg != null) {
             snackbarHostState.showSnackbar(
-                message = exportError,
+                message = exportErrorMsg,
                 duration = SnackbarDuration.Long
             )
             component.onEvent(GroupDashboardEvent.DismissExportError)
         }
     }
 
-    // F3: Show edit-score draw validation error as Snackbar
+    // F3: Show edit-score draw validation error as Snackbar.
     val editScoreError = state.editScoreError
+    val editScoreErrorMsg = editScoreError?.toLocalizedMessage()
     LaunchedEffect(editScoreError) {
-        if (editScoreError != null) {
+        if (editScoreErrorMsg != null) {
             snackbarHostState.showSnackbar(
-                message = editScoreError,
+                message = editScoreErrorMsg,
                 duration = SnackbarDuration.Short
             )
             component.onEvent(GroupDashboardEvent.DismissEditScoreError)
