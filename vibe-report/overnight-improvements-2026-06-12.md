@@ -42,3 +42,9 @@ F1-F5 fixed. +10 unit tests. testDebugUnitTest: 88 tests, 0 failures (independen
 
 ### Wave 2 ✓ (commits a95f301 + 3fe2d54)
 FIE t.114 card escalation: 2nd group-1 yellow→red(+pt), 3rd→black(exclusion), direct black-card action, all undoable, respects sabre break-at-8. Black-card UI button + strings in 3 locales. +10 BoutEngine tests → 98 total green, lintDebug clean (re-verified).
+
+### Wave 3 ✓ (commit 5383cc5)
+Quick pool score-entry: tap PENDING matrix cell → score dialog → recordBoutResult (same path as timer bouts), draw rejected via snackbar, timer flow untouched, pending-cell highlight + testTags. +2 instrumented tests. assembleDebug/AndroidTest/lint green.
+
+### Wave 4 — DE tableau (in progress)
+4a domain (seeding/byes/progression/classification) → 4b persistence (additive migration v1→v2 + migration test) → 4c UI+nav+instrumented.
