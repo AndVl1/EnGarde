@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.2.21"
-agp = "8.13.2"
+agp = "9.2.1"
 compose-bom = "2026.05.01"
 coroutines = "1.11.0"
 datastore = "1.2.1"
