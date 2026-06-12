@@ -141,6 +141,7 @@ class DefaultGroupSetupComponent(
                             weapon = _state.value.weapon,
                             fencers = _state.value.fencers
                         )
+                        _state.value = _state.value.copy(isCreating = false)
                         onPoolCreated(poolId)
                     } catch (e: Exception) {
                         FirebaseCrashlytics.getInstance().recordException(e)

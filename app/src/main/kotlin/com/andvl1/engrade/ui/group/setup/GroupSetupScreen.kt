@@ -57,7 +57,11 @@ fun GroupSetupScreen(component: GroupSetupComponent) {
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(snackbarData = data, modifier = Modifier.testTag("groupSetup_snackbar"))
+            }
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.group_setup)) },

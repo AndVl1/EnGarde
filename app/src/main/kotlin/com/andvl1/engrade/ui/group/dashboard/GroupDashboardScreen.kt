@@ -272,7 +272,10 @@ private fun OverflowMenu(component: GroupDashboardComponent, state: GroupDashboa
     var showExcludeDialog by remember { mutableStateOf(false) }
 
     Box {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(
+            onClick = { expanded = true },
+            modifier = Modifier.testTag("dashboard_button_overflow")
+        ) {
             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
         }
         DropdownMenu(
@@ -284,7 +287,8 @@ private fun OverflowMenu(component: GroupDashboardComponent, state: GroupDashboa
                 onClick = {
                     expanded = false
                     showExcludeDialog = true
-                }
+                },
+                modifier = Modifier.testTag("dashboard_menuItem_exclude")
             )
         }
     }
@@ -418,7 +422,9 @@ fun ExcludeFencerDialog(
                 activeSeeds.forEach { seed ->
                     TextButton(
                         onClick = { pendingSeed = seed },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("excludeDialog_button_fencer_$seed")
                     ) {
                         Text("${seed}. ${fencerNames[seed] ?: ""}")
                     }
@@ -439,7 +445,7 @@ fun ExcludeFencerDialog(
         AlertDialog(
             onDismissRequest = { pendingSeed = null },
             title = { Text(stringResource(R.string.confirm_exclude)) },
-            text = { Text(stringResource(R.string.confirm_exclude_fencer, fencerName)) },
+            text = { Text(stringResource(R.string.confirm_exclude_fencer, fencerName), modifier = Modifier.testTag("excludeConfirmDialog_text")) },
             confirmButton = {
                 TextButton(
                     onClick = {
