@@ -18,7 +18,10 @@ data class BoutResultState(
     val leftScore: Int,
     val rightScore: Int,
     val winner: String
-)
+) {
+    /** Derived from [winner] — never set directly to avoid desync with copy(). */
+    val isLeftWinner: Boolean get() = winner == "LEFT"
+}
 
 sealed class BoutResultEvent {
     data object Continue : BoutResultEvent()
@@ -50,7 +53,9 @@ class DefaultBoutResultComponent(
     override val state: Value<BoutResultState> = _state
 
     init {
-        // Save bout result
+        // Record the bout result once on component creation.
+        // The underlying DAO uses an INSERT OR REPLACE strategy, so calling this
+        // more than once with the same boutId is idempotent and safe.
         scope.launch {
             poolRepository.recordBoutResult(boutId, leftScore, rightScore)
         }

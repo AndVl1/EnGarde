@@ -20,6 +20,7 @@ fun BoutResultScreen(component: BoutResultComponent) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -43,17 +44,17 @@ fun BoutResultScreen(component: BoutResultComponent) {
             ) {
                 // Left fencer
                 Column(
-                    horizontalAlignment = if (state.winner == "LEFT") Alignment.CenterHorizontally else Alignment.Start,
+                    horizontalAlignment = Alignment.Start,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = state.leftName,
-                        style = if (state.winner == "LEFT") {
+                        style = if (state.isLeftWinner) {
                             MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         } else {
                             MaterialTheme.typography.titleMedium
                         },
-                        color = if (state.winner == "LEFT") {
+                        color = if (state.isLeftWinner) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurface
@@ -62,14 +63,14 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (state.winner == "LEFT") {
+                        text = if (state.isLeftWinner) {
                             stringResource(R.string.victory_short, state.leftScore)
                         } else {
                             stringResource(R.string.defeat_short, state.leftScore)
                         },
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        color = if (state.winner == "LEFT") {
+                        color = if (state.isLeftWinner) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.error
@@ -86,17 +87,17 @@ fun BoutResultScreen(component: BoutResultComponent) {
 
                 // Right fencer
                 Column(
-                    horizontalAlignment = if (state.winner == "RIGHT") Alignment.CenterHorizontally else Alignment.End,
+                    horizontalAlignment = Alignment.End,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = state.rightName,
-                        style = if (state.winner == "RIGHT") {
+                        style = if (!state.isLeftWinner) {
                             MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                         } else {
                             MaterialTheme.typography.titleMedium
                         },
-                        color = if (state.winner == "RIGHT") {
+                        color = if (!state.isLeftWinner) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurface
@@ -105,14 +106,14 @@ fun BoutResultScreen(component: BoutResultComponent) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (state.winner == "RIGHT") {
+                        text = if (!state.isLeftWinner) {
                             stringResource(R.string.victory_short, state.rightScore)
                         } else {
                             stringResource(R.string.defeat_short, state.rightScore)
                         },
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        color = if (state.winner == "RIGHT") {
+                        color = if (!state.isLeftWinner) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.error
