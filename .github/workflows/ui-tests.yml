@@ -81,7 +81,7 @@ jobs:
 
       - name: Publish test report
         if: always()
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: '**/build/outputs/androidTest-results/connected/**/*.xml'
           check_name: 'UI Test Results'
