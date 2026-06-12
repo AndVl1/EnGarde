@@ -5,6 +5,7 @@ import com.atiurin.ultron.extensions.*
 import com.atiurin.ultron.page.Page
 
 object BoutConfirmPage : Page<BoutConfirmPage>() {
+    val backButton = hasTestTag("boutConfirm_button_back")
     val boutNumber = hasTestTag("boutConfirm_text_boutNumber")
     val leftName = hasTestTag("boutConfirm_text_leftName")
     val rightName = hasTestTag("boutConfirm_text_rightName")

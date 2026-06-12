@@ -136,6 +136,37 @@ class GroupDashboardScreenTest : BaseTest() {
     }
 
     @Test
+    fun excludeFencer_secondStepConfirmationRequired() {
+        step("Create pool and navigate to dashboard") {
+            createPoolAndNavigateToDashboard()
+        }
+        step("Open overflow menu") {
+            GroupDashboardPage {
+                overflowButton.withTimeout(5000).assertIsDisplayed()
+                overflowButton.click()
+            }
+        }
+        step("Tap Exclude menu item") {
+            GroupDashboardPage {
+                excludeMenuItem.withTimeout(3000).assertIsDisplayed()
+                excludeMenuItem.click()
+            }
+        }
+        step("Tap the first fencer in the first-step exclude dialog") {
+            GroupDashboardPage {
+                excludeFencerButton(1).withTimeout(3000).assertIsDisplayed()
+                excludeFencerButton(1).click()
+            }
+        }
+        step("Verify second-step confirmation dialog with fencer name appears") {
+            GroupDashboardPage {
+                // Presence of the tagged confirm-dialog text proves the second step triggered
+                excludeConfirmText.withTimeout(3000).assertIsDisplayed()
+            }
+        }
+    }
+
+    @Test
     fun quickEntry_drawIsRejected() {
         step("Create pool and navigate to dashboard") {
             createPoolAndNavigateToDashboard()
