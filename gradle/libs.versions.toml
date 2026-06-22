@@ -9,7 +9,7 @@ essenty = "2.5.0"
 lifecycle = "2.10.0"
 activity-compose = "1.13.0"
 serialization = "1.11.0"
-firebase-bom = "34.14.0"
+firebase-bom = "34.15.0"
 ksp = "2.2.21-2.0.5"
 room = "2.8.4"
 ultron = "2.6.2"
@@ -73,7 +73,7 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+google-services = { id = "com.google.gms.google-services", version = "4.5.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.7" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
