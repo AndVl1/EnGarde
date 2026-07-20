@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.21"
+kotlin = "2.4.10"
 agp = "8.13.2"
 compose-bom = "2026.05.01"
 coroutines = "1.11.0"
@@ -14,7 +14,7 @@ ksp = "2.2.21-2.0.5"
 room = "2.8.4"
 ultron = "2.6.2"
 detekt = "1.23.8"
-kover = "0.9.8"
+kover = "0.9.9"
 
 [libraries]
 # Kotlin
